@@ -230,8 +230,8 @@ export const sequence = <A>(sources: Source<A>[]): Source<A[]> => ({
 	notifier: (listener) => {
 		const subscriptions = array.map(sources, (source) => source.notifier(listener))
 		return () => {
-			for (const subscription of subscriptions) {
-				subscription()
+			for (let i = 0, l = subscriptions.length; i < l; i++) {
+				subscriptions[i]()
 			}
 		}
 	},

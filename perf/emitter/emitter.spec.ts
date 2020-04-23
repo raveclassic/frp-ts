@@ -93,8 +93,8 @@ class EmitterImpl implements Emitter {
 
 			// flush pending additions
 			if (this.pendingAdditions.length > 0) {
-				for (const pending of this.pendingAdditions) {
-					this.listeners.add(pending)
+				for (let i = 0, l = this.pendingAdditions.length; i < l; i++) {
+					this.listeners.add(this.pendingAdditions[i])
 				}
 				this.pendingAdditions = []
 			}
