@@ -33,9 +33,9 @@ export interface Listener {
 export interface Notifier {
 	(listener: Listener): Disposable;
 }
-export interface Source<A> extends Array<unknown> {
-	readonly [0]: Getter<A>;
-	readonly [1]: Notifier;
+export interface Source<A> {
+	readonly getter: Getter<A>;
+	readonly notifier: Notifier;
 }
 
 declare module 'fp-ts/lib/HKT' {
@@ -121,17 +121,19 @@ export const instance: Applicative1<URI> & Observable1<URI> = {
 	URI,
 	map: (fa, f) => {
 		const memoF = memo1(f);
-		return [() => memoF(fa[0]()), fa[1]];
-	},
-	of: (a) => [() => a, never],
-	ap: (fab, fa) => [() => memoApply(fab[0](), fa[0]()), combineNotifier(fab[1], fa[1])],
-	subscribe: (ma, observer) => {
-		const [getA, a] = ma;
-		const unsubscribe = a(() => observer.next(getA()));
 		return {
-			unsubscribe,
+			getter: () => memoF(fa.getter()),
+			notifier: fa.notifier,
 		};
 	},
+	of: (a) => ({ getter: () => a, notifier: never }),
+	ap: (fab, fa) => ({
+		getter: () => memoApply(fab.getter(), fa.getter()),
+		notifier: combineNotifier(fab.notifier, fa.notifier),
+	}),
+	subscribe: (ma, observer) => ({
+		unsubscribe: ma.notifier(() => observer.next(ma.getter())),
+	}),
 };
 
 export function sample<M extends URIS4>(
@@ -152,7 +154,7 @@ export function sample<M extends URIS2, E>(
 export function sample<M extends URIS>(M: Observable1<M>): <A>(e: Kind<M, A>) => <B>(sb: Source<B>) => Kind<M, B>;
 export function sample<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Source<B>) => HKT<M, B>;
 export function sample<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Source<B>) => HKT<M, B> {
-	return (e) => (sb) => M.map(e, sb[0]);
+	return (e) => (sb) => M.map(e, sb.getter);
 }
 
 export function sampleIO<M extends URIS4>(
@@ -173,12 +175,12 @@ export function sampleIO<M extends URIS2, E>(
 export function sampleIO<M extends URIS>(M: Observable1<M>): <A>(e: Kind<M, A>) => <B>(sb: Source<B>) => Kind<M, IO<B>>;
 export function sampleIO<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Source<B>) => HKT<M, IO<B>>;
 export function sampleIO<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Source<B>) => HKT<M, IO<B>> {
-	return (e) => (sb) => M.map(e, () => sb[0]);
+	return (e) => (sb) => M.map(e, () => sb.getter);
 }
 
 export const flatten = <A>(source: Source<Source<A>>): [Source<A>, Disposable] => {
 	// store initial inner source in a mutable reference
-	let inner: Source<A> = source[0]();
+	let inner: Source<A> = source.getter();
 	let innerDisposable: Disposable = constVoid;
 	const emitter = newEmitter();
 
@@ -186,54 +188,54 @@ export const flatten = <A>(source: Source<Source<A>>): [Source<A>, Disposable] =
 		// dispose previous subscription
 		innerDisposable();
 		// create new subscription
-		innerDisposable = inner[1]((t) => emitter.notify(t));
+		innerDisposable = inner.notifier(emitter.notify);
 	};
 
-	const outerDisposable = source[1](() => {
+	const outerDisposable = source.notifier(() => {
 		// update reference to new inner source
-		inner = source[0]();
+		inner = source.getter();
 		resubscribeToInner();
 	});
 
 	resubscribeToInner();
 
 	return [
-		[
-			() => {
+		{
+			getter: () => {
 				// use extra thunk because reference to inner source changes
-				return inner[0]();
+				return inner.getter();
 			},
-			(listener) => emitter.subscribe(listener),
-		],
+			notifier: emitter.subscribe,
+		},
 		outerDisposable,
 	];
 };
 
-export const tap = <A>(f: (a: A) => unknown) => (fa: Source<A>): Source<A> => [
-	fa[0],
-	(listener) =>
-		fa[1]((t) => {
-			f(fa[0]());
-			return listener(t);
+export const tap = <A>(f: (a: A) => unknown) => (fa: Source<A>): Source<A> => ({
+	getter: fa.getter,
+	notifier: (listener) =>
+		fa.notifier((t) => {
+			f(fa.getter());
+			listener(t);
 		}),
-];
+});
 
 const { map, ap, apFirst, apSecond } = pipeable(instance);
 export { map, ap, apFirst, apSecond };
 
 export const sequenceS = sequenceSApply(instance);
 export const sequenceT = sequenceTApply(instance);
-export const sequence = <A>(sources: Source<A>[]): Source<A[]> => [
-	() => array.map(sources, (source) => source[0]()),
-	(listener) => {
-		const subscriptions = array.map(sources, (source) => source[1](listener));
+export const sequence = <A>(sources: Source<A>[]): Source<A[]> => ({
+	getter: () => array.map(sources, (source) => source.getter()),
+	notifier: (listener) => {
+		const subscriptions = array.map(sources, (source) => source.notifier(listener));
 		return () => {
 			for (const subscription of subscriptions) {
 				subscription();
 			}
 		};
 	},
-];
+});
 
 export const never: Notifier = () => constVoid;
 
@@ -303,7 +305,7 @@ export function scan<M>(
 		return (f, initial) => (ma) => {
 			const p = producer(initial);
 			const s = M.subscribe(ma, {
-				next: (a) => p.next(f(p.source[0](), a)),
+				next: (a) => p.next(f(p.source.getter(), a)),
 				complete: constVoid,
 			});
 			return [p.source, () => s.unsubscribe()];

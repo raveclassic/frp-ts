@@ -24,6 +24,6 @@ export const newProducer = (env: Env) => <A>(initial: A): Producer<A> => {
 	const notifier: Notifier = (listener) => e.subscribe(listener);
 	return {
 		next,
-		source: [getter, notifier],
+		source: { getter, notifier },
 	};
 };
