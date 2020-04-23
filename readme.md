@@ -11,14 +11,15 @@ This library provides an **experimental** `TypeScript` implementation of an "App
 Based on and ready to be used with the gorgeous [fp-ts](https://github.com/gcanti/fp-ts).
 
 **Table of contents**
-- [Introduction](#introduction)
-  - [Clock](#clock)
-  - [Getter](#getter)
-  - [Listener](#listener)
-  - [Notifier](#notifier)
-  - [Disposable](#disposable)
-  - [Source & Producer](#source--producer)
-- [Installation & Setup](#installation--setup)
+
+-   [Introduction](#introduction)
+    -   [Clock](#clock)
+    -   [Getter](#getter)
+    -   [Listener](#listener)
+    -   [Notifier](#notifier)
+    -   [Disposable](#disposable)
+    -   [Source & Producer](#source--producer)
+-   [Installation & Setup](#installation--setup)
 
 ## Introduction
 
@@ -248,4 +249,5 @@ export const sampleIO = getSampleIO(e)
 Now everything is ready, and the functions can be used directly from this module.
 
 ## Changelog
+
 Read more [here](./CHANGELOG.md)
