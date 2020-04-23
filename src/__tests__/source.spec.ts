@@ -15,9 +15,9 @@ import { constFalse, constTrue, constVoid } from 'fp-ts/lib/function'
 import { Observable, Subject } from 'rxjs'
 import { Observable1, Observer } from '../observable'
 import { map } from 'rxjs/operators'
-import { Env, newProducer as getNewProducer, Producer } from '../producer'
+import { newProducer as getNewProducer, Producer } from '../producer'
 import { source } from '..'
-import { Clock, newCounterClock } from '../clock'
+import { Clock, Env, newCounterClock } from '../clock'
 
 const TEST_OBSERVABLE_URI = 'frp-ts//TestObservable'
 type TEST_OBSERVABLE_URI = typeof TEST_OBSERVABLE_URI

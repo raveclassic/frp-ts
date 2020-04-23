@@ -10,3 +10,7 @@ export const newCounterClock = (): Clock => {
 		now: () => ++time,
 	}
 }
+
+export interface Env {
+	readonly clock: Clock
+}
