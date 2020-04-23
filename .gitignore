@@ -3,3 +3,4 @@
 *.log
 /lib
 /coverage
+.coveralls.yml
