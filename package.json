@@ -1,6 +1,6 @@
 {
   "name": "frp-ts",
-  "version": "0.0.0",
+  "version": "0.0.1-0",
   "description": "Functional reactive values-over-time",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -23,7 +23,7 @@
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "version": "yarn changelog && git add CHANGELOG.md"
+    "version": "npm run changelog && git add CHANGELOG.md"
   },
   "publishConfig": {
     "access": "public"
