@@ -1,6 +1,6 @@
 {
   "name": "frp-ts",
-  "version": "0.0.1-0",
+  "version": "0.0.1-1",
   "description": "Functional reactive values-over-time",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -22,8 +22,7 @@
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "version": "npm run changelog && git add CHANGELOG.md"
+    "version": "standard-changelog -a && git add CHANGELOG.md"
   },
   "publishConfig": {
     "access": "public"
@@ -35,13 +34,13 @@
     "@types/benchmark": "^1.0.31",
     "@types/jest": "^25.2.1",
     "benchmark": "^2.1.4",
-    "conventional-changelog": "^3.1.18",
     "coveralls": "^3.0.13",
     "fp-ts": "^2.5.3",
     "jest": "^25.3.0",
     "np": "^6.2.2",
     "prettier": "^2.0.4",
     "rxjs": "^6.5.5",
+    "standard-changelog": "^2.0.21",
     "ts-jest": "^25.4.0",
     "ts-node": "^8.9.0",
     "typescript": "^3.8.3"
