@@ -15,12 +15,15 @@
   },
   "homepage": "https://github.com/raveclassic/frp-ts#readme",
   "scripts": {
+    "prepublishOnly": "npm run test && npm run build",
     "build": "tsc --project ./tsconfig.build.json",
     "test": "npm run prettier && npm run jest",
     "jest": "jest --no-cache --collectCoverage=true",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
-    "coveralls": "cat coverage/lcov.info | coveralls"
+    "coveralls": "cat coverage/lcov.info | coveralls",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
+    "version": "yarn changelog && git add CHANGELOG.md"
   },
   "publishConfig": {
     "access": "public"
@@ -32,9 +35,11 @@
     "@types/benchmark": "^1.0.31",
     "@types/jest": "^25.2.1",
     "benchmark": "^2.1.4",
+    "conventional-changelog": "^3.1.18",
     "coveralls": "^3.0.13",
     "fp-ts": "^2.5.3",
     "jest": "^25.3.0",
+    "np": "^6.2.2",
     "prettier": "^2.0.4",
     "rxjs": "^6.5.5",
     "ts-jest": "^25.4.0",
