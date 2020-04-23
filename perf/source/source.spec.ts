@@ -1,20 +1,20 @@
-import { suite } from '../suite';
-import { constVoid } from 'fp-ts/lib/function';
-import { never } from '../../src/source';
-import { range } from 'fp-ts/lib/Array';
+import { suite } from '../suite'
+import { constVoid } from 'fp-ts/lib/function'
+import { never } from '../../src/source'
+import { range } from 'fp-ts/lib/Array'
 
-const r = range(0, 1000);
+const r = range(0, 1000)
 
 describe('source', () => {
 	it('initialization', () => {
 		suite((s) =>
 			s
 				.add('tuple', () => {
-					return r.map(() => [constVoid, never]);
+					return r.map(() => [constVoid, never])
 				})
 				.add('object', () => {
-					return r.map(() => ({ getter: constVoid, notifier: never }));
+					return r.map(() => ({ getter: constVoid, notifier: never }))
 				}),
-		).run();
-	});
-});
+		).run()
+	})
+})

@@ -1,12 +1,12 @@
-export type Time = number;
+export type Time = number
 
 export interface Clock {
-	readonly now: () => Time;
+	readonly now: () => Time
 }
 
 export const newCounterClock = (): Clock => {
-	let time = -1;
+	let time = -1
 	return {
 		now: () => ++time,
-	};
-};
+	}
+}

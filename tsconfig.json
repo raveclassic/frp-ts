@@ -12,11 +12,6 @@
     "lib": ["es6", "dom"],
     "noEmit": true
   },
-  "include": [
-    "src",
-    "perf"
-  ],
-  "exclude": [
-    "dist"
-  ]
+  "include": ["src", "perf"],
+  "exclude": ["dist"]
 }

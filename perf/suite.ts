@@ -1,4 +1,4 @@
-import { Suite } from 'benchmark';
+import { Suite } from 'benchmark'
 // import { isNonEmpty } from 'fp-ts/lib/Array';
 // import { last } from 'fp-ts/lib/NonEmptyArray';
 //
@@ -55,5 +55,5 @@ export const suite = (f: (suite: Suite) => Suite): Suite =>
 			// // const slowest = this.filter('slowest');
 			//
 			// // console.log(this, fastest, slowest);
-			console.log('Fastest is', (this.filter('fastest') as any).map('name'));
-		});
+			console.log('Fastest is', (this.filter('fastest') as any).map('name'))
+		})
