@@ -22,7 +22,7 @@
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
-    "version": "standard-changelog -a && git add CHANGELOG.md"
+    "version": "standard-changelog && git add CHANGELOG.md"
   },
   "publishConfig": {
     "access": "public"
