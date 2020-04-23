@@ -6,12 +6,23 @@
   "typings": "lib/index.d.ts",
   "author": "raveclassic",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raveclassic/frp-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raveclassic/frp-ts/issues"
+  },
+  "homepage": "https://github.com/raveclassic/frp-ts#readme",
   "scripts": {
     "build": "tsc --project ./tsconfig.build.json",
     "test": "npm run prettier && npm run jest",
     "jest": "jest --no-cache --collectCoverage=true",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write ."
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "fp-ts": "^2.5.3"
