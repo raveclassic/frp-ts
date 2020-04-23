@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "target": "ES2015",
+    "module": "commonjs",
+    "outDir": "lib",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es6", "dom"],
+    "noEmit": true
+  },
+  "include": [
+    "src",
+    "perf"
+  ],
+  "exclude": [
+    "dist"
+  ]
+}

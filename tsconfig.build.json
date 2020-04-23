@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false
+  },
+  "include": [
+    "./src/index.ts"
+  ],
+  "exclude": [
+    "**/__tests__",
+    "dist",
+    "perf"
+  ]
+}
