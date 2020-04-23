@@ -10,6 +10,16 @@ This library provides an **experimental** `TypeScript` implementation of an "App
 
 Based on and ready to be used with the gorgeous [fp-ts](https://github.com/gcanti/fp-ts).
 
+**Table of contents**
+- [Introduction](#introduction)
+  - [Clock](#clock)
+  - [Getter](#getter)
+  - [Listener](#listener)
+  - [Notifier](#notifier)
+  - [Disposable](#disposable)
+  - [Source & Producer](#source--producer)
+- [Installation & Setup](#installation--setup)
+
 ## Introduction
 
 As described in the paper:
@@ -191,6 +201,8 @@ console.log(counter.source.getter()) // logs 2
 
 `Disposable` is similar to `Subscription#unsubscribe` in [rxjs](https://rxjs.dev/).
 
+### `Source` & `Producer`
+
 Now we are ready to grasp the most useful parts of the library - `Source` and `Producer`. But wait, we've already seen everything we need in previous examples: how to create producers, how to get and update the values inside them and finally how to listen to that changes.
 
 However it may seem awkward to create a new clock for each producer. That's indeed awkward and generally not should be done. We should always have a single global clock for an application. It may be created as a part of the setup required for some parts of this library including producers - some helpers also require `Clock`. More on that later.
@@ -234,3 +246,6 @@ export const sampleIO = getSampleIO(e)
 ```
 
 Now everything is ready, and the functions can be used directly from this module.
+
+## Changelog
+Read more [here](./CHANGELOG.md)
