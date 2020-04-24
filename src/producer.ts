@@ -2,9 +2,8 @@ import { newEmitter } from './emitter'
 import { Notifier, Source } from './source'
 import { Env } from './clock'
 
-export interface Producer<A> {
+export interface Producer<A> extends Source<A> {
 	readonly next: (a: A) => void
-	readonly source: Source<A>
 }
 
 export const newProducer = (env: Env) => <A>(initial: A): Producer<A> => {
@@ -20,6 +19,7 @@ export const newProducer = (env: Env) => <A>(initial: A): Producer<A> => {
 	const notifier: Notifier = (listener) => e.subscribe(listener)
 	return {
 		next,
-		source: { getter, notifier },
+		getter,
+		notifier,
 	}
 }

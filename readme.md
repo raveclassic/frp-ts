@@ -67,9 +67,8 @@ The library core consists of the following pieces:
 -   `Clock` - makes things happen, allows notifications to actually work and deliver updates to listeners
 -   `Producer<A>` - combination of a `Source<A>` and a setter to update its value imperatively, requires a `Clock` to work
     ```typescript
-    interface Producer<A> {
+    interface Producer<A> extends Source<A> {
     	readonly next: (a: A) => void
-    	readonly source: Source<A>
     }
     ```
 
@@ -125,13 +124,13 @@ import { newCounterClock } from 'frp-ts/lib/clock'
 const counter = newProducer({ clock: newCounterClock() })(0)
 
 // get the last value
-console.log(counter.source.getter()) // logs '1'
+console.log(counter.getter()) // logs '1'
 
 // let's update the value
 counter.next(1)
 
 // get the last value
-console.log(counter.source.getter()) // logs '2'
+console.log(counter.getter()) // logs '2'
 ```
 
 A getter is similar to `BehaviorSubject#getValue` in [rxjs](https://rxjs.dev/).
@@ -159,10 +158,10 @@ import { newCounterClock } from 'frp-ts/lib/clock'
 const counter = newProducer({ clock: newCounterClock() })(0)
 
 // we create a listener to be notified about updates of our counter
-const listener = () => console.log('The value has changed!', counter.source.getter())
+const listener = () => console.log('The value has changed!', counter.getter())
 
 // now we need to subscribe to notifications
-counter.source.notifier(listener)
+counter.notifier(listener)
 
 // and we're set up
 // now let's update the counter
@@ -182,10 +181,10 @@ import { newCounterClock } from 'frp-ts/lib/clock'
 
 // let's create a counter and a listener
 const counter = newProducer({ clock: newCounterClock() })(0)
-const listener = () => console.log('The value has changed!', counter.source.getter())
+const listener = () => console.log('The value has changed!', counter.getter())
 
 // now we store the output of notifier in a disposable
-const dispose = counter.source.notifier(listener)
+const dispose = counter.notifier(listener)
 
 // try to update the counter
 counter.next(1) // logs 'The value has changed! 1'
@@ -197,7 +196,7 @@ dispose()
 counter.next(2) // nothing happens! we've disposed our listener
 
 // but the actual value is still updated
-console.log(counter.source.getter()) // logs 2
+console.log(counter.getter()) // logs 2
 ```
 
 `Disposable` is similar to `Subscription#unsubscribe` in [rxjs](https://rxjs.dev/).

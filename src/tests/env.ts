@@ -29,8 +29,8 @@ export const scan = getScan(testObservable)(defaultEnv)
 
 export const fromObservable = getFromObservable(testObservable)(defaultEnv)
 
-export const attachDisposable = <A>(source: Source<A>, disposable: Disposable): Source<A> => ({
-	getter: source.getter,
+export const attachDisposable = <A, S extends Source<A>>(source: S, disposable: Disposable): S => ({
+	...source,
 	notifier: (l) => {
 		const d = source.notifier(l)
 		return () => {

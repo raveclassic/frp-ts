@@ -263,10 +263,10 @@ export function scan<M>(
 		return (f, initial) => (ma) => {
 			const p = producer(initial)
 			const s = M.subscribe(ma, {
-				next: (a) => p.next(f(p.source.getter(), a)),
+				next: (a) => p.next(f(p.getter(), a)),
 				complete: constVoid,
 			})
-			return [p.source, () => s.unsubscribe()]
+			return [p, () => s.unsubscribe()]
 		}
 	}
 }
