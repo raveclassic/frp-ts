@@ -250,6 +250,7 @@ export const sampleIO = getSampleIO(e)
 Now everything is ready, and the functions can be used directly from this module.
 
 ## Integration with `fp-ts`
+
 The library is deeply integrated with [fp-ts](https://github.com/gcanti/fp-ts/).
 It provides an instance of [Applicative](https://gcanti.github.io/fp-ts/modules/Applicative.ts.html) for `Source` and `pipeable` top-level functions.
 
