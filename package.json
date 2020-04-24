@@ -27,6 +27,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "dependencies": {},
   "peerDependencies": {
     "fp-ts": "^2.5.3"
   },
@@ -37,7 +38,6 @@
     "coveralls": "^3.0.13",
     "fp-ts": "^2.5.3",
     "jest": "^25.3.0",
-    "np": "^6.2.2",
     "prettier": "^2.0.4",
     "rxjs": "^6.5.5",
     "standard-changelog": "^2.0.21",
