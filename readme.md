@@ -7,8 +7,9 @@
 ## Overview
 
 This library provides an **experimental** `TypeScript` implementation of an "Applicative Data-Driven Computation" described by [Conal Elliot](http://conal.net/) in his [paper](http://conal.net/papers/data-driven/paper.pdf).
+The implementation is a push-pull model with atomic updates (means it is glitch-free, no [diamond shape problem](https://stackoverflow.com/a/56523673/1961479)).
 
-Based on and ready to be used with the gorgeous [fp-ts](https://github.com/gcanti/fp-ts).
+Based on and is ready to be used with the gorgeous [fp-ts](https://github.com/gcanti/fp-ts).
 
 **Table of contents**
 
@@ -20,6 +21,7 @@ Based on and ready to be used with the gorgeous [fp-ts](https://github.com/gcant
     -   [Disposable](#disposable)
     -   [Source & Producer](#source--producer)
 -   [Installation & Setup](#installation--setup)
+-   [Changelog](#changelog)
 
 ## Introduction
 
@@ -246,6 +248,10 @@ export const sampleIO = getSampleIO(e)
 ```
 
 Now everything is ready, and the functions can be used directly from this module.
+
+## Integration with `fp-ts`
+The library is deeply integrated with [fp-ts](https://github.com/gcanti/fp-ts/).
+It provides an instance of [Applicative](https://gcanti.github.io/fp-ts/modules/Applicative.ts.html) for `Source` and `pipeable` top-level functions.
 
 ## Changelog
 
