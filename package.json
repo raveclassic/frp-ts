@@ -32,11 +32,15 @@
     "fp-ts": "^2.5.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
+    "@commitlint/travis-cli": "^8.3.5",
     "@types/benchmark": "^1.0.31",
     "@types/jest": "^25.2.1",
     "benchmark": "^2.1.4",
     "coveralls": "^3.0.13",
     "fp-ts": "^2.5.3",
+    "husky": "^4.2.5",
     "jest": "^25.3.0",
     "prettier": "^2.0.4",
     "rxjs": "^6.5.5",
@@ -44,5 +48,10 @@
     "ts-jest": "^25.4.0",
     "ts-node": "^8.9.0",
     "typescript": "^3.8.3"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   }
 }
