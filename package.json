@@ -21,6 +21,7 @@
     "eslint": "eslint . --ext .js,.ts",
     "eslint:fix": "eslint --fix . --ext .js,.ts",
     "jest": "jest --no-cache --collectCoverage=true",
+    "jest:watch": "jest --watch",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",

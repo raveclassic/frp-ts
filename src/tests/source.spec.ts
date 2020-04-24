@@ -1,31 +1,12 @@
-import {
-	Disposable,
-	flatten,
-	fromObservable as getFromObservable,
-	instance,
-	never,
-	sample,
-	sampleIO,
-	scan as getScan,
-	sequence,
-	Source,
-} from '../source'
+import { flatten, instance, never, sample, sampleIO, sequence, Source } from '../source'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { constFalse, constTrue, constVoid } from 'fp-ts/lib/function'
 import { Observable, Subject } from 'rxjs'
-import { Observable1, Observer } from '../observable'
-import { map } from 'rxjs/operators'
+import { Observer } from '../observable'
 import { newProducer as getNewProducer, Producer } from '../producer'
 import { source } from '..'
-import { Clock, Env, newCounterClock } from '../clock'
-
-const TEST_OBSERVABLE_URI = 'frp-ts//TestObservable'
-type TEST_OBSERVABLE_URI = typeof TEST_OBSERVABLE_URI
-declare module 'fp-ts/lib/HKT' {
-	interface URItoKind<A> {
-		readonly [TEST_OBSERVABLE_URI]: Observable<A>
-	}
-}
+import { Clock } from '../clock'
+import { attachDisposable, fromObservable, newProducer, scan, testObservable } from './env'
 
 interface VirtualClock extends Clock {
 	readonly next: () => void
@@ -38,31 +19,7 @@ const newVirtualClock = (initialTime: number): VirtualClock => {
 	}
 }
 
-const defaultEnv: Env = {
-	clock: newCounterClock(),
-}
-const newProducer = getNewProducer(defaultEnv)
-
-const testObservable: Observable1<TEST_OBSERVABLE_URI> = {
-	URI: TEST_OBSERVABLE_URI,
-	map: (fa, f) => fa.pipe(map(f)),
-	subscribe: (ma, observer) => ma.subscribe(observer),
-}
-const scan = getScan(testObservable)(defaultEnv)
-const fromObservable = getFromObservable(testObservable)(defaultEnv)
-
-const attachDisposable = <A>(source: Source<A>, disposable: Disposable): Source<A> => ({
-	getter: source.getter,
-	notifier: (l) => {
-		const d = source.notifier(l)
-		return () => {
-			d()
-			disposable()
-		}
-	},
-})
-
-describe('frp', () => {
+describe('source', () => {
 	describe('instance', () => {
 		it('subscribe', () => {
 			const { next, source: a } = newProducer(0)
@@ -198,42 +155,6 @@ describe('frp', () => {
 		disposableC()
 		expect(disposeA).toHaveBeenCalledTimes(1)
 		expect(disposeB).toHaveBeenCalledTimes(1)
-	})
-	describe('producer', () => {
-		it('should store initial value', () => {
-			const p = newProducer(0)
-			expect(p.source.getter()).toBe(0)
-		})
-		it('should update value', () => {
-			const p = newProducer(0)
-			expect(p.source.getter()).toBe(0)
-			p.next(1)
-			expect(p.source.getter()).toBe(1)
-		})
-		it('should notify about changes', () => {
-			const {
-				next,
-				source: { notifier },
-			} = newProducer(0)
-			const f = jest.fn()
-			const s = notifier(f)
-			expect(f).toHaveBeenCalledTimes(0)
-			next(1)
-			expect(f).toHaveBeenCalledTimes(1)
-			s()
-		})
-		it('should skip duplicates', () => {
-			const {
-				next,
-				source: { notifier },
-			} = newProducer(0)
-			const f = jest.fn()
-			const s = notifier(f)
-			expect(f).toHaveBeenCalledTimes(0)
-			next(0)
-			expect(f).toHaveBeenCalledTimes(0)
-			s()
-		})
 	})
 	describe('map', () => {
 		it('should map', () => {
