@@ -1,5 +1,4 @@
-import { newEmitter } from '../emitter'
-import { Disposable, Listener } from '../source'
+import { Disposable, Listener, newEmitter } from '../emitter'
 import { constVoid } from 'fp-ts/lib/function'
 
 describe('Emitter', () => {

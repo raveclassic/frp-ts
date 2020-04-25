@@ -1,9 +1,10 @@
-import { Disposable, fromObservable as getFromObservable, scan as getScan, Source } from '../source'
+import { fromObservable as getFromObservable, scan as getScan, Source } from '../source'
 import { Observable1 } from '../observable'
 import { map } from 'rxjs/operators'
 import { newProducer as getNewProducer } from '../producer'
 import { Env, newCounterClock } from '../clock'
 import { Observable } from 'rxjs'
+import { Disposable } from '../emitter'
 
 const TEST_OBSERVABLE_URI = 'frp-ts//TestObservable'
 type TEST_OBSERVABLE_URI = typeof TEST_OBSERVABLE_URI

@@ -1,8 +1,7 @@
 import { suite } from '../suite'
 import { range } from 'fp-ts/lib/Array'
 import { Time } from '../../src/clock'
-import { Disposable, Listener } from '../../src/source'
-import { Emitter, newEmitter } from '../../src/emitter'
+import { Disposable, Emitter, Listener, newEmitter } from '../../src/emitter'
 
 describe('emitter performance', () => {
 	it('creating instance', () => {

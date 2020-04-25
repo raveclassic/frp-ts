@@ -144,7 +144,7 @@ However only a getter is not enough to build reactive computations, we need some
 A listener is just a callback that receives nothing... It may seem strange at first but it is implemented this way intentionally and it will be explained later why (at least I will try).
 
 ```typescript
-import { Listener } from 'frp-ts/lib/source'
+import { Listener } from 'frp-ts/lib/emitter'
 const listener: Listener = () => console.log('I am called!')
 ```
 

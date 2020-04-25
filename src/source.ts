@@ -13,10 +13,10 @@ import {
 } from './observable'
 import { array } from 'fp-ts/lib/Array'
 import { Applicative1 } from 'fp-ts/lib/Applicative'
-import { newEmitter } from './emitter'
+import { combineNotifier, Disposable, newEmitter, Notifier } from './emitter'
 import { newProducer } from './producer'
 import { IO } from 'fp-ts/lib/IO'
-import { Env, Time } from './clock'
+import { Env } from './clock'
 
 export const URI = 'frp-ts//Source'
 export type URI = typeof URI
@@ -24,15 +24,7 @@ export type URI = typeof URI
 export interface Getter<A> {
 	(): A
 }
-export interface Disposable {
-	(): void
-}
-export interface Listener {
-	(time: Time): void
-}
-export interface Notifier {
-	(listener: Listener): Disposable
-}
+
 export interface Source<A> {
 	readonly getter: Getter<A>
 	readonly notifier: Notifier
@@ -42,48 +34,6 @@ declare module 'fp-ts/lib/HKT' {
 	interface URItoKind<A> {
 		readonly [URI]: Source<A>
 	}
-}
-
-const multicast = (a: Notifier): Notifier => {
-	const emitter = newEmitter()
-	let counter = 0
-	let outerDisposable: Disposable = constVoid
-	return (listener) => {
-		counter++
-		const disposable = emitter.subscribe(listener)
-		if (counter === 1) {
-			outerDisposable = a((t) => emitter.notify(t))
-		}
-		return () => {
-			counter--
-			disposable()
-			if (counter === 0) {
-				outerDisposable()
-			}
-		}
-	}
-}
-
-const combineNotifier = (a: Notifier, b: Notifier): Notifier => {
-	let lastNotifiedTime = Infinity
-	return multicast((listener) => {
-		const sa = a((t) => {
-			if (t !== lastNotifiedTime) {
-				lastNotifiedTime = t
-				listener(t)
-			}
-		})
-		const sb = b((t) => {
-			if (t !== lastNotifiedTime) {
-				lastNotifiedTime = t
-				listener(t)
-			}
-		})
-		return () => {
-			sa()
-			sb()
-		}
-	})
 }
 
 const memo2 = <A, B, C>(f: (a: A, b: B) => C): ((a: A, b: B) => C) => {
@@ -312,3 +262,18 @@ export function sampleIO<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Sour
 export function sampleIO<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Source<B>) => HKT<M, IO<B>> {
 	return (e) => (sb) => M.map(e, () => sb.getter)
 }
+
+// export const fromEvent = (e: Env) => <T extends EventTarget, A>(
+// 	target: T,
+// 	event: string,
+// 	getter: (target: T) => A,
+// ): Source<A> => {
+// 	return {
+// 		getter: () => getter(target),
+// 		notifier: multicast((listener) => {
+// 			const handler = () => listener(e.clock.now())
+// 			target.addEventListener(event, handler)
+// 			return () => target.removeEventListener(event, handler)
+// 		}),
+// 	}
+// }

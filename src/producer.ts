@@ -1,5 +1,5 @@
-import { newEmitter } from './emitter'
-import { Notifier, Source } from './source'
+import { newEmitter, Notifier } from './emitter'
+import { Source } from './source'
 import { Env } from './clock'
 
 export interface Producer<A> extends Source<A> {
