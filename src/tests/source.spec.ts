@@ -5,19 +5,7 @@ import { Observable, Subject } from 'rxjs'
 import { Observer } from '../observable'
 import { newProducer as getNewProducer, Producer } from '../producer'
 import { source } from '..'
-import { Clock } from '../clock'
-import { attachDisposable, fromObservable, newProducer, scan, testObservable } from './env'
-
-interface VirtualClock extends Clock {
-	readonly next: () => void
-}
-const newVirtualClock = (initialTime: number): VirtualClock => {
-	let time = initialTime
-	return {
-		now: () => time,
-		next: () => ++time,
-	}
-}
+import { attachDisposable, fromObservable, newProducer, newVirtualClock, scan, testObservable } from './env'
 
 describe('source', () => {
 	describe('instance', () => {

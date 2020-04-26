@@ -9,7 +9,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es6", "dom"],
     "noEmit": true
   },
   "include": ["src", "perf"],

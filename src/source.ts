@@ -262,18 +262,3 @@ export function sampleIO<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Sour
 export function sampleIO<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Source<B>) => HKT<M, IO<B>> {
 	return (e) => (sb) => M.map(e, () => sb.getter)
 }
-
-// export const fromEvent = (e: Env) => <T extends EventTarget, A>(
-// 	target: T,
-// 	event: string,
-// 	getter: (target: T) => A,
-// ): Source<A> => {
-// 	return {
-// 		getter: () => getter(target),
-// 		notifier: multicast((listener) => {
-// 			const handler = () => listener(e.clock.now())
-// 			target.addEventListener(event, handler)
-// 			return () => target.removeEventListener(event, handler)
-// 		}),
-// 	}
-// }

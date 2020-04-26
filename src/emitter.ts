@@ -1,4 +1,4 @@
-import { Time } from './clock'
+import { Env, Time } from './clock'
 import { constVoid } from 'fp-ts/lib/function'
 
 export interface Disposable {
@@ -99,3 +99,25 @@ export const combineNotifier = (a: Notifier, b: Notifier): Notifier => {
 		}
 	})
 }
+
+export interface EventListenerOptions {
+	capture?: boolean
+}
+export interface AddEventListenerOptions extends EventListenerOptions {
+	once?: boolean
+	passive?: boolean
+}
+export interface EventTarget {
+	readonly addEventListener: (event: string, handler: () => void, options?: AddEventListenerOptions | boolean) => void
+	readonly removeEventListener: (event: string, handler: () => void, options?: EventListenerOptions | boolean) => void
+}
+export const fromEvent = (e: Env) => (
+	target: EventTarget,
+	event: string,
+	options?: AddEventListenerOptions,
+): Notifier =>
+	multicast((listener) => {
+		const handler = () => listener(e.clock.now())
+		target.addEventListener(event, handler, options)
+		return () => target.removeEventListener(event, handler, options)
+	})

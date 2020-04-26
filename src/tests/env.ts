@@ -2,9 +2,9 @@ import { fromObservable as getFromObservable, scan as getScan, Source } from '..
 import { Observable1 } from '../observable'
 import { map } from 'rxjs/operators'
 import { newProducer as getNewProducer } from '../producer'
-import { Env, newCounterClock } from '../clock'
+import { Clock, Env, newCounterClock } from '../clock'
 import { Observable } from 'rxjs'
-import { Disposable } from '../emitter'
+import { Disposable, fromEvent as getFromEvent } from '../emitter'
 
 const TEST_OBSERVABLE_URI = 'frp-ts//TestObservable'
 type TEST_OBSERVABLE_URI = typeof TEST_OBSERVABLE_URI
@@ -40,3 +40,17 @@ export const attachDisposable = <A, S extends Source<A>>(source: S, disposable: 
 		}
 	},
 })
+
+export const fromEvent = getFromEvent(defaultEnv)
+
+interface VirtualClock extends Clock {
+	readonly next: () => void
+}
+
+export const newVirtualClock = (initialTime: number): VirtualClock => {
+	let time = initialTime
+	return {
+		now: () => time,
+		next: () => ++time,
+	}
+}
