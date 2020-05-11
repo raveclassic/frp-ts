@@ -59,7 +59,7 @@ describe('Emitter', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
 			const s1 = jest.fn(e.subscribe(f1))
-			// now we have child subscriptions, calling next will iterate over them
+			// now we have child subscriptions, calling set will iterate over them
 			// check if it's possible to unsubscribe immediately on notification
 			const f2: Listener = jest.fn(() => s2())
 			const s2 = jest.fn(e.subscribe(f2))
@@ -79,7 +79,7 @@ describe('Emitter', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
 			const s1 = jest.fn(e.subscribe(f1))
-			// now we have child subscriptions, calling next will iterate over them
+			// now we have child subscriptions, calling set will iterate over them
 			// check if it's possible to add new subscriptions immediately on notification
 			const f2 = jest.fn()
 			let s2: Disposable = constVoid
@@ -132,7 +132,7 @@ describe('Emitter', () => {
 			expect(cb).toHaveBeenCalledWith(0)
 			// should also multicast
 			expect(cb).toHaveBeenCalledTimes(1)
-			// next tick
+			// set tick
 			clock.next()
 			target.dispatchEvent({
 				type: 'click',

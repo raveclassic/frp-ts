@@ -19,7 +19,7 @@ describe('source', () => {
 			const d = instance.subscribe(p, observer)
 			expect(observer.next).toHaveBeenCalledTimes(0)
 			expect(observer.complete).toHaveBeenCalledTimes(0)
-			p.next(1)
+			p.set(1)
 			expect(observer.next).toHaveBeenCalledWith(1)
 			expect(observer.complete).toHaveBeenCalledTimes(0)
 			d.unsubscribe()
@@ -55,7 +55,7 @@ describe('source', () => {
 		expect(next).toHaveBeenCalledTimes(1)
 		expect(next).toHaveBeenCalledWith(0)
 
-		source.next(23)
+		source.set(23)
 		// should not notify on source notification
 		expect(next).toHaveBeenCalledTimes(1)
 
@@ -81,7 +81,7 @@ describe('source', () => {
 		const cb = jest.fn()
 		const d = sampled(cb)
 		expect(cb).toHaveBeenCalledTimes(0)
-		source.next(2)
+		source.set(2)
 		// notifications are not propagated from source
 		expect(cb).toHaveBeenCalledTimes(0)
 		// but value should be updated
@@ -100,14 +100,14 @@ describe('source', () => {
 		const cb = jest.fn()
 		const d = sampled.notifier(cb)
 		expect(cb).toHaveBeenCalledTimes(0)
-		source.next(2)
+		source.set(2)
 		// notifications are not propagated from source
 		expect(cb).toHaveBeenCalledTimes(0)
 		// but value should be updated
 		expect(sampled.getter()()).toBe(2)
 
 		// notifications are propagated from sampler
-		sampler.next(1)
+		sampler.set(1)
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(sampled.getter()()).toBe(2)
 
@@ -125,11 +125,11 @@ describe('source', () => {
 
 		expect(listenerC).toHaveBeenCalledTimes(0)
 
-		a.next(1)
+		a.set(1)
 		expect(getC()).toEqual([1, 1])
 		expect(listenerC).toHaveBeenCalledTimes(1)
 
-		b.next(2)
+		b.set(2)
 		expect(getC()).toEqual([1, 2])
 		expect(listenerC).toHaveBeenCalledTimes(2)
 
@@ -152,7 +152,7 @@ describe('source', () => {
 			expect(b.getter()).toBe(f(0))
 			expect(cba).toHaveBeenCalledTimes(0)
 			expect(cbb).toHaveBeenCalledTimes(0)
-			a.next(10)
+			a.set(10)
 			expect(a.getter()).toBe(10)
 			expect(b.getter()).toBe(f(10))
 			expect(cba).toHaveBeenCalledTimes(1)
@@ -186,11 +186,11 @@ describe('source', () => {
 			const fa = newProducer(0)
 			const b = pipe(fab, source.ap(fa))
 			expect(b.getter()).toBe(f(0))
-			fab.next(g)
+			fab.set(g)
 			expect(b.getter()).toBe(g(0))
-			fa.next(1)
+			fa.set(1)
 			expect(b.getter()).toBe(g(1))
-			fab.next(f)
+			fab.set(f)
 			expect(b.getter()).toBe(f(1))
 		})
 		it('should multicast', () => {
@@ -241,7 +241,7 @@ describe('source', () => {
 			expect(getA()).toBe(0)
 			expect(getB()).toBe(f(0))
 			expect(inner.getter()).toBe(f(0))
-			a.next(1)
+			a.set(1)
 			expect(getA()).toBe(1)
 			expect(getB()).toBe(f(1))
 			expect(inner.getter()).toBe(f(1))
@@ -255,11 +255,11 @@ describe('source', () => {
 			)
 			expect(getB()).toBe(f(0))
 			const s = b(constVoid)
-			a.next(1)
+			a.set(1)
 			expect(getB()).toBe(f(1))
 			// dispose
 			s()
-			a.next(2)
+			a.set(2)
 			// should still propagate getter to outer
 			expect(getB()).toBe(f(2))
 		})
@@ -273,7 +273,7 @@ describe('source', () => {
 			const cb = jest.fn()
 			const s = b(cb)
 			expect(cb).toHaveBeenCalledTimes(0)
-			a.next(1)
+			a.set(1)
 			expect(cb).toHaveBeenCalledTimes(0)
 			s()
 		})
@@ -288,7 +288,7 @@ describe('source', () => {
 			const cb = jest.fn()
 			expect(cb).toHaveBeenCalledTimes(0)
 			const s = b(cb)
-			inner.next('foo')
+			inner.set('foo')
 			expect(cb).toHaveBeenCalledTimes(1)
 			s()
 		})
@@ -306,14 +306,14 @@ describe('source', () => {
 			const sb = b(cb)
 			expect(inner1Dispose).toHaveBeenCalledTimes(0)
 			expect(cb).toHaveBeenCalledTimes(0)
-			innerSource1.next('foo')
+			innerSource1.set('foo')
 			expect(inner1Dispose).toHaveBeenCalledTimes(0)
 			expect(cb).toHaveBeenCalledTimes(1)
 			// switch b to inner2
-			a.next(1)
+			a.set(1)
 			expect(inner1Dispose).toHaveBeenCalledTimes(1)
 			expect(cb).toHaveBeenCalledTimes(1)
-			innerSource1.next('bar')
+			innerSource1.set('bar')
 			expect(inner1Dispose).toHaveBeenCalledTimes(1)
 			// b should not be notified about inner1 because it's switched to inner2
 			expect(cb).toHaveBeenCalledTimes(1)
@@ -344,7 +344,7 @@ describe('source', () => {
 			const cb2 = jest.fn()
 			const s2 = b(cb2)
 
-			inner.next('foo')
+			inner.set('foo')
 			expect(cb1).toHaveBeenCalledTimes(1)
 			expect(cb2).toHaveBeenCalledTimes(1)
 
@@ -370,7 +370,7 @@ describe('source', () => {
 			const { notifier: b } = pipe(a, source.tap(cb))
 			const s = b(constVoid)
 			expect(cb).toHaveBeenCalledTimes(0)
-			a.next(1)
+			a.set(1)
 			expect(cb).toHaveBeenCalledWith(1)
 			s()
 		})
@@ -392,10 +392,10 @@ describe('source', () => {
 
 			expect(cb).toHaveBeenCalledTimes(0)
 
-			a.next(1)
+			a.set(1)
 			expect(cb).toHaveBeenCalledTimes(1)
 
-			a.next(2)
+			a.set(2)
 			expect(cb).toHaveBeenCalledTimes(2)
 
 			sub()
@@ -413,17 +413,17 @@ describe('source', () => {
 
 			expect(cb).toHaveBeenCalledTimes(0)
 			// first a notification
-			a.next(1)
+			a.set(1)
 			// next a notification in the same tick
-			b.next(2)
+			b.set(2)
 			expect(cb).toHaveBeenCalledTimes(1)
 			// next tick
 			clock.next()
 			// first b notification
-			b.next(1)
+			b.set(1)
 			expect(cb).toHaveBeenCalledTimes(2)
 			// next b notification in the same tick
-			a.next(2)
+			a.set(2)
 			expect(cb).toHaveBeenCalledTimes(2)
 
 			sub()
