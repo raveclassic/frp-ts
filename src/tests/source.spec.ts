@@ -76,7 +76,7 @@ describe('source', () => {
 		const disposeSampler = jest.fn()
 		const sampler = attachDisposable(newProducer(0), disposeSampler)
 		const source = newProducer(1)
-		const { getter: getSampled, notifier: sampled } = sampleSource(sampler)(source)
+		const { get: getSampled, notifier: sampled } = sampleSource(sampler)(source)
 		expect(getSampled()).toBe(1)
 		const cb = jest.fn()
 		const d = sampled(cb)
@@ -96,7 +96,7 @@ describe('source', () => {
 		const sampler = attachDisposable(newProducer(0), disposeSampler)
 		const source = newProducer(1)
 		const sampled = sampleSource(sampler)(source)
-		expect(sampled.getter()()).toBe(1)
+		expect(sampled.get()()).toBe(1)
 		const cb = jest.fn()
 		const d = sampled.notifier(cb)
 		expect(cb).toHaveBeenCalledTimes(0)
@@ -104,12 +104,12 @@ describe('source', () => {
 		// notifications are not propagated from source
 		expect(cb).toHaveBeenCalledTimes(0)
 		// but value should be updated
-		expect(sampled.getter()()).toBe(2)
+		expect(sampled.get()()).toBe(2)
 
 		// notifications are propagated from sampler
 		sampler.set(1)
 		expect(cb).toHaveBeenCalledTimes(1)
-		expect(sampled.getter()()).toBe(2)
+		expect(sampled.get()()).toBe(2)
 
 		d()
 	})
@@ -118,7 +118,7 @@ describe('source', () => {
 		const disposeB = jest.fn()
 		const a = attachDisposable(newProducer(0), disposeA)
 		const b = attachDisposable(newProducer(1), disposeB)
-		const { getter: getC, notifier: c } = sequence([a, b])
+		const { get: getC, notifier: c } = sequence([a, b])
 		expect(getC()).toEqual([0, 1])
 		const listenerC = jest.fn()
 		const disposableC = c(listenerC)
@@ -148,13 +148,13 @@ describe('source', () => {
 			const cbb = jest.fn()
 			const sa = a.notifier(cba)
 			const sb = b.notifier(cbb)
-			expect(a.getter()).toBe(0)
-			expect(b.getter()).toBe(f(0))
+			expect(a.get()).toBe(0)
+			expect(b.get()).toBe(f(0))
 			expect(cba).toHaveBeenCalledTimes(0)
 			expect(cbb).toHaveBeenCalledTimes(0)
 			a.set(10)
-			expect(a.getter()).toBe(10)
-			expect(b.getter()).toBe(f(10))
+			expect(a.get()).toBe(10)
+			expect(b.get()).toBe(f(10))
 			expect(cba).toHaveBeenCalledTimes(1)
 			expect(cbb).toHaveBeenCalledTimes(1)
 			sa()
@@ -163,7 +163,7 @@ describe('source', () => {
 		it('should memo', () => {
 			const f = jest.fn((n: number) => `value: ${n}`)
 			const a = newProducer(0)
-			const { getter: getB, notifier: b } = pipe(a, source.map(f))
+			const { get: getB, notifier: b } = pipe(a, source.map(f))
 			const s = b(constVoid)
 			expect(f).toHaveBeenCalledTimes(0)
 			getB()
@@ -173,7 +173,7 @@ describe('source', () => {
 			s()
 		})
 		it('should skip never', () => {
-			const a: Source<boolean> = { getter: constTrue, notifier: never }
+			const a: Source<boolean> = { get: constTrue, notifier: never }
 			const b = pipe(a, source.map(constFalse))
 			expect(b.notifier).toBe(never)
 		})
@@ -185,13 +185,13 @@ describe('source', () => {
 			const fab = newProducer(f)
 			const fa = newProducer(0)
 			const b = pipe(fab, source.ap(fa))
-			expect(b.getter()).toBe(f(0))
+			expect(b.get()).toBe(f(0))
 			fab.set(g)
-			expect(b.getter()).toBe(g(0))
+			expect(b.get()).toBe(g(0))
 			fa.set(1)
-			expect(b.getter()).toBe(g(1))
+			expect(b.get()).toBe(g(1))
 			fab.set(f)
-			expect(b.getter()).toBe(f(1))
+			expect(b.get()).toBe(f(1))
 		})
 		it('should multicast', () => {
 			const f = (n: number) => n + 1
@@ -199,8 +199,8 @@ describe('source', () => {
 			const fa = newProducer(0)
 			const spyFab = jest.fn(fab.notifier)
 			const spyFa = jest.fn(fa.notifier)
-			const fabSource: Source<typeof f> = { getter: fab.getter, notifier: spyFab }
-			const faSource: Source<number> = { getter: fa.getter, notifier: spyFa }
+			const fabSource: Source<typeof f> = { get: fab.get, notifier: spyFab }
+			const faSource: Source<number> = { get: fa.get, notifier: spyFa }
 			const b = pipe(fabSource, source.ap(faSource))
 			const s1 = b.notifier(constVoid)
 			expect(spyFab).toHaveBeenCalledTimes(1)
@@ -215,7 +215,7 @@ describe('source', () => {
 			const f = jest.fn((n: number) => n + 1)
 			const fab = instance.of(f)
 			const fa = instance.of(0)
-			const { getter: getR } = pipe(fab, source.ap(fa))
+			const { get: getR } = pipe(fab, source.ap(fa))
 			getR()
 			expect(f).toHaveBeenCalledTimes(1)
 			getR()
@@ -225,11 +225,11 @@ describe('source', () => {
 	})
 	describe('flatten', () => {
 		const f = (n: number): string => `value: ${n}`
-		it('should chain getter', () => {
+		it('should chain get', () => {
 			const a = newProducer(0)
 			// don't destruct inner because reference is overwritten in chain
 			let inner: Atom<string> = newProducer('')
-			const [{ getter: getB }] = pipe(
+			const [{ get: getB }] = pipe(
 				a,
 				source.map((a) => {
 					inner = newProducer(f(a))
@@ -237,18 +237,18 @@ describe('source', () => {
 				}),
 				flatten,
 			)
-			const { getter: getA } = a
+			const { get: getA } = a
 			expect(getA()).toBe(0)
 			expect(getB()).toBe(f(0))
-			expect(inner.getter()).toBe(f(0))
+			expect(inner.get()).toBe(f(0))
 			a.set(1)
 			expect(getA()).toBe(1)
 			expect(getB()).toBe(f(1))
-			expect(inner.getter()).toBe(f(1))
+			expect(inner.get()).toBe(f(1))
 		})
 		it('should ignore outlive last listener disposal', () => {
 			const a = newProducer(0)
-			const [{ getter: getB, notifier: b }] = pipe(
+			const [{ get: getB, notifier: b }] = pipe(
 				a,
 				source.map((a) => newProducer(f(a))),
 				flatten,
@@ -260,7 +260,7 @@ describe('source', () => {
 			// dispose
 			s()
 			a.set(2)
-			// should still propagate getter to outer
+			// should still propagate get to outer
 			expect(getB()).toBe(f(2))
 		})
 		it('should not pass notifications from source', () => {
@@ -321,7 +321,7 @@ describe('source', () => {
 		})
 		it('outer dispose should unsubscribe from source', () => {
 			const disposeA = jest.fn()
-			const sourceA: Source<boolean> = { getter: constTrue, notifier: () => disposeA }
+			const sourceA: Source<boolean> = { get: constTrue, notifier: () => disposeA }
 			const inner = newProducer('')
 			const [, disposeB] = pipe(
 				sourceA,
@@ -354,10 +354,10 @@ describe('source', () => {
 	})
 	describe('of', () => {
 		it('should store initial value and never notify', () => {
-			const { getter, notifier } = instance.of(0)
+			const { get, notifier } = instance.of(0)
 			const f = jest.fn()
 			const s = notifier(f)
-			expect(getter()).toBe(0)
+			expect(get()).toBe(0)
 			expect(f).toHaveBeenCalledTimes(0)
 			expect(notifier).toBe(never)
 			s()
@@ -443,7 +443,7 @@ describe('source', () => {
 				}
 			})
 
-			const [{ getter: getA, notifier: a }, disposeA] = fromObservable(0, obs)
+			const [{ get: getA, notifier: a }, disposeA] = fromObservable(0, obs)
 			expect(getA()).toBe(0)
 			const cb = jest.fn()
 			const sub = a(cb)
@@ -474,7 +474,7 @@ describe('source', () => {
 		})
 		it('should support complete', () => {
 			const s = new Subject<number>()
-			const [{ getter: getA, notifier: a }] = fromObservable(0, s)
+			const [{ get: getA, notifier: a }] = fromObservable(0, s)
 			const cb = jest.fn()
 			const sub = a(cb)
 			s.next(1)
@@ -501,7 +501,7 @@ describe('source', () => {
 					},
 				}
 			})
-			const [{ getter: getA, notifier: a }, disposeA] = pipe(
+			const [{ get: getA, notifier: a }, disposeA] = pipe(
 				obs,
 				scan((acc, n) => acc + n, 1),
 			)
@@ -536,7 +536,7 @@ describe('source', () => {
 		})
 		it('should support complete', () => {
 			const s = new Subject<number>()
-			const [{ getter: getA, notifier: a }] = pipe(
+			const [{ get: getA, notifier: a }] = pipe(
 				s,
 				scan((acc, n) => acc + n, 1),
 			)

@@ -15,11 +15,11 @@ export const newAtom = (env: Env) => <A>(initial: A): Atom<A> => {
 			e.notify(env.clock.now())
 		}
 	}
-	const getter = () => last
+	const get = () => last
 	const notifier: Notifier = (listener) => e.subscribe(listener)
 	return {
 		set,
-		getter,
+		get,
 		notifier,
 	}
 }
