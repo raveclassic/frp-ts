@@ -1,4 +1,4 @@
-import { fromObservable as getFromObservable, scan as getScan, Source } from '../source'
+import { fromObservable as getFromObservable, scan as getScan, Property } from '../property'
 import { Observable1 } from '../observable'
 import { map } from 'rxjs/operators'
 import { newAtom as getNewProducer } from '../atom'
@@ -30,7 +30,7 @@ export const scan = getScan(testObservable)(defaultEnv)
 
 export const fromObservable = getFromObservable(testObservable)(defaultEnv)
 
-export const attachDisposable = <A, S extends Source<A>>(source: S, disposable: Disposable): S => ({
+export const attachDisposable = <A, S extends Property<A>>(source: S, disposable: Disposable): S => ({
 	...source,
 	notifier: (l) => {
 		const d = source.notifier(l)

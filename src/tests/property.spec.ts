@@ -1,10 +1,10 @@
-import { flatten, instance, never, sample, sampleIO, sequence, Source } from '../source'
+import { flatten, instance, never, sample, sampleIO, sequence, Property } from '../property'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { constFalse, constTrue, constVoid } from 'fp-ts/lib/function'
 import { Observable, Subject } from 'rxjs'
 import { Observer } from '../observable'
 import { newAtom as getNewProducer, Atom } from '../atom'
-import { source } from '..'
+import { property } from '..'
 import { attachDisposable, fromObservable, newProducer, newVirtualClock, scan, testObservable } from './env'
 
 describe('source', () => {
@@ -70,7 +70,7 @@ describe('source', () => {
 		// should not dispose source
 		expect(disposeSource).toHaveBeenCalledTimes(0)
 	})
-	it('sample Source', () => {
+	it('sample Property', () => {
 		const sampleSource = sample(instance)
 		// const { source: sampler_ } = newAtom(0)
 		const disposeSampler = jest.fn()
@@ -89,7 +89,7 @@ describe('source', () => {
 
 		d()
 	})
-	it('sampleIO Source', () => {
+	it('sampleIO Property', () => {
 		const sampleSource = sampleIO(instance)
 
 		const disposeSampler = jest.fn()
@@ -143,7 +143,7 @@ describe('source', () => {
 		it('should map', () => {
 			const f = (n: number) => `value: ${n}`
 			const a = newProducer(0)
-			const b = pipe(a, source.map(f))
+			const b = pipe(a, property.map(f))
 			const cba = jest.fn()
 			const cbb = jest.fn()
 			const sa = a.notifier(cba)
@@ -163,7 +163,7 @@ describe('source', () => {
 		it('should memo', () => {
 			const f = jest.fn((n: number) => `value: ${n}`)
 			const a = newProducer(0)
-			const { get: getB, notifier: b } = pipe(a, source.map(f))
+			const { get: getB, notifier: b } = pipe(a, property.map(f))
 			const s = b(constVoid)
 			expect(f).toHaveBeenCalledTimes(0)
 			getB()
@@ -173,8 +173,8 @@ describe('source', () => {
 			s()
 		})
 		it('should skip never', () => {
-			const a: Source<boolean> = { get: constTrue, notifier: never }
-			const b = pipe(a, source.map(constFalse))
+			const a: Property<boolean> = { get: constTrue, notifier: never }
+			const b = pipe(a, property.map(constFalse))
 			expect(b.notifier).toBe(never)
 		})
 	})
@@ -184,7 +184,7 @@ describe('source', () => {
 			const g = (n: number) => n / 2
 			const fab = newProducer(f)
 			const fa = newProducer(0)
-			const b = pipe(fab, source.ap(fa))
+			const b = pipe(fab, property.ap(fa))
 			expect(b.get()).toBe(f(0))
 			fab.set(g)
 			expect(b.get()).toBe(g(0))
@@ -199,9 +199,9 @@ describe('source', () => {
 			const fa = newProducer(0)
 			const spyFab = jest.fn(fab.notifier)
 			const spyFa = jest.fn(fa.notifier)
-			const fabSource: Source<typeof f> = { get: fab.get, notifier: spyFab }
-			const faSource: Source<number> = { get: fa.get, notifier: spyFa }
-			const b = pipe(fabSource, source.ap(faSource))
+			const fabSource: Property<typeof f> = { get: fab.get, notifier: spyFab }
+			const faSource: Property<number> = { get: fa.get, notifier: spyFa }
+			const b = pipe(fabSource, property.ap(faSource))
 			const s1 = b.notifier(constVoid)
 			expect(spyFab).toHaveBeenCalledTimes(1)
 			expect(spyFa).toHaveBeenCalledTimes(1)
@@ -215,7 +215,7 @@ describe('source', () => {
 			const f = jest.fn((n: number) => n + 1)
 			const fab = instance.of(f)
 			const fa = instance.of(0)
-			const { get: getR } = pipe(fab, source.ap(fa))
+			const { get: getR } = pipe(fab, property.ap(fa))
 			getR()
 			expect(f).toHaveBeenCalledTimes(1)
 			getR()
@@ -231,7 +231,7 @@ describe('source', () => {
 			let inner: Atom<string> = newProducer('')
 			const [{ get: getB }] = pipe(
 				a,
-				source.map((a) => {
+				property.map((a) => {
 					inner = newProducer(f(a))
 					return inner
 				}),
@@ -250,7 +250,7 @@ describe('source', () => {
 			const a = newProducer(0)
 			const [{ get: getB, notifier: b }] = pipe(
 				a,
-				source.map((a) => newProducer(f(a))),
+				property.map((a) => newProducer(f(a))),
 				flatten,
 			)
 			expect(getB()).toBe(f(0))
@@ -267,7 +267,7 @@ describe('source', () => {
 			const a = newProducer(0)
 			const [{ notifier: b }] = pipe(
 				a,
-				source.map((a) => newProducer(f(a))),
+				property.map((a) => newProducer(f(a))),
 				flatten,
 			)
 			const cb = jest.fn()
@@ -282,7 +282,7 @@ describe('source', () => {
 			const inner = newProducer('')
 			const [{ notifier: b }] = pipe(
 				a,
-				source.map(() => inner),
+				property.map(() => inner),
 				flatten,
 			)
 			const cb = jest.fn()
@@ -299,7 +299,7 @@ describe('source', () => {
 			const inner2 = newProducer('')
 			const [{ notifier: b }] = pipe(
 				a,
-				source.map((a) => (a === 0 ? innerSource1 : inner2)),
+				property.map((a) => (a === 0 ? innerSource1 : inner2)),
 				flatten,
 			)
 			const cb = jest.fn()
@@ -321,11 +321,11 @@ describe('source', () => {
 		})
 		it('outer dispose should unsubscribe from source', () => {
 			const disposeA = jest.fn()
-			const sourceA: Source<boolean> = { get: constTrue, notifier: () => disposeA }
+			const sourceA: Property<boolean> = { get: constTrue, notifier: () => disposeA }
 			const inner = newProducer('')
 			const [, disposeB] = pipe(
 				sourceA,
-				source.map(() => inner),
+				property.map(() => inner),
 				flatten,
 			)
 			disposeB()
@@ -336,7 +336,7 @@ describe('source', () => {
 			const inner = newProducer('')
 			const [{ notifier: b }] = pipe(
 				a,
-				source.map(() => inner),
+				property.map(() => inner),
 				flatten,
 			)
 			const cb1 = jest.fn()
@@ -367,7 +367,7 @@ describe('source', () => {
 		it('should tap', () => {
 			const a = newProducer(0)
 			const cb = jest.fn()
-			const { notifier: b } = pipe(a, source.tap(cb))
+			const { notifier: b } = pipe(a, property.tap(cb))
 			const s = b(constVoid)
 			expect(cb).toHaveBeenCalledTimes(0)
 			a.set(1)
@@ -380,13 +380,13 @@ describe('source', () => {
 			const a = newProducer(0)
 			const b = pipe(
 				a,
-				source.map((n) => n + 1),
+				property.map((n) => n + 1),
 			)
 			const c = pipe(
 				a,
-				source.map((n) => n / 1),
+				property.map((n) => n / 1),
 			)
-			const { notifier: d } = source.sequenceT(b, c)
+			const { notifier: d } = property.sequenceT(b, c)
 			const cb = jest.fn()
 			const sub = d(cb)
 
@@ -407,7 +407,7 @@ describe('source', () => {
 			})
 			const a = newProducer(0)
 			const b = newProducer(0)
-			const { notifier: c } = source.sequenceT(a, b)
+			const { notifier: c } = property.sequenceT(a, b)
 			const cb = jest.fn()
 			const sub = c(cb)
 

@@ -1,8 +1,8 @@
 import { newEmitter, Notifier } from './emitter'
-import { Source } from './source'
+import { Property } from './property'
 import { Env } from './clock'
 
-export interface Atom<A> extends Source<A> {
+export interface Atom<A> extends Property<A> {
 	readonly set: (a: A) => void
 }
 

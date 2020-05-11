@@ -1,6 +1,6 @@
 import { suite } from '../suite'
 import { constVoid } from 'fp-ts/lib/function'
-import { never } from '../../src/source'
+import { never } from '../../src/property'
 import { range } from 'fp-ts/lib/Array'
 
 const r = range(0, 1000)
