@@ -14,7 +14,7 @@ import {
 import { array } from 'fp-ts/lib/Array'
 import { Applicative1 } from 'fp-ts/lib/Applicative'
 import { combineNotifier, Disposable, newEmitter, Notifier } from './emitter'
-import { newProducer } from './producer'
+import { newAtom } from './atom'
 import { IO } from 'fp-ts/lib/IO'
 import { Env } from './clock'
 
@@ -209,7 +209,7 @@ export function scan<M>(
 	M: Observable<M>,
 ): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: HKT<M, A>) => [Source<B>, Disposable] {
 	return (env) => {
-		const producer = newProducer(env)
+		const producer = newAtom(env)
 		return (f, initial) => (ma) => {
 			const p = producer(initial)
 			const s = M.subscribe(ma, {

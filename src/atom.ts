@@ -2,11 +2,11 @@ import { newEmitter, Notifier } from './emitter'
 import { Source } from './source'
 import { Env } from './clock'
 
-export interface Producer<A> extends Source<A> {
+export interface Atom<A> extends Source<A> {
 	readonly set: (a: A) => void
 }
 
-export const newProducer = (env: Env) => <A>(initial: A): Producer<A> => {
+export const newAtom = (env: Env) => <A>(initial: A): Atom<A> => {
 	let last = initial
 	const e = newEmitter()
 	const set = (a: A): void => {

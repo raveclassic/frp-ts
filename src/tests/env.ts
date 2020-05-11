@@ -1,7 +1,7 @@
 import { fromObservable as getFromObservable, scan as getScan, Source } from '../source'
 import { Observable1 } from '../observable'
 import { map } from 'rxjs/operators'
-import { newProducer as getNewProducer } from '../producer'
+import { newAtom as getNewProducer } from '../atom'
 import { Clock, Env, newCounterClock } from '../clock'
 import { Observable } from 'rxjs'
 import { Disposable, fromEvent as getFromEvent } from '../emitter'

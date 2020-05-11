@@ -3,7 +3,7 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import { constFalse, constTrue, constVoid } from 'fp-ts/lib/function'
 import { Observable, Subject } from 'rxjs'
 import { Observer } from '../observable'
-import { newProducer as getNewProducer, Producer } from '../producer'
+import { newAtom as getNewProducer, Atom } from '../atom'
 import { source } from '..'
 import { attachDisposable, fromObservable, newProducer, newVirtualClock, scan, testObservable } from './env'
 
@@ -72,7 +72,7 @@ describe('source', () => {
 	})
 	it('sample Source', () => {
 		const sampleSource = sample(instance)
-		// const { source: sampler_ } = newProducer(0)
+		// const { source: sampler_ } = newAtom(0)
 		const disposeSampler = jest.fn()
 		const sampler = attachDisposable(newProducer(0), disposeSampler)
 		const source = newProducer(1)
@@ -228,7 +228,7 @@ describe('source', () => {
 		it('should chain getter', () => {
 			const a = newProducer(0)
 			// don't destruct inner because reference is overwritten in chain
-			let inner: Producer<string> = newProducer('')
+			let inner: Atom<string> = newProducer('')
 			const [{ getter: getB }] = pipe(
 				a,
 				source.map((a) => {

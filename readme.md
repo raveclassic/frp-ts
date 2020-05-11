@@ -121,7 +121,7 @@ import { newProducer } from 'frp-ts/lib/producer'
 import { newCounterClock } from 'frp-ts/lib/clock'
 
 // We create a producer that will allow us to get values, listen to updates and update its value manually
-// As mentioned earlier a `Producer` depends on a `Clock`
+// As mentioned earlier a `Atom` depends on a `Clock`
 // so wee need to pass it directly as part of environment
 const counter = newProducer({ clock: newCounterClock() })(0)
 
