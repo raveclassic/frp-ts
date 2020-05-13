@@ -2,6 +2,7 @@
 
 import { HKT, Kind, Kind2, Kind3, Kind4, URIS, URIS2, URIS3, URIS4 } from 'fp-ts/lib/HKT'
 import { Functor, Functor1, Functor2, Functor3, Functor3C, Functor2C, Functor4 } from 'fp-ts/lib/Functor'
+import { constVoid } from 'fp-ts/lib/function'
 
 export interface Observer<A> {
 	readonly next: (a: A) => void
@@ -37,4 +38,8 @@ export interface Observable3C<F extends URIS3, E> extends Functor3C<F, E> {
 
 export interface Observable4<F extends URIS4> extends Functor4<F> {
 	readonly subscribe: <S, R, E, A>(ma: Kind4<F, S, R, E, A>, observer: Observer<A>) => Subscription
+}
+
+export const subscriptionNone: Subscription = {
+	unsubscribe: constVoid,
 }

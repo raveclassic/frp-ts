@@ -1,10 +1,10 @@
 import { fromObservable as getFromObservable, scan as getScan, Property } from '../property'
-import { Observable1 } from '../observable'
+import { Observable1, Subscription } from '../observable'
 import { map } from 'rxjs/operators'
 import { newAtom as getNewProducer } from '../atom'
 import { Clock, Env, newCounterClock } from '../clock'
 import { Observable } from 'rxjs'
-import { Disposable, fromEvent as getFromEvent } from '../emitter'
+import { fromEvent as getFromEvent } from '../emitter'
 
 const TEST_OBSERVABLE_URI = 'frp-ts//TestObservable'
 type TEST_OBSERVABLE_URI = typeof TEST_OBSERVABLE_URI
@@ -30,13 +30,15 @@ export const scan = getScan(testObservable)(defaultEnv)
 
 export const fromObservable = getFromObservable(testObservable)(defaultEnv)
 
-export const attachDisposable = <A, S extends Property<A>>(source: S, disposable: Disposable): S => ({
+export const attachSubscription = <A, S extends Property<A>>(source: S, subscription: Subscription): S => ({
 	...source,
 	notifier: (l) => {
 		const d = source.notifier(l)
-		return () => {
-			d()
-			disposable()
+		return {
+			unsubscribe: () => {
+				d.unsubscribe()
+				subscription.unsubscribe()
+			},
 		}
 	},
 })

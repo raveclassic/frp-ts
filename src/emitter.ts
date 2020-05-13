@@ -1,16 +1,12 @@
 import { Env, Time } from './clock'
-import { constVoid } from 'fp-ts/lib/function'
-
-export interface Disposable {
-	(): void
-}
+import { Subscription, subscriptionNone } from './observable'
 
 export interface Listener {
 	(time: Time): void
 }
 
 export interface Notifier {
-	(listener: Listener): Disposable
+	(listener: Listener): Subscription
 }
 
 /**
@@ -53,7 +49,9 @@ export const newEmitter = (): Emitter => {
 			} else {
 				listeners.add(listener)
 			}
-			return () => listeners.delete(listener)
+			return {
+				unsubscribe: () => listeners.delete(listener),
+			}
 		},
 	}
 }
@@ -61,19 +59,21 @@ export const newEmitter = (): Emitter => {
 const multicast = (a: Notifier): Notifier => {
 	const emitter = newEmitter()
 	let counter = 0
-	let outerDisposable: Disposable = constVoid
+	let outer = subscriptionNone
 	return (listener) => {
 		counter++
-		const disposable = emitter.subscribe(listener)
+		const inner = emitter.subscribe(listener)
 		if (counter === 1) {
-			outerDisposable = a((t) => emitter.notify(t))
+			outer = a((t) => emitter.notify(t))
 		}
-		return () => {
-			counter--
-			disposable()
-			if (counter === 0) {
-				outerDisposable()
-			}
+		return {
+			unsubscribe: () => {
+				counter--
+				inner.unsubscribe()
+				if (counter === 0) {
+					outer.unsubscribe()
+				}
+			},
 		}
 	}
 }
@@ -93,9 +93,11 @@ export const combineNotifier = (a: Notifier, b: Notifier): Notifier => {
 				listener(t)
 			}
 		})
-		return () => {
-			sa()
-			sb()
+		return {
+			unsubscribe: () => {
+				sa.unsubscribe()
+				sb.unsubscribe()
+			},
 		}
 	})
 }
@@ -119,5 +121,7 @@ export const fromEvent = (e: Env) => (
 	multicast((listener) => {
 		const handler = () => listener(e.clock.now())
 		target.addEventListener(event, handler, options)
-		return () => target.removeEventListener(event, handler, options)
+		return {
+			unsubscribe: () => target.removeEventListener(event, handler, options),
+		}
 	})

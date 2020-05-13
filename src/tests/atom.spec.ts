@@ -18,7 +18,7 @@ describe('producer', () => {
 		expect(f).toHaveBeenCalledTimes(0)
 		set(1)
 		expect(f).toHaveBeenCalledTimes(1)
-		s()
+		s.unsubscribe()
 	})
 	it('should skip duplicates', () => {
 		const { set, notifier } = newProducer(0)
@@ -27,6 +27,6 @@ describe('producer', () => {
 		expect(f).toHaveBeenCalledTimes(0)
 		set(0)
 		expect(f).toHaveBeenCalledTimes(0)
-		s()
+		s.unsubscribe()
 	})
 })

@@ -1,7 +1,8 @@
 import { suite } from '../suite'
 import { range } from 'fp-ts/lib/Array'
 import { Time } from '../../src/clock'
-import { Disposable, Emitter, Listener, newEmitter } from '../../src/emitter'
+import { Emitter, Listener, newEmitter } from '../../src/emitter'
+import { Subscription } from '../../src/observable'
 
 describe('emitter performance', () => {
 	it('creating instance', () => {
@@ -72,13 +73,15 @@ class EmitterImpl implements Emitter {
 	// tracks new listeners added while notifying
 	private pendingAdditions: Listener[] = []
 
-	subscribe(listener: Listener): Disposable {
+	subscribe(listener: Listener): Subscription {
 		if (this.isNotifying) {
 			this.pendingAdditions.push(listener)
 		} else {
 			this.listeners.add(listener)
 		}
-		return () => this.listeners.delete(listener)
+		return {
+			unsubscribe: () => this.listeners.delete(listener),
+		}
 	}
 
 	notify(time: Time) {

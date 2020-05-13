@@ -1,4 +1,4 @@
-import { Disposable, EventTarget, AddEventListenerOptions, Listener, newEmitter, fromEvent } from '../emitter'
+import { EventTarget, AddEventListenerOptions, Listener, newEmitter, fromEvent } from '../emitter'
 import { constVoid } from 'fp-ts/lib/function'
 import { newVirtualClock } from './env'
 
@@ -58,14 +58,14 @@ describe('Emitter', () => {
 		it('should remove subscriptions immediately even while notifying', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
-			const s1 = jest.fn(e.subscribe(f1))
+			const s1 = jest.fn(e.subscribe(f1).unsubscribe)
 			// now we have child subscriptions, calling set will iterate over them
 			// check if it's possible to unsubscribe immediately on notification
 			const f2: Listener = jest.fn(() => s2())
-			const s2 = jest.fn(e.subscribe(f2))
+			const s2 = jest.fn(e.subscribe(f2).unsubscribe)
 			// add more subscriptions
 			const f3 = jest.fn()
-			const s3 = jest.fn(e.subscribe(f3))
+			const s3 = jest.fn(e.subscribe(f3).unsubscribe)
 			// notify!
 			e.notify(0)
 			expect(f1).toHaveBeenCalledTimes(1)
@@ -78,19 +78,19 @@ describe('Emitter', () => {
 		it('should not notify new subscriptions added immediately while notifying', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
-			const s1 = jest.fn(e.subscribe(f1))
+			const s1 = jest.fn(e.subscribe(f1).unsubscribe)
 			// now we have child subscriptions, calling set will iterate over them
 			// check if it's possible to add new subscriptions immediately on notification
 			const f2 = jest.fn()
-			let s2: Disposable = constVoid
+			let s2 = constVoid
 			const f3: Listener = jest.fn(() => {
 				s2?.()
-				s2 = jest.fn(e.subscribe(f2))
+				s2 = jest.fn(e.subscribe(f2).unsubscribe)
 			})
-			const s3 = jest.fn(e.subscribe(f3))
+			const s3 = jest.fn(e.subscribe(f3).unsubscribe)
 			// add some more
 			const f4 = jest.fn()
-			const s4 = jest.fn(e.subscribe(f4))
+			const s4 = jest.fn(e.subscribe(f4).unsubscribe)
 			// notify!
 			e.notify(0)
 			expect(f1).toHaveBeenCalledTimes(1)
@@ -142,10 +142,10 @@ describe('Emitter', () => {
 			expect(cb).toHaveBeenCalledTimes(2)
 			// should unsubscribe
 			expect(removeEventListener).toHaveBeenCalledTimes(0)
-			d2()
+			d2.unsubscribe()
 			// should also multicast
 			expect(removeEventListener).toHaveBeenCalledTimes(0)
-			d()
+			d.unsubscribe()
 			expect(removeEventListener).toHaveBeenCalledTimes(1)
 		})
 	})

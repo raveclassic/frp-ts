@@ -5,13 +5,13 @@ import { Observable, Subject } from 'rxjs'
 import { Observer } from '../observable'
 import { newAtom as getNewProducer, Atom } from '../atom'
 import { property } from '..'
-import { attachDisposable, fromObservable, newProducer, newVirtualClock, scan, testObservable } from './env'
+import { attachSubscription, fromObservable, newProducer, newVirtualClock, scan, testObservable } from './env'
 
-describe('source', () => {
+describe('property', () => {
 	describe('instance', () => {
 		it('subscribe', () => {
-			const dispose = jest.fn()
-			const p = attachDisposable(newProducer(0), dispose)
+			const unsubscribe = jest.fn()
+			const p = attachSubscription(newProducer(0), { unsubscribe })
 			const observer: Observer<number> = {
 				next: jest.fn(),
 			}
@@ -20,7 +20,7 @@ describe('source', () => {
 			p.set(1)
 			expect(observer.next).toHaveBeenCalledWith(1)
 			d.unsubscribe()
-			expect(dispose).toHaveBeenCalledTimes(1)
+			expect(unsubscribe).toHaveBeenCalledTimes(1)
 		})
 	})
 	it('sample testObservable', () => {
@@ -31,8 +31,8 @@ describe('source', () => {
 			return disposeSampler
 		})
 		const nextObserver = (n: number) => observer.next(n)
-		const disposeSource = jest.fn()
-		const source = attachDisposable(newProducer(0), disposeSource)
+		const unsubscribe = jest.fn()
+		const source = attachSubscription(newProducer(0), { unsubscribe })
 		const sampleObservable = sample(testObservable)
 		const sampled = sampleObservable(sampler)(source)
 		const next = jest.fn()
@@ -64,13 +64,11 @@ describe('source', () => {
 		// should dispose sampler
 		expect(disposeSampler).toHaveBeenCalledTimes(1)
 		// should not dispose source
-		expect(disposeSource).toHaveBeenCalledTimes(0)
+		expect(unsubscribe).toHaveBeenCalledTimes(0)
 	})
 	it('sample Property', () => {
 		const sampleSource = sample(instance)
-		// const { source: sampler_ } = newAtom(0)
-		const disposeSampler = jest.fn()
-		const sampler = attachDisposable(newProducer(0), disposeSampler)
+		const sampler = newProducer(0)
 		const source = newProducer(1)
 		const { get: getSampled, notifier: sampled } = sampleSource(sampler)(source)
 		expect(getSampled()).toBe(1)
@@ -83,13 +81,12 @@ describe('source', () => {
 		// but value should be updated
 		expect(getSampled()).toBe(1)
 
-		d()
+		d.unsubscribe()
 	})
 	it('sampleIO Property', () => {
 		const sampleSource = sampleIO(instance)
 
-		const disposeSampler = jest.fn()
-		const sampler = attachDisposable(newProducer(0), disposeSampler)
+		const sampler = newProducer(0)
 		const source = newProducer(1)
 		const sampled = sampleSource(sampler)(source)
 		expect(sampled.get()()).toBe(1)
@@ -107,13 +104,13 @@ describe('source', () => {
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(sampled.get()()).toBe(2)
 
-		d()
+		d.unsubscribe()
 	})
 	it('sequence', () => {
 		const disposeA = jest.fn()
 		const disposeB = jest.fn()
-		const a = attachDisposable(newProducer(0), disposeA)
-		const b = attachDisposable(newProducer(1), disposeB)
+		const a = attachSubscription(newProducer(0), { unsubscribe: disposeA })
+		const b = attachSubscription(newProducer(1), { unsubscribe: disposeB })
 		const { get: getC, notifier: c } = sequence([a, b])
 		expect(getC()).toEqual([0, 1])
 		const listenerC = jest.fn()
@@ -131,7 +128,7 @@ describe('source', () => {
 
 		expect(disposeA).toHaveBeenCalledTimes(0)
 		expect(disposeB).toHaveBeenCalledTimes(0)
-		disposableC()
+		disposableC.unsubscribe()
 		expect(disposeA).toHaveBeenCalledTimes(1)
 		expect(disposeB).toHaveBeenCalledTimes(1)
 	})
@@ -153,8 +150,8 @@ describe('source', () => {
 			expect(b.get()).toBe(f(10))
 			expect(cba).toHaveBeenCalledTimes(1)
 			expect(cbb).toHaveBeenCalledTimes(1)
-			sa()
-			sb()
+			sa.unsubscribe()
+			sb.unsubscribe()
 		})
 		it('should memo', () => {
 			const f = jest.fn((n: number) => `value: ${n}`)
@@ -166,7 +163,7 @@ describe('source', () => {
 			expect(f).toHaveBeenCalledTimes(1)
 			getB()
 			expect(f).toHaveBeenCalledTimes(1) // value didn't change, should not increase call amount
-			s()
+			s.unsubscribe()
 		})
 		it('should skip never', () => {
 			const a: Property<boolean> = { get: constTrue, notifier: never }
@@ -204,8 +201,8 @@ describe('source', () => {
 			const s2 = b.notifier(constVoid)
 			expect(spyFab).toHaveBeenCalledTimes(1)
 			expect(spyFa).toHaveBeenCalledTimes(1)
-			s1()
-			s2()
+			s1.unsubscribe()
+			s2.unsubscribe()
 		})
 		it('should memo', () => {
 			const f = jest.fn((n: number) => n + 1)
@@ -254,7 +251,7 @@ describe('source', () => {
 			a.set(1)
 			expect(getB()).toBe(f(1))
 			// dispose
-			s()
+			s.unsubscribe()
 			a.set(2)
 			// should still propagate get to outer
 			expect(getB()).toBe(f(2))
@@ -271,7 +268,7 @@ describe('source', () => {
 			expect(cb).toHaveBeenCalledTimes(0)
 			a.set(1)
 			expect(cb).toHaveBeenCalledTimes(0)
-			s()
+			s.unsubscribe()
 		})
 		it('should switch to notifications from inner source', () => {
 			const a = newProducer(0)
@@ -286,12 +283,12 @@ describe('source', () => {
 			const s = b(cb)
 			inner.set('foo')
 			expect(cb).toHaveBeenCalledTimes(1)
-			s()
+			s.unsubscribe()
 		})
 		it('should dispose previous subscription to inner source on passed source emit', () => {
 			const a = newProducer(0)
 			const inner1Dispose = jest.fn()
-			const innerSource1 = attachDisposable(newProducer(''), inner1Dispose)
+			const innerSource1 = attachSubscription(newProducer(''), { unsubscribe: inner1Dispose })
 			const inner2 = newProducer('')
 			const [{ notifier: b }] = pipe(
 				a,
@@ -313,18 +310,23 @@ describe('source', () => {
 			expect(inner1Dispose).toHaveBeenCalledTimes(1)
 			// b should not be notified about inner1 because it's switched to inner2
 			expect(cb).toHaveBeenCalledTimes(1)
-			sb()
+			sb.unsubscribe()
 		})
 		it('outer dispose should unsubscribe from source', () => {
 			const disposeA = jest.fn()
-			const sourceA: Property<boolean> = { get: constTrue, notifier: () => disposeA }
+			const sourceA: Property<boolean> = {
+				get: constTrue,
+				notifier: () => ({
+					unsubscribe: disposeA,
+				}),
+			}
 			const inner = newProducer('')
-			const [, disposeB] = pipe(
+			const [, subscriptionB] = pipe(
 				sourceA,
 				property.map(() => inner),
 				flatten,
 			)
-			disposeB()
+			subscriptionB.unsubscribe()
 			expect(disposeA).toHaveBeenCalledTimes(1)
 		})
 		it('should multicast', () => {
@@ -344,8 +346,8 @@ describe('source', () => {
 			expect(cb1).toHaveBeenCalledTimes(1)
 			expect(cb2).toHaveBeenCalledTimes(1)
 
-			s1()
-			s2()
+			s1.unsubscribe()
+			s2.unsubscribe()
 		})
 	})
 	describe('of', () => {
@@ -356,7 +358,7 @@ describe('source', () => {
 			expect(get()).toBe(0)
 			expect(f).toHaveBeenCalledTimes(0)
 			expect(notifier).toBe(never)
-			s()
+			s.unsubscribe()
 		})
 	})
 	describe('tap', () => {
@@ -368,7 +370,7 @@ describe('source', () => {
 			expect(cb).toHaveBeenCalledTimes(0)
 			a.set(1)
 			expect(cb).toHaveBeenCalledWith(1)
-			s()
+			s.unsubscribe()
 		})
 	})
 	describe('diamond flow', () => {
@@ -394,7 +396,7 @@ describe('source', () => {
 			a.set(2)
 			expect(cb).toHaveBeenCalledTimes(2)
 
-			sub()
+			sub.unsubscribe()
 		})
 		it('should notify combined on each different source emit in different ticks', () => {
 			const clock = newVirtualClock(0)
@@ -422,7 +424,7 @@ describe('source', () => {
 			a.set(2)
 			expect(cb).toHaveBeenCalledTimes(2)
 
-			sub()
+			sub.unsubscribe()
 		})
 	})
 	describe('fromObservable', () => {
@@ -451,7 +453,7 @@ describe('source', () => {
 			s.next(1)
 			expect(cb).toHaveBeenCalledTimes(1)
 			// check listener disposal
-			sub()
+			sub.unsubscribe()
 			// should keep subscription
 			expect(dispose).toHaveBeenCalledTimes(0)
 			s.next(2)
@@ -460,7 +462,7 @@ describe('source', () => {
 			// but should update value
 			expect(getA()).toBe(2)
 			// check full dispose
-			disposeA()
+			disposeA.unsubscribe()
 			// should unsubscribe from source
 			expect(dispose).toHaveBeenCalledTimes(1)
 			// should not ignore any updates
@@ -481,7 +483,7 @@ describe('source', () => {
 			s.next(2)
 			expect(getA()).toBe(1)
 			expect(cb).toHaveBeenCalledTimes(1)
-			sub()
+			sub.unsubscribe()
 		})
 	})
 	describe('scan', () => {
@@ -497,7 +499,7 @@ describe('source', () => {
 					},
 				}
 			})
-			const [{ get: getA, notifier: a }, disposeA] = pipe(
+			const [{ get: getA, notifier: a }, subscriptionA] = pipe(
 				obs,
 				scan((acc, n) => acc + n, 1),
 			)
@@ -513,7 +515,7 @@ describe('source', () => {
 			expect(getA()).toBe(2)
 			expect(cb).toHaveBeenCalledTimes(1)
 			// check listener disposal
-			sub()
+			sub.unsubscribe()
 			// should keep subscription
 			expect(dispose).toHaveBeenCalledTimes(0)
 			s.next(1)
@@ -522,7 +524,7 @@ describe('source', () => {
 			// but should update value
 			expect(getA()).toBe(3)
 			// check full dispose
-			disposeA()
+			subscriptionA.unsubscribe()
 			// should unsubscribe from source
 			expect(dispose).toHaveBeenCalledTimes(1)
 			// should not ignore any updates
@@ -546,7 +548,7 @@ describe('source', () => {
 			s.next(1)
 			expect(getA()).toBe(2)
 			expect(cb).toHaveBeenCalledTimes(1)
-			sub()
+			sub.unsubscribe()
 		})
 	})
 })

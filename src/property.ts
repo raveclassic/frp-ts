@@ -10,10 +10,12 @@ import {
 	Observable3,
 	Observable3C,
 	Observable4,
+	Subscription,
+	subscriptionNone,
 } from './observable'
 import { array } from 'fp-ts/lib/Array'
 import { Applicative1 } from 'fp-ts/lib/Applicative'
-import { combineNotifier, Disposable, newEmitter, Notifier } from './emitter'
+import { combineNotifier, newEmitter, Notifier } from './emitter'
 import { newAtom } from './atom'
 import { IO } from 'fp-ts/lib/IO'
 import { Env } from './clock'
@@ -81,20 +83,18 @@ export const instance: Applicative1<URI> & Observable1<URI> = {
 		get: () => memoApply(fab.get(), fa.get()),
 		notifier: combineNotifier(fab.notifier, fa.notifier),
 	}),
-	subscribe: (ma, observer) => ({
-		unsubscribe: ma.notifier(() => observer.next(ma.get())),
-	}),
+	subscribe: (ma, observer) => ma.notifier(() => observer.next(ma.get())),
 }
 
-export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Disposable] => {
+export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscription] => {
 	// store initial inner source in a mutable reference
 	let inner: Property<A> = source.get()
-	let innerDisposable: Disposable = constVoid
+	let innerDisposable: Subscription = subscriptionNone
 	const emitter = newEmitter()
 
 	const resubscribeToInner = () => {
 		// dispose previous subscription
-		innerDisposable()
+		innerDisposable.unsubscribe()
 		// create new subscription
 		innerDisposable = inner.notifier(emitter.notify)
 	}
@@ -137,40 +137,42 @@ export const sequence = <A>(sources: Property<A>[]): Property<A[]> => ({
 	get: () => array.map(sources, (source) => source.get()),
 	notifier: (listener) => {
 		const subscriptions = array.map(sources, (source) => source.notifier(listener))
-		return () => {
-			for (let i = 0, l = subscriptions.length; i < l; i++) {
-				subscriptions[i]()
-			}
+		return {
+			unsubscribe: () => {
+				for (let i = 0, l = subscriptions.length; i < l; i++) {
+					subscriptions[i].unsubscribe()
+				}
+			},
 		}
 	},
 })
 
-export const never: Notifier = () => constVoid
+export const never: Notifier = () => subscriptionNone
 
 export function fromObservable<M extends URIS4>(
 	M: Observable4<M>,
-): (env: Env) => <S, R, E, A>(initial: A, ma: Kind4<M, S, R, E, A>) => [Property<A>, Disposable]
+): (env: Env) => <S, R, E, A>(initial: A, ma: Kind4<M, S, R, E, A>) => [Property<A>, Subscription]
 export function fromObservable<M extends URIS3>(
 	M: Observable3<M>,
-): (env: Env) => <R, E, A>(initial: A, ma: Kind3<M, R, E, A>) => [Property<A>, Disposable]
+): (env: Env) => <R, E, A>(initial: A, ma: Kind3<M, R, E, A>) => [Property<A>, Subscription]
 export function fromObservable<M extends URIS3, E>(
 	M: Observable3C<M, E>,
-): (env: Env) => <R, A>(initial: A, ma: Kind3<M, R, E, A>) => [Property<A>, Disposable]
+): (env: Env) => <R, A>(initial: A, ma: Kind3<M, R, E, A>) => [Property<A>, Subscription]
 export function fromObservable<M extends URIS2>(
 	M: Observable2<M>,
-): (env: Env) => <E, A>(initial: A, ma: Kind2<M, E, A>) => [Property<A>, Disposable]
+): (env: Env) => <E, A>(initial: A, ma: Kind2<M, E, A>) => [Property<A>, Subscription]
 export function fromObservable<M extends URIS2, E>(
 	M: Observable2C<M, E>,
-): (env: Env) => <A>(initial: A, ma: Kind2<M, E, A>) => [Property<A>, Disposable]
+): (env: Env) => <A>(initial: A, ma: Kind2<M, E, A>) => [Property<A>, Subscription]
 export function fromObservable<M extends URIS>(
 	M: Observable1<M>,
-): (env: Env) => <A>(initial: A, ma: Kind<M, A>) => [Property<A>, Disposable]
+): (env: Env) => <A>(initial: A, ma: Kind<M, A>) => [Property<A>, Subscription]
 export function fromObservable<M>(
 	M: Observable<M>,
-): (env: Env) => <A>(initial: A, ma: HKT<M, A>) => [Property<A>, Disposable]
+): (env: Env) => <A>(initial: A, ma: HKT<M, A>) => [Property<A>, Subscription]
 export function fromObservable<M>(
 	M: Observable<M>,
-): (env: Env) => <A>(initial: A, ma: HKT<M, A>) => [Property<A>, Disposable] {
+): (env: Env) => <A>(initial: A, ma: HKT<M, A>) => [Property<A>, Subscription] {
 	const scanM = scan(M)
 	return (env) => {
 		const s = scanM(env)
@@ -186,30 +188,30 @@ export function scan<M extends URIS4>(
 	M: Observable4<M>,
 ): (
 	env: Env,
-) => <S, R, E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind4<M, S, R, E, A>) => [Property<B>, Disposable]
+) => <S, R, E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind4<M, S, R, E, A>) => [Property<B>, Subscription]
 export function scan<M extends URIS3>(
 	M: Observable3<M>,
 ): (
 	env: Env,
-) => <R, E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind3<M, R, E, A>) => [Property<B>, Disposable]
+) => <R, E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind3<M, R, E, A>) => [Property<B>, Subscription]
 export function scan<M extends URIS3, E>(
 	M: Observable3C<M, E>,
-): (env: Env) => <R, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind3<M, R, E, A>) => [Property<B>, Disposable]
+): (env: Env) => <R, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind3<M, R, E, A>) => [Property<B>, Subscription]
 export function scan<M extends URIS2>(
 	M: Observable2<M>,
-): (env: Env) => <E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind2<M, E, A>) => [Property<B>, Disposable]
+): (env: Env) => <E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind2<M, E, A>) => [Property<B>, Subscription]
 export function scan<M extends URIS2, E>(
 	M: Observable2C<M, E>,
-): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind2<M, E, A>) => [Property<B>, Disposable]
+): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind2<M, E, A>) => [Property<B>, Subscription]
 export function scan<M extends URIS>(
 	M: Observable1<M>,
-): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind<M, A>) => [Property<B>, Disposable]
+): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind<M, A>) => [Property<B>, Subscription]
 export function scan<M>(
 	M: Observable<M>,
-): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: HKT<M, A>) => [Property<B>, Disposable]
+): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: HKT<M, A>) => [Property<B>, Subscription]
 export function scan<M>(
 	M: Observable<M>,
-): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: HKT<M, A>) => [Property<B>, Disposable] {
+): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: HKT<M, A>) => [Property<B>, Subscription] {
 	return (env) => {
 		const producer = newAtom(env)
 		return (f, initial) => (ma) => {
@@ -217,7 +219,7 @@ export function scan<M>(
 			const s = M.subscribe(ma, {
 				next: (a) => p.set(f(p.get(), a)),
 			})
-			return [p, () => s.unsubscribe()]
+			return [p, s]
 		}
 	}
 }
