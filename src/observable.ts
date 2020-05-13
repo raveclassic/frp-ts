@@ -5,7 +5,6 @@ import { Functor, Functor1, Functor2, Functor3, Functor3C, Functor2C, Functor4 }
 
 export interface Observer<A> {
 	readonly next: (a: A) => void
-	readonly complete: () => void
 }
 
 export interface Subscription {

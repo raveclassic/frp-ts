@@ -14,16 +14,12 @@ describe('source', () => {
 			const p = attachDisposable(newProducer(0), dispose)
 			const observer: Observer<number> = {
 				next: jest.fn(),
-				complete: jest.fn(),
 			}
 			const d = instance.subscribe(p, observer)
 			expect(observer.next).toHaveBeenCalledTimes(0)
-			expect(observer.complete).toHaveBeenCalledTimes(0)
 			p.set(1)
 			expect(observer.next).toHaveBeenCalledWith(1)
-			expect(observer.complete).toHaveBeenCalledTimes(0)
 			d.unsubscribe()
-			expect(observer.complete).toHaveBeenCalledTimes(0)
 			expect(dispose).toHaveBeenCalledTimes(1)
 		})
 	})

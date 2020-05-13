@@ -216,7 +216,6 @@ export function scan<M>(
 			const p = producer(initial)
 			const s = M.subscribe(ma, {
 				next: (a) => p.set(f(p.get(), a)),
-				complete: constVoid,
 			})
 			return [p, () => s.unsubscribe()]
 		}
