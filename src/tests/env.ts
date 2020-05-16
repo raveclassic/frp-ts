@@ -1,7 +1,7 @@
 import { fromObservable as getFromObservable, scan as getScan, Property } from '../property'
 import { Subscription } from '../observable'
 import { map } from 'rxjs/operators'
-import { newAtom as getNewProducer } from '../atom'
+import { newAtom as getNewAtom } from '../atom'
 import { Clock, Env, newCounterClock } from '../clock'
 import { Observable } from 'rxjs'
 import { fromEvent as getFromEvent } from '../emitter'
@@ -19,7 +19,7 @@ const defaultEnv: Env = {
 	clock: newCounterClock(),
 }
 
-export const newProducer = getNewProducer(defaultEnv)
+export const newAtom = getNewAtom(defaultEnv)
 
 export const testObservable: Functor1<TEST_OBSERVABLE_URI> = {
 	URI: TEST_OBSERVABLE_URI,

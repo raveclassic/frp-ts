@@ -5,7 +5,7 @@ import { Observable, Subject } from 'rxjs'
 import { never, newObservable, Observer } from '../observable'
 import { newAtom as getNewProducer, Atom } from '../atom'
 import { property } from '..'
-import { attachSubscription, fromObservable, newProducer, newVirtualClock, scan, testObservable } from './env'
+import { attachSubscription, fromObservable, newAtom, newVirtualClock, scan, testObservable } from './env'
 
 describe('property', () => {
 	it('sample testObservable', () => {
@@ -17,7 +17,7 @@ describe('property', () => {
 		})
 		const nextObserver = (n: number) => observer.next(n)
 		const unsubscribe = jest.fn()
-		const source = attachSubscription(newProducer(0), { unsubscribe })
+		const source = attachSubscription(newAtom(0), { unsubscribe })
 		const sampleObservable = sample(testObservable)
 		const sampled = sampleObservable(source, sampler)
 		const next = jest.fn()
@@ -53,8 +53,8 @@ describe('property', () => {
 	})
 	it('sample Property', () => {
 		const sampleSource = sample(instance)
-		const sampler = newProducer(0)
-		const source = newProducer(1)
+		const sampler = newAtom(0)
+		const source = newAtom(1)
 		const { get: getSampled, subscribe: sampled } = sampleSource(source, sampler)
 		expect(getSampled()).toBe(1)
 		const cb = jest.fn()
@@ -71,8 +71,8 @@ describe('property', () => {
 	it('sampleIO Property', () => {
 		const sampleSource = sampleIO(instance)
 
-		const sampler = newProducer(0)
-		const source = newProducer(1)
+		const sampler = newAtom(0)
+		const source = newAtom(1)
 		const sampled = sampleSource(source, sampler)
 		expect(sampled.get()()).toBe(1)
 		const cb = jest.fn()
@@ -94,8 +94,8 @@ describe('property', () => {
 	it('sequence', () => {
 		const disposeA = jest.fn()
 		const disposeB = jest.fn()
-		const a = attachSubscription(newProducer(0), { unsubscribe: disposeA })
-		const b = attachSubscription(newProducer(1), { unsubscribe: disposeB })
+		const a = attachSubscription(newAtom(0), { unsubscribe: disposeA })
+		const b = attachSubscription(newAtom(1), { unsubscribe: disposeB })
 		const { get: getC, subscribe: c } = sequence([a, b])
 		expect(getC()).toEqual([0, 1])
 		const listenerC = jest.fn()
@@ -120,7 +120,7 @@ describe('property', () => {
 	describe('map', () => {
 		it('should map', () => {
 			const f = (n: number) => `value: ${n}`
-			const a = newProducer(0)
+			const a = newAtom(0)
 			const b = pipe(a, property.map(f))
 			const cba = jest.fn()
 			const cbb = jest.fn()
@@ -140,7 +140,7 @@ describe('property', () => {
 		})
 		it('should memo', () => {
 			const f = jest.fn((n: number) => `value: ${n}`)
-			const a = newProducer(0)
+			const a = newAtom(0)
 			const { get: getB, subscribe: b } = pipe(a, property.map(f))
 			const s = b({ next: constVoid })
 			expect(f).toHaveBeenCalledTimes(0)
@@ -160,8 +160,8 @@ describe('property', () => {
 		it('should ap', () => {
 			const f = (n: number) => n + 1
 			const g = (n: number) => n / 2
-			const fab = newProducer(f)
-			const fa = newProducer(0)
+			const fab = newAtom(f)
+			const fa = newAtom(0)
 			const b = pipe(fab, property.ap(fa))
 			expect(b.get()).toBe(f(0))
 			fab.set(g)
@@ -173,8 +173,8 @@ describe('property', () => {
 		})
 		it('should multicast', () => {
 			const f = (n: number) => n + 1
-			const fab = newProducer(f)
-			const fa = newProducer(0)
+			const fab = newAtom(f)
+			const fa = newAtom(0)
 			const spyFab = jest.fn(fab.subscribe)
 			const spyFa = jest.fn(fa.subscribe)
 			const fabSource: Property<typeof f> = { get: fab.get, subscribe: spyFab }
@@ -208,13 +208,13 @@ describe('property', () => {
 	describe('flatten', () => {
 		const f = (n: number): string => `value: ${n}`
 		it('should chain get', () => {
-			const a = newProducer(0)
+			const a = newAtom(0)
 			// don't destruct inner because reference is overwritten in chain
-			let inner: Atom<string> = newProducer('')
+			let inner: Atom<string> = newAtom('')
 			const [{ get: getB }] = pipe(
 				a,
 				property.map((a) => {
-					inner = newProducer(f(a))
+					inner = newAtom(f(a))
 					return inner
 				}),
 				flatten,
@@ -229,10 +229,10 @@ describe('property', () => {
 			expect(inner.get()).toBe(f(1))
 		})
 		it('should ignore outlive last listener disposal', () => {
-			const a = newProducer(0)
+			const a = newAtom(0)
 			const [{ get: getB, subscribe: b }] = pipe(
 				a,
-				property.map((a) => newProducer(f(a))),
+				property.map((a) => newAtom(f(a))),
 				flatten,
 			)
 			expect(getB()).toBe(f(0))
@@ -246,10 +246,10 @@ describe('property', () => {
 			expect(getB()).toBe(f(2))
 		})
 		it('should not pass notifications from source', () => {
-			const a = newProducer(0)
+			const a = newAtom(0)
 			const [{ subscribe: b }] = pipe(
 				a,
-				property.map((a) => newProducer(f(a))),
+				property.map((a) => newAtom(f(a))),
 				flatten,
 			)
 			const cb = jest.fn()
@@ -260,8 +260,8 @@ describe('property', () => {
 			s.unsubscribe()
 		})
 		it('should switch to notifications from inner source', () => {
-			const a = newProducer(0)
-			const inner = newProducer('')
+			const a = newAtom(0)
+			const inner = newAtom('')
 			const [{ subscribe: b }] = pipe(
 				a,
 				property.map(() => inner),
@@ -275,10 +275,10 @@ describe('property', () => {
 			s.unsubscribe()
 		})
 		it('should dispose previous subscription to inner source on passed source emit', () => {
-			const a = newProducer(0)
+			const a = newAtom(0)
 			const inner1Dispose = jest.fn()
-			const innerSource1 = attachSubscription(newProducer(''), { unsubscribe: inner1Dispose })
-			const inner2 = newProducer('')
+			const innerSource1 = attachSubscription(newAtom(''), { unsubscribe: inner1Dispose })
+			const inner2 = newAtom('')
 			const [{ subscribe: b }] = pipe(
 				a,
 				property.map((a) => (a === 0 ? innerSource1 : inner2)),
@@ -309,7 +309,7 @@ describe('property', () => {
 					unsubscribe: disposeA,
 				}),
 			}
-			const inner = newProducer('')
+			const inner = newAtom('')
 			const [, subscriptionB] = pipe(
 				sourceA,
 				property.map(() => inner),
@@ -319,8 +319,8 @@ describe('property', () => {
 			expect(disposeA).toHaveBeenCalledTimes(1)
 		})
 		it('should multicast', () => {
-			const a = newProducer(0)
-			const inner = newProducer('')
+			const a = newAtom(0)
+			const inner = newAtom('')
 			const [{ subscribe: b }] = pipe(
 				a,
 				property.map(() => inner),
@@ -352,7 +352,7 @@ describe('property', () => {
 	})
 	describe('tap', () => {
 		it('should tap', () => {
-			const a = newProducer(0)
+			const a = newAtom(0)
 			const cb = jest.fn()
 			const { subscribe: b } = pipe(a, property.tap(cb))
 			const s = b({ next: constVoid })
@@ -364,7 +364,7 @@ describe('property', () => {
 	})
 	describe('diamond flow', () => {
 		it('should notify combined once on each source emit', () => {
-			const a = newProducer(0)
+			const a = newAtom(0)
 			const b = pipe(
 				a,
 				property.map((n) => n + 1),
