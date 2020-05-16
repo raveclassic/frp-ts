@@ -1,24 +1,14 @@
-import { constVoid } from 'fp-ts/lib/function'
 import { sequenceS as sequenceSApply, sequenceT as sequenceTApply } from 'fp-ts/lib/Apply'
 import { pipe, pipeable } from 'fp-ts/lib/pipeable'
-import { HKT, Kind, Kind2, Kind3, Kind4, URIS, URIS2, URIS3, URIS4 } from 'fp-ts/lib/HKT'
-import {
-	Observable,
-	Observable1,
-	Observable2,
-	Observable2C,
-	Observable3,
-	Observable3C,
-	Observable4,
-	Subscription,
-	subscriptionNone,
-} from './observable'
+import { Observable, Subscription, subscriptionNone } from './observable'
 import { array } from 'fp-ts/lib/Array'
 import { Applicative1 } from 'fp-ts/lib/Applicative'
 import { combineNotifier, newEmitter, Notifier } from './emitter'
 import { newAtom } from './atom'
-import { IO } from 'fp-ts/lib/IO'
 import { Env } from './clock'
+import { Functor, Functor1, Functor2, Functor2C, Functor3, Functor3C, Functor4 } from 'fp-ts/lib/Functor'
+import { HKT, Kind, Kind2, Kind3, Kind4, URIS, URIS2, URIS3, URIS4 } from 'fp-ts/lib/HKT'
+import { IO } from 'fp-ts/lib/IO'
 
 export const URI = 'frp-ts//Property'
 export type URI = typeof URI
@@ -69,7 +59,7 @@ const memo1 = <A, B>(f: (a: A) => B): ((a: A) => B) => {
 
 const memoApply = memo2(<A, B>(f: (a: A) => B, a: A): B => f(a))
 
-export const instance: Applicative1<URI> & Observable1<URI> = {
+export const instance: Applicative1<URI> = {
 	URI,
 	map: (fa, f) => {
 		const memoF = memo1(f)
@@ -83,7 +73,6 @@ export const instance: Applicative1<URI> & Observable1<URI> = {
 		get: () => memoApply(fab.get(), fa.get()),
 		notifier: combineNotifier(fab.notifier, fa.notifier),
 	}),
-	subscribe: (ma, observer) => ma.notifier(() => observer.next(ma.get())),
 }
 
 export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscription] => {
@@ -149,121 +138,68 @@ export const sequence = <A>(sources: Property<A>[]): Property<A[]> => ({
 
 export const never: Notifier = () => subscriptionNone
 
-export function fromObservable<M extends URIS4>(
-	M: Observable4<M>,
-): (env: Env) => <S, R, E, A>(initial: A, ma: Kind4<M, S, R, E, A>) => [Property<A>, Subscription]
-export function fromObservable<M extends URIS3>(
-	M: Observable3<M>,
-): (env: Env) => <R, E, A>(initial: A, ma: Kind3<M, R, E, A>) => [Property<A>, Subscription]
-export function fromObservable<M extends URIS3, E>(
-	M: Observable3C<M, E>,
-): (env: Env) => <R, A>(initial: A, ma: Kind3<M, R, E, A>) => [Property<A>, Subscription]
-export function fromObservable<M extends URIS2>(
-	M: Observable2<M>,
-): (env: Env) => <E, A>(initial: A, ma: Kind2<M, E, A>) => [Property<A>, Subscription]
-export function fromObservable<M extends URIS2, E>(
-	M: Observable2C<M, E>,
-): (env: Env) => <A>(initial: A, ma: Kind2<M, E, A>) => [Property<A>, Subscription]
-export function fromObservable<M extends URIS>(
-	M: Observable1<M>,
-): (env: Env) => <A>(initial: A, ma: Kind<M, A>) => [Property<A>, Subscription]
-export function fromObservable<M>(
-	M: Observable<M>,
-): (env: Env) => <A>(initial: A, ma: HKT<M, A>) => [Property<A>, Subscription]
-export function fromObservable<M>(
-	M: Observable<M>,
-): (env: Env) => <A>(initial: A, ma: HKT<M, A>) => [Property<A>, Subscription] {
-	const scanM = scan(M)
-	return (env) => {
-		const s = scanM(env)
-		return (initial, ma) =>
-			pipe(
-				ma,
-				s((_, a) => a, initial),
-			)
+export function fromObservable(env: Env): <A>(initial: A, ma: Observable<A>) => [Property<A>, Subscription] {
+	const s = scan(env)
+	return (initial, ma) =>
+		pipe(
+			ma,
+			s((_, a) => a, initial),
+		)
+}
+
+export function scan<M>(
+	env: Env,
+): <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Observable<A>) => [Property<B>, Subscription] {
+	const producer = newAtom(env)
+	return (f, initial) => (ma) => {
+		const p = producer(initial)
+		const s = ma.subscribe({
+			next: (a) => p.set(f(p.get(), a)),
+		})
+		return [p, s]
 	}
 }
 
-export function scan<M extends URIS4>(
-	M: Observable4<M>,
-): (
-	env: Env,
-) => <S, R, E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind4<M, S, R, E, A>) => [Property<B>, Subscription]
-export function scan<M extends URIS3>(
-	M: Observable3<M>,
-): (
-	env: Env,
-) => <R, E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind3<M, R, E, A>) => [Property<B>, Subscription]
-export function scan<M extends URIS3, E>(
-	M: Observable3C<M, E>,
-): (env: Env) => <R, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind3<M, R, E, A>) => [Property<B>, Subscription]
-export function scan<M extends URIS2>(
-	M: Observable2<M>,
-): (env: Env) => <E, A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind2<M, E, A>) => [Property<B>, Subscription]
-export function scan<M extends URIS2, E>(
-	M: Observable2C<M, E>,
-): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind2<M, E, A>) => [Property<B>, Subscription]
-export function scan<M extends URIS>(
-	M: Observable1<M>,
-): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Kind<M, A>) => [Property<B>, Subscription]
-export function scan<M>(
-	M: Observable<M>,
-): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: HKT<M, A>) => [Property<B>, Subscription]
-export function scan<M>(
-	M: Observable<M>,
-): (env: Env) => <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: HKT<M, A>) => [Property<B>, Subscription] {
-	return (env) => {
-		const producer = newAtom(env)
-		return (f, initial) => (ma) => {
-			const p = producer(initial)
-			const s = M.subscribe(ma, {
-				next: (a) => p.set(f(p.get(), a)),
-			})
-			return [p, s]
-		}
-	}
+export function sample<F extends URIS4>(
+	F: Functor4<F>,
+): <S, R, E, A, B>(property: Property<A>, sampler: Kind4<F, S, R, E, B>) => Kind4<F, S, R, E, A>
+export function sample<F extends URIS3>(
+	F: Functor3<F>,
+): <R, E, A, B>(property: Property<A>, sampler: Kind3<F, R, E, B>) => Kind3<F, R, E, A>
+export function sample<F extends URIS3, E>(
+	F: Functor3C<F, E>,
+): <R, A, B>(property: Property<A>, sampler: Kind3<F, R, E, B>) => Kind3<F, R, E, A>
+export function sample<F extends URIS2>(
+	F: Functor2<F>,
+): <E, A, B>(property: Property<A>, sampler: Kind2<F, E, B>) => Kind2<F, E, A>
+export function sample<F extends URIS2, E>(
+	F: Functor2C<F, E>,
+): <A, B>(property: Property<A>, sampler: Kind2<F, E, B>) => Kind2<F, E, A>
+export function sample<F extends URIS>(F: Functor1<F>): <A, B>(property: Property<A>, sampler: Kind<F, B>) => Kind<F, A>
+export function sample<F>(F: Functor<F>): <A, B>(property: Property<A>, sampler: HKT<F, B>) => HKT<F, A>
+export function sample<F>(F: Functor<F>): <A, B>(property: Property<A>, sampler: HKT<F, B>) => HKT<F, A> {
+	return (property, sampler) => F.map(sampler, property.get)
 }
 
-export function sample<M extends URIS4>(
-	M: Observable4<M>,
-): <S, R, E, A>(e: Kind4<M, S, R, E, A>) => <B>(sb: Property<B>) => Kind4<M, S, R, E, B>
-export function sample<M extends URIS3>(
-	M: Observable3<M>,
-): <R, E, A>(e: Kind3<M, R, E, A>) => <B>(sb: Property<B>) => Kind3<M, R, E, B>
-export function sample<M extends URIS3, E>(
-	M: Observable3C<M, E>,
-): <R, A>(e: Kind3<M, R, E, A>) => <B>(sb: Property<B>) => Kind3<M, R, E, B>
-export function sample<M extends URIS2>(
-	M: Observable2<M>,
-): <E, A>(e: Kind2<M, E, A>) => <B>(sb: Property<B>) => Kind2<M, E, B>
-export function sample<M extends URIS2, E>(
-	M: Observable2C<M, E>,
-): <A>(e: Kind2<M, E, A>) => <B>(sb: Property<B>) => Kind2<M, E, B>
-export function sample<M extends URIS>(M: Observable1<M>): <A>(e: Kind<M, A>) => <B>(sb: Property<B>) => Kind<M, B>
-export function sample<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Property<B>) => HKT<M, B>
-export function sample<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Property<B>) => HKT<M, B> {
-	return (e) => (sb) => M.map(e, sb.get)
-}
-
-export function sampleIO<M extends URIS4>(
-	M: Observable4<M>,
-): <S, R, E, A>(e: Kind4<M, S, R, E, A>) => <B>(sb: Property<B>) => Kind4<M, S, R, E, IO<B>>
-export function sampleIO<M extends URIS3>(
-	M: Observable3<M>,
-): <R, E, A>(e: Kind3<M, R, E, A>) => <B>(sb: Property<B>) => Kind3<M, R, E, IO<B>>
-export function sampleIO<M extends URIS3, E>(
-	M: Observable3C<M, E>,
-): <R, A>(e: Kind3<M, R, E, A>) => <B>(sb: Property<B>) => Kind3<M, R, E, IO<B>>
-export function sampleIO<M extends URIS2>(
-	M: Observable2<M>,
-): <E, A>(e: Kind2<M, E, A>) => <B>(sb: Property<B>) => Kind2<M, E, IO<B>>
-export function sampleIO<M extends URIS2, E>(
-	M: Observable2C<M, E>,
-): <A>(e: Kind2<M, E, A>) => <B>(sb: Property<B>) => Kind2<M, E, IO<B>>
-export function sampleIO<M extends URIS>(
-	M: Observable1<M>,
-): <A>(e: Kind<M, A>) => <B>(sb: Property<B>) => Kind<M, IO<B>>
-export function sampleIO<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Property<B>) => HKT<M, IO<B>>
-export function sampleIO<M>(M: Observable<M>): <A>(e: HKT<M, A>) => <B>(sb: Property<B>) => HKT<M, IO<B>> {
-	return (e) => (sb) => M.map(e, () => sb.get)
+export function sampleIO<F extends URIS4>(
+	F: Functor4<F>,
+): <S, R, E, A, B>(property: Property<A>, sampler: Kind4<F, S, R, E, B>) => Kind4<F, S, R, E, IO<A>>
+export function sampleIO<F extends URIS3>(
+	F: Functor3<F>,
+): <R, E, A, B>(property: Property<A>, sampler: Kind3<F, R, E, B>) => Kind3<F, R, E, IO<A>>
+export function sampleIO<F extends URIS3, E>(
+	F: Functor3C<F, E>,
+): <R, A, B>(property: Property<A>, sampler: Kind3<F, R, E, B>) => Kind3<F, R, E, IO<A>>
+export function sampleIO<F extends URIS2>(
+	F: Functor2<F>,
+): <E, A, B>(property: Property<A>, sampler: Kind2<F, E, B>) => Kind2<F, E, IO<A>>
+export function sampleIO<F extends URIS2, E>(
+	F: Functor2C<F, E>,
+): <A, B>(property: Property<A>, sampler: Kind2<F, E, B>) => Kind2<F, E, IO<A>>
+export function sampleIO<F extends URIS>(
+	F: Functor1<F>,
+): <A, B>(property: Property<A>, sampler: Kind<F, B>) => Kind<F, IO<A>>
+export function sampleIO<F>(F: Functor<F>): <A, B>(property: Property<A>, sampler: HKT<F, B>) => HKT<F, IO<A>>
+export function sampleIO<F>(F: Functor<F>): <A, B>(property: Property<A>, sampler: HKT<F, B>) => HKT<F, IO<A>> {
+	return (property, sampler) => F.map(sampler, () => property.get)
 }

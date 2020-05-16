@@ -1,28 +1,13 @@
-import { flatten, instance, never, sample, sampleIO, sequence, Property } from '../property'
+import { flatten, instance, never, sample, sequence, Property, sampleIO } from '../property'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { constFalse, constTrue, constVoid } from 'fp-ts/lib/function'
 import { Observable, Subject } from 'rxjs'
-import { Observer } from '../observable'
+import { newObservable, Observer } from '../observable'
 import { newAtom as getNewProducer, Atom } from '../atom'
 import { property } from '..'
 import { attachSubscription, fromObservable, newProducer, newVirtualClock, scan, testObservable } from './env'
 
 describe('property', () => {
-	describe('instance', () => {
-		it('subscribe', () => {
-			const unsubscribe = jest.fn()
-			const p = attachSubscription(newProducer(0), { unsubscribe })
-			const observer: Observer<number> = {
-				next: jest.fn(),
-			}
-			const d = instance.subscribe(p, observer)
-			expect(observer.next).toHaveBeenCalledTimes(0)
-			p.set(1)
-			expect(observer.next).toHaveBeenCalledWith(1)
-			d.unsubscribe()
-			expect(unsubscribe).toHaveBeenCalledTimes(1)
-		})
-	})
 	it('sample testObservable', () => {
 		let observer: Observer<number>
 		const disposeSampler = jest.fn()
@@ -34,7 +19,7 @@ describe('property', () => {
 		const unsubscribe = jest.fn()
 		const source = attachSubscription(newProducer(0), { unsubscribe })
 		const sampleObservable = sample(testObservable)
-		const sampled = sampleObservable(sampler)(source)
+		const sampled = sampleObservable(source, sampler)
 		const next = jest.fn()
 		const complete = jest.fn()
 		const subscription = sampled.subscribe({
@@ -70,7 +55,7 @@ describe('property', () => {
 		const sampleSource = sample(instance)
 		const sampler = newProducer(0)
 		const source = newProducer(1)
-		const { get: getSampled, notifier: sampled } = sampleSource(sampler)(source)
+		const { get: getSampled, notifier: sampled } = sampleSource(source, sampler)
 		expect(getSampled()).toBe(1)
 		const cb = jest.fn()
 		const d = sampled(cb)
@@ -88,7 +73,7 @@ describe('property', () => {
 
 		const sampler = newProducer(0)
 		const source = newProducer(1)
-		const sampled = sampleSource(sampler)(source)
+		const sampled = sampleSource(source, sampler)
 		expect(sampled.get()()).toBe(1)
 		const cb = jest.fn()
 		const d = sampled.notifier(cb)
@@ -431,7 +416,7 @@ describe('property', () => {
 		it('should propagate changes', () => {
 			const s = new Subject<number>()
 			const dispose = jest.fn()
-			const obs = new Observable((observer) => {
+			const obs = new Observable<number>((observer) => {
 				const sub = s.subscribe(observer)
 				return {
 					unsubscribe(): void {
@@ -490,13 +475,11 @@ describe('property', () => {
 		it('should scan', () => {
 			const s = new Subject<number>()
 			const dispose = jest.fn()
-			const obs = new Observable<number>((observer) => {
+			const obs = newObservable<number>((observer) => {
 				const sub = s.subscribe(observer)
-				return {
-					unsubscribe(): void {
-						sub.unsubscribe()
-						dispose()
-					},
+				return () => {
+					sub.unsubscribe()
+					dispose()
 				}
 			})
 			const [{ get: getA, notifier: a }, subscriptionA] = pipe(
@@ -531,24 +514,6 @@ describe('property', () => {
 			s.next(1)
 			expect(cb).toHaveBeenCalledTimes(1)
 			expect(getA()).toBe(3)
-		})
-		it('should support complete', () => {
-			const s = new Subject<number>()
-			const [{ get: getA, notifier: a }] = pipe(
-				s,
-				scan((acc, n) => acc + n, 1),
-			)
-			const cb = jest.fn()
-			const sub = a(cb)
-			s.next(1)
-			expect(getA()).toBe(2)
-			expect(cb).toHaveBeenCalledTimes(1)
-			s.complete()
-			// should ignore any updates
-			s.next(1)
-			expect(getA()).toBe(2)
-			expect(cb).toHaveBeenCalledTimes(1)
-			sub.unsubscribe()
 		})
 	})
 })
