@@ -32,8 +32,8 @@ export const fromObservable = getFromObservable(defaultEnv)
 
 export const attachSubscription = <A, S extends Property<A>>(source: S, subscription: Subscription): S => ({
 	...source,
-	notifier: (l) => {
-		const d = source.notifier(l)
+	subscribe: (l) => {
+		const d = source.subscribe(l)
 		return {
 			unsubscribe: () => {
 				d.unsubscribe()

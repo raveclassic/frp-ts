@@ -1,6 +1,7 @@
-import { EventTarget, AddEventListenerOptions, Listener, newEmitter, fromEvent } from '../emitter'
+import { EventTarget, AddEventListenerOptions, newEmitter, fromEvent } from '../emitter'
 import { constVoid } from 'fp-ts/lib/function'
 import { newVirtualClock } from './env'
+import { Time } from '../clock'
 
 interface Event {
 	readonly type: string
@@ -40,34 +41,34 @@ describe('Emitter', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
 			const f2 = jest.fn()
-			e.subscribe(f1)
-			e.subscribe(f2)
-			e.notify(0)
+			e.subscribe({ next: f1 })
+			e.subscribe({ next: f2 })
+			e.next(0)
 			expect(f1).toHaveBeenCalledWith(0)
 			expect(f2).toHaveBeenCalledWith(0)
 		})
 		it('should not emit if notified within the same tick', () => {
 			const e = newEmitter()
 			const f = jest.fn()
-			e.subscribe(f)
-			e.notify(0)
-			e.notify(0)
-			e.notify(0)
+			e.subscribe({ next: f })
+			e.next(0)
+			e.next(0)
+			e.next(0)
 			expect(f).toHaveBeenCalledTimes(1)
 		})
 		it('should remove subscriptions immediately even while notifying', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
-			const s1 = jest.fn(e.subscribe(f1).unsubscribe)
+			const s1 = jest.fn(e.subscribe({ next: f1 }).unsubscribe)
 			// now we have child subscriptions, calling set will iterate over them
 			// check if it's possible to unsubscribe immediately on notification
-			const f2: Listener = jest.fn(() => s2())
-			const s2 = jest.fn(e.subscribe(f2).unsubscribe)
+			const f2: (time: Time) => void = jest.fn(() => s2())
+			const s2 = jest.fn(e.subscribe({ next: f2 }).unsubscribe)
 			// add more subscriptions
 			const f3 = jest.fn()
-			const s3 = jest.fn(e.subscribe(f3).unsubscribe)
+			const s3 = jest.fn(e.subscribe({ next: f3 }).unsubscribe)
 			// notify!
-			e.notify(0)
+			e.next(0)
 			expect(f1).toHaveBeenCalledTimes(1)
 			expect(s1).toHaveBeenCalledTimes(0)
 			expect(f2).toHaveBeenCalledTimes(1)
@@ -78,21 +79,21 @@ describe('Emitter', () => {
 		it('should not notify new subscriptions added immediately while notifying', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
-			const s1 = jest.fn(e.subscribe(f1).unsubscribe)
+			const s1 = jest.fn(e.subscribe({ next: f1 }).unsubscribe)
 			// now we have child subscriptions, calling set will iterate over them
 			// check if it's possible to add new subscriptions immediately on notification
 			const f2 = jest.fn()
 			let s2 = constVoid
-			const f3: Listener = jest.fn(() => {
+			const f3: (time: Time) => void = jest.fn(() => {
 				s2?.()
-				s2 = jest.fn(e.subscribe(f2).unsubscribe)
+				s2 = jest.fn(e.subscribe({ next: f2 }).unsubscribe)
 			})
-			const s3 = jest.fn(e.subscribe(f3).unsubscribe)
+			const s3 = jest.fn(e.subscribe({ next: f3 }).unsubscribe)
 			// add some more
 			const f4 = jest.fn()
-			const s4 = jest.fn(e.subscribe(f4).unsubscribe)
+			const s4 = jest.fn(e.subscribe({ next: f4 }).unsubscribe)
 			// notify!
-			e.notify(0)
+			e.next(0)
 			expect(f1).toHaveBeenCalledTimes(1)
 			expect(s1).toHaveBeenCalledTimes(0)
 			expect(f3).toHaveBeenCalledTimes(1)
@@ -119,11 +120,14 @@ describe('Emitter', () => {
 			// should subscribe
 			expect(addEventListener).toHaveBeenCalledTimes(0)
 			const cb = jest.fn()
-			const d = n(cb)
+			const observer = {
+				next: cb,
+			}
+			const d = n.subscribe(observer)
 			expect(addEventListener).toHaveBeenCalledTimes(1)
 			expect(addEventListener).toHaveBeenCalledWith('click', jasmine.any(Function), options)
 			// should also multicast
-			const d2 = n(cb)
+			const d2 = n.subscribe(observer)
 			expect(addEventListener).toHaveBeenCalledTimes(1)
 			// should notify
 			target.dispatchEvent({

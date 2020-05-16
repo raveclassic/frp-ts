@@ -1,11 +1,11 @@
 import { sequenceS as sequenceSApply, sequenceT as sequenceTApply } from 'fp-ts/lib/Apply'
 import { pipe, pipeable } from 'fp-ts/lib/pipeable'
-import { Observable, Subscription, subscriptionNone } from './observable'
+import { never, Observable, Subscription, subscriptionNone } from './observable'
 import { array } from 'fp-ts/lib/Array'
 import { Applicative1 } from 'fp-ts/lib/Applicative'
-import { combineNotifier, newEmitter, Notifier } from './emitter'
+import { merge, newEmitter } from './emitter'
 import { newAtom } from './atom'
-import { Env } from './clock'
+import { Env, Time } from './clock'
 import { Functor, Functor1, Functor2, Functor2C, Functor3, Functor3C, Functor4 } from 'fp-ts/lib/Functor'
 import { HKT, Kind, Kind2, Kind3, Kind4, URIS, URIS2, URIS3, URIS4 } from 'fp-ts/lib/HKT'
 import { IO } from 'fp-ts/lib/IO'
@@ -13,13 +13,8 @@ import { IO } from 'fp-ts/lib/IO'
 export const URI = 'frp-ts//Property'
 export type URI = typeof URI
 
-export interface Getter<A> {
-	(): A
-}
-
-export interface Property<A> {
-	readonly get: Getter<A>
-	readonly notifier: Notifier
+export interface Property<A> extends Observable<Time> {
+	readonly get: () => A
 }
 
 declare module 'fp-ts/lib/HKT' {
@@ -65,13 +60,13 @@ export const instance: Applicative1<URI> = {
 		const memoF = memo1(f)
 		return {
 			get: () => memoF(fa.get()),
-			notifier: fa.notifier,
+			subscribe: fa.subscribe,
 		}
 	},
-	of: (a) => ({ get: () => a, notifier: never }),
+	of: (a) => ({ get: () => a, subscribe: never.subscribe }),
 	ap: (fab, fa) => ({
 		get: () => memoApply(fab.get(), fa.get()),
-		notifier: combineNotifier(fab.notifier, fa.notifier),
+		subscribe: merge(fab, fa).subscribe,
 	}),
 }
 
@@ -85,13 +80,15 @@ export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscri
 		// dispose previous subscription
 		innerDisposable.unsubscribe()
 		// create new subscription
-		innerDisposable = inner.notifier(emitter.notify)
+		innerDisposable = inner.subscribe(emitter)
 	}
 
-	const outerDisposable = source.notifier(() => {
-		// update reference to new inner source
-		inner = source.get()
-		resubscribeToInner()
+	const outerDisposable = source.subscribe({
+		next: () => {
+			// update reference to new inner source
+			inner = source.get()
+			resubscribeToInner()
+		},
 	})
 
 	resubscribeToInner()
@@ -102,7 +99,7 @@ export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscri
 				// use extra thunk because reference to inner source changes
 				return inner.get()
 			},
-			notifier: emitter.subscribe,
+			subscribe: emitter.subscribe,
 		},
 		outerDisposable,
 	]
@@ -110,10 +107,12 @@ export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscri
 
 export const tap = <A>(f: (a: A) => unknown) => (fa: Property<A>): Property<A> => ({
 	get: fa.get,
-	notifier: (listener) =>
-		fa.notifier((t) => {
-			f(fa.get())
-			listener(t)
+	subscribe: (observer) =>
+		fa.subscribe({
+			next: (t) => {
+				f(fa.get())
+				observer.next(t)
+			},
 		}),
 })
 
@@ -124,8 +123,8 @@ export const sequenceS = sequenceSApply(instance)
 export const sequenceT = sequenceTApply(instance)
 export const sequence = <A>(sources: Property<A>[]): Property<A[]> => ({
 	get: () => array.map(sources, (source) => source.get()),
-	notifier: (listener) => {
-		const subscriptions = array.map(sources, (source) => source.notifier(listener))
+	subscribe: (observer) => {
+		const subscriptions = array.map(sources, (source) => source.subscribe(observer))
 		return {
 			unsubscribe: () => {
 				for (let i = 0, l = subscriptions.length; i < l; i++) {
@@ -135,8 +134,6 @@ export const sequence = <A>(sources: Property<A>[]): Property<A[]> => ({
 		}
 	},
 })
-
-export const never: Notifier = () => subscriptionNone
 
 export function fromObservable(env: Env): <A>(initial: A, ma: Observable<A>) => [Property<A>, Subscription] {
 	const s = scan(env)

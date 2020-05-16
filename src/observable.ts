@@ -23,3 +23,7 @@ export const newObservable = <A>(f: (observer: Observer<A>) => () => void): Obse
 export const subscriptionNone: Subscription = {
 	unsubscribe: constVoid,
 }
+
+export const never: Observable<never> = {
+	subscribe: () => subscriptionNone,
+}

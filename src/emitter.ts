@@ -1,36 +1,25 @@
 import { Env, Time } from './clock'
-import { Subscription, subscriptionNone } from './observable'
-
-export interface Listener {
-	(time: Time): void
-}
-
-export interface Notifier {
-	(listener: Listener): Subscription
-}
+import { Observable, Observer, subscriptionNone } from './observable'
 
 /**
  * Synchronous time-based emitter
  */
-export interface Emitter {
-	readonly subscribe: Notifier
-	readonly notify: Listener
-}
+export interface Emitter extends Observable<Time>, Observer<Time> {}
 
 export const newEmitter = (): Emitter => {
 	let lastNotifiedTime: Time | undefined = undefined
-	const listeners = new Set<Listener>()
+	const listeners = new Set<Observer<Time>>()
 	let isNotifying = false
 	// tracks new listeners added while notifying
-	let pendingAdditions: Listener[] = []
+	let pendingAdditions: Observer<Time>[] = []
 
 	return {
-		notify: (time) => {
+		next: (time) => {
 			if (lastNotifiedTime !== time) {
 				lastNotifiedTime = time
 				isNotifying = true
 				for (const listener of listeners) {
-					listener(time)
+					listener.next(time)
 				}
 				isNotifying = false
 
@@ -56,49 +45,57 @@ export const newEmitter = (): Emitter => {
 	}
 }
 
-const multicast = (a: Notifier): Notifier => {
+const multicast = (a: Observable<Time>): Observable<Time> => {
 	const emitter = newEmitter()
 	let counter = 0
 	let outer = subscriptionNone
-	return (listener) => {
-		counter++
-		const inner = emitter.subscribe(listener)
-		if (counter === 1) {
-			outer = a((t) => emitter.notify(t))
-		}
-		return {
-			unsubscribe: () => {
-				counter--
-				inner.unsubscribe()
-				if (counter === 0) {
-					outer.unsubscribe()
-				}
-			},
-		}
+	return {
+		subscribe: (listener) => {
+			counter++
+			const inner = emitter.subscribe(listener)
+			if (counter === 1) {
+				outer = a.subscribe(emitter)
+			}
+			return {
+				unsubscribe: () => {
+					counter--
+					inner.unsubscribe()
+					if (counter === 0) {
+						outer.unsubscribe()
+					}
+				},
+			}
+		},
 	}
 }
 
-export const combineNotifier = (a: Notifier, b: Notifier): Notifier => {
+export const merge = (a: Observable<Time>, b: Observable<Time>): Observable<Time> => {
 	let lastNotifiedTime = Infinity
-	return multicast((listener) => {
-		const sa = a((t) => {
-			if (t !== lastNotifiedTime) {
-				lastNotifiedTime = t
-				listener(t)
+	return multicast({
+		subscribe: (listener) => {
+			const sa = a.subscribe({
+				next: (t) => {
+					if (t !== lastNotifiedTime) {
+						lastNotifiedTime = t
+						listener.next(t)
+					}
+				},
+			})
+			const sb = b.subscribe({
+				next: (t) => {
+					if (t !== lastNotifiedTime) {
+						lastNotifiedTime = t
+						listener.next(t)
+					}
+				},
+			})
+			return {
+				unsubscribe: () => {
+					sa.unsubscribe()
+					sb.unsubscribe()
+				},
 			}
-		})
-		const sb = b((t) => {
-			if (t !== lastNotifiedTime) {
-				lastNotifiedTime = t
-				listener(t)
-			}
-		})
-		return {
-			unsubscribe: () => {
-				sa.unsubscribe()
-				sb.unsubscribe()
-			},
-		}
+		},
 	})
 }
 
@@ -117,11 +114,13 @@ export const fromEvent = (e: Env) => (
 	target: EventTarget,
 	event: string,
 	options?: AddEventListenerOptions,
-): Notifier =>
-	multicast((listener) => {
-		const handler = () => listener(e.clock.now())
-		target.addEventListener(event, handler, options)
-		return {
-			unsubscribe: () => target.removeEventListener(event, handler, options),
-		}
+): Observable<Time> =>
+	multicast({
+		subscribe: (listener) => {
+			const handler = () => listener.next(e.clock.now())
+			target.addEventListener(event, handler, options)
+			return {
+				unsubscribe: () => target.removeEventListener(event, handler, options),
+			}
+		},
 	})

@@ -1,8 +1,8 @@
-import { flatten, instance, never, sample, sequence, Property, sampleIO } from '../property'
+import { flatten, instance, sample, sequence, Property, sampleIO } from '../property'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { constFalse, constTrue, constVoid } from 'fp-ts/lib/function'
 import { Observable, Subject } from 'rxjs'
-import { newObservable, Observer } from '../observable'
+import { never, newObservable, Observer } from '../observable'
 import { newAtom as getNewProducer, Atom } from '../atom'
 import { property } from '..'
 import { attachSubscription, fromObservable, newProducer, newVirtualClock, scan, testObservable } from './env'
@@ -55,10 +55,10 @@ describe('property', () => {
 		const sampleSource = sample(instance)
 		const sampler = newProducer(0)
 		const source = newProducer(1)
-		const { get: getSampled, notifier: sampled } = sampleSource(source, sampler)
+		const { get: getSampled, subscribe: sampled } = sampleSource(source, sampler)
 		expect(getSampled()).toBe(1)
 		const cb = jest.fn()
-		const d = sampled(cb)
+		const d = sampled({ next: cb })
 		expect(cb).toHaveBeenCalledTimes(0)
 		source.set(2)
 		// notifications are not propagated from source
@@ -76,7 +76,7 @@ describe('property', () => {
 		const sampled = sampleSource(source, sampler)
 		expect(sampled.get()()).toBe(1)
 		const cb = jest.fn()
-		const d = sampled.notifier(cb)
+		const d = sampled.subscribe({ next: cb })
 		expect(cb).toHaveBeenCalledTimes(0)
 		source.set(2)
 		// notifications are not propagated from source
@@ -96,10 +96,10 @@ describe('property', () => {
 		const disposeB = jest.fn()
 		const a = attachSubscription(newProducer(0), { unsubscribe: disposeA })
 		const b = attachSubscription(newProducer(1), { unsubscribe: disposeB })
-		const { get: getC, notifier: c } = sequence([a, b])
+		const { get: getC, subscribe: c } = sequence([a, b])
 		expect(getC()).toEqual([0, 1])
 		const listenerC = jest.fn()
-		const disposableC = c(listenerC)
+		const disposableC = c({ next: listenerC })
 
 		expect(listenerC).toHaveBeenCalledTimes(0)
 
@@ -124,8 +124,8 @@ describe('property', () => {
 			const b = pipe(a, property.map(f))
 			const cba = jest.fn()
 			const cbb = jest.fn()
-			const sa = a.notifier(cba)
-			const sb = b.notifier(cbb)
+			const sa = a.subscribe({ next: cba })
+			const sb = b.subscribe({ next: cbb })
 			expect(a.get()).toBe(0)
 			expect(b.get()).toBe(f(0))
 			expect(cba).toHaveBeenCalledTimes(0)
@@ -141,8 +141,8 @@ describe('property', () => {
 		it('should memo', () => {
 			const f = jest.fn((n: number) => `value: ${n}`)
 			const a = newProducer(0)
-			const { get: getB, notifier: b } = pipe(a, property.map(f))
-			const s = b(constVoid)
+			const { get: getB, subscribe: b } = pipe(a, property.map(f))
+			const s = b({ next: constVoid })
 			expect(f).toHaveBeenCalledTimes(0)
 			getB()
 			expect(f).toHaveBeenCalledTimes(1)
@@ -151,9 +151,9 @@ describe('property', () => {
 			s.unsubscribe()
 		})
 		it('should skip never', () => {
-			const a: Property<boolean> = { get: constTrue, notifier: never }
+			const a: Property<boolean> = { get: constTrue, subscribe: never.subscribe }
 			const b = pipe(a, property.map(constFalse))
-			expect(b.notifier).toBe(never)
+			expect(b.subscribe).toBe(never.subscribe)
 		})
 	})
 	describe('ap', () => {
@@ -175,15 +175,19 @@ describe('property', () => {
 			const f = (n: number) => n + 1
 			const fab = newProducer(f)
 			const fa = newProducer(0)
-			const spyFab = jest.fn(fab.notifier)
-			const spyFa = jest.fn(fa.notifier)
-			const fabSource: Property<typeof f> = { get: fab.get, notifier: spyFab }
-			const faSource: Property<number> = { get: fa.get, notifier: spyFa }
+			const spyFab = jest.fn(fab.subscribe)
+			const spyFa = jest.fn(fa.subscribe)
+			const fabSource: Property<typeof f> = { get: fab.get, subscribe: spyFab }
+			const faSource: Property<number> = { get: fa.get, subscribe: spyFa }
 			const b = pipe(fabSource, property.ap(faSource))
-			const s1 = b.notifier(constVoid)
+			const s1 = b.subscribe({
+				next: constVoid,
+			})
 			expect(spyFab).toHaveBeenCalledTimes(1)
 			expect(spyFa).toHaveBeenCalledTimes(1)
-			const s2 = b.notifier(constVoid)
+			const s2 = b.subscribe({
+				next: constVoid,
+			})
 			expect(spyFab).toHaveBeenCalledTimes(1)
 			expect(spyFa).toHaveBeenCalledTimes(1)
 			s1.unsubscribe()
@@ -226,13 +230,13 @@ describe('property', () => {
 		})
 		it('should ignore outlive last listener disposal', () => {
 			const a = newProducer(0)
-			const [{ get: getB, notifier: b }] = pipe(
+			const [{ get: getB, subscribe: b }] = pipe(
 				a,
 				property.map((a) => newProducer(f(a))),
 				flatten,
 			)
 			expect(getB()).toBe(f(0))
-			const s = b(constVoid)
+			const s = b({ next: constVoid })
 			a.set(1)
 			expect(getB()).toBe(f(1))
 			// dispose
@@ -243,13 +247,13 @@ describe('property', () => {
 		})
 		it('should not pass notifications from source', () => {
 			const a = newProducer(0)
-			const [{ notifier: b }] = pipe(
+			const [{ subscribe: b }] = pipe(
 				a,
 				property.map((a) => newProducer(f(a))),
 				flatten,
 			)
 			const cb = jest.fn()
-			const s = b(cb)
+			const s = b({ next: cb })
 			expect(cb).toHaveBeenCalledTimes(0)
 			a.set(1)
 			expect(cb).toHaveBeenCalledTimes(0)
@@ -258,14 +262,14 @@ describe('property', () => {
 		it('should switch to notifications from inner source', () => {
 			const a = newProducer(0)
 			const inner = newProducer('')
-			const [{ notifier: b }] = pipe(
+			const [{ subscribe: b }] = pipe(
 				a,
 				property.map(() => inner),
 				flatten,
 			)
 			const cb = jest.fn()
 			expect(cb).toHaveBeenCalledTimes(0)
-			const s = b(cb)
+			const s = b({ next: cb })
 			inner.set('foo')
 			expect(cb).toHaveBeenCalledTimes(1)
 			s.unsubscribe()
@@ -275,13 +279,13 @@ describe('property', () => {
 			const inner1Dispose = jest.fn()
 			const innerSource1 = attachSubscription(newProducer(''), { unsubscribe: inner1Dispose })
 			const inner2 = newProducer('')
-			const [{ notifier: b }] = pipe(
+			const [{ subscribe: b }] = pipe(
 				a,
 				property.map((a) => (a === 0 ? innerSource1 : inner2)),
 				flatten,
 			)
 			const cb = jest.fn()
-			const sb = b(cb)
+			const sb = b({ next: cb })
 			expect(inner1Dispose).toHaveBeenCalledTimes(0)
 			expect(cb).toHaveBeenCalledTimes(0)
 			innerSource1.set('foo')
@@ -301,7 +305,7 @@ describe('property', () => {
 			const disposeA = jest.fn()
 			const sourceA: Property<boolean> = {
 				get: constTrue,
-				notifier: () => ({
+				subscribe: () => ({
 					unsubscribe: disposeA,
 				}),
 			}
@@ -317,15 +321,15 @@ describe('property', () => {
 		it('should multicast', () => {
 			const a = newProducer(0)
 			const inner = newProducer('')
-			const [{ notifier: b }] = pipe(
+			const [{ subscribe: b }] = pipe(
 				a,
 				property.map(() => inner),
 				flatten,
 			)
 			const cb1 = jest.fn()
-			const s1 = b(cb1)
+			const s1 = b({ next: cb1 })
 			const cb2 = jest.fn()
-			const s2 = b(cb2)
+			const s2 = b({ next: cb2 })
 
 			inner.set('foo')
 			expect(cb1).toHaveBeenCalledTimes(1)
@@ -337,12 +341,12 @@ describe('property', () => {
 	})
 	describe('of', () => {
 		it('should store initial value and never notify', () => {
-			const { get, notifier } = instance.of(0)
+			const { get, subscribe } = instance.of(0)
 			const f = jest.fn()
-			const s = notifier(f)
+			const s = subscribe({ next: f })
 			expect(get()).toBe(0)
 			expect(f).toHaveBeenCalledTimes(0)
-			expect(notifier).toBe(never)
+			expect(subscribe).toBe(never.subscribe)
 			s.unsubscribe()
 		})
 	})
@@ -350,8 +354,8 @@ describe('property', () => {
 		it('should tap', () => {
 			const a = newProducer(0)
 			const cb = jest.fn()
-			const { notifier: b } = pipe(a, property.tap(cb))
-			const s = b(constVoid)
+			const { subscribe: b } = pipe(a, property.tap(cb))
+			const s = b({ next: constVoid })
 			expect(cb).toHaveBeenCalledTimes(0)
 			a.set(1)
 			expect(cb).toHaveBeenCalledWith(1)
@@ -369,9 +373,9 @@ describe('property', () => {
 				a,
 				property.map((n) => n / 1),
 			)
-			const { notifier: d } = property.sequenceT(b, c)
+			const { subscribe: d } = property.sequenceT(b, c)
 			const cb = jest.fn()
-			const sub = d(cb)
+			const sub = d({ next: cb })
 
 			expect(cb).toHaveBeenCalledTimes(0)
 
@@ -390,9 +394,9 @@ describe('property', () => {
 			})
 			const a = newProducer(0)
 			const b = newProducer(0)
-			const { notifier: c } = property.sequenceT(a, b)
+			const { subscribe: c } = property.sequenceT(a, b)
 			const cb = jest.fn()
-			const sub = c(cb)
+			const sub = c({ next: cb })
 
 			expect(cb).toHaveBeenCalledTimes(0)
 			// first a notification
@@ -426,10 +430,10 @@ describe('property', () => {
 				}
 			})
 
-			const [{ get: getA, notifier: a }, disposeA] = fromObservable(0, obs)
+			const [{ get: getA, subscribe: a }, disposeA] = fromObservable(0, obs)
 			expect(getA()).toBe(0)
 			const cb = jest.fn()
-			const sub = a(cb)
+			const sub = a({ next: cb })
 			// check value
 			s.next(1)
 			expect(getA()).toBe(1)
@@ -457,9 +461,9 @@ describe('property', () => {
 		})
 		it('should support complete', () => {
 			const s = new Subject<number>()
-			const [{ get: getA, notifier: a }] = fromObservable(0, s)
+			const [{ get: getA, subscribe: a }] = fromObservable(0, s)
 			const cb = jest.fn()
-			const sub = a(cb)
+			const sub = a({ next: cb })
 			s.next(1)
 			expect(getA()).toBe(1)
 			expect(cb).toHaveBeenCalledTimes(1)
@@ -482,13 +486,13 @@ describe('property', () => {
 					dispose()
 				}
 			})
-			const [{ get: getA, notifier: a }, subscriptionA] = pipe(
+			const [{ get: getA, subscribe: a }, subscriptionA] = pipe(
 				obs,
 				scan((acc, n) => acc + n, 1),
 			)
 			expect(getA()).toBe(1)
 			const cb = jest.fn()
-			const sub = a(cb)
+			const sub = a({ next: cb })
 			// check value
 			s.next(1)
 			expect(getA()).toBe(2)
