@@ -11,6 +11,7 @@ export interface Lens<S, A> {
 export interface Atom<A> extends Property<A> {
 	readonly set: (a: A) => void
 	readonly view: <B>(lens: Lens<A, B>) => Atom<B>
+	readonly transaction: (thunk: () => void) => void
 }
 
 export const newAtom = (env: Env) => <A>(initial: A): Atom<A> => {
@@ -24,17 +25,20 @@ export const newAtom = (env: Env) => <A>(initial: A): Atom<A> => {
 	}
 	const get = (): A => last
 	const subscribe = (observer: Observer<Time>): Subscription => e.subscribe(observer)
+	const transaction = env.clock.transaction
 	const view = <B>(lens: Lens<A, B>): Atom<B> => ({
 		get: () => lens.get(get()),
 		set: (a) => set(lens.set(a)(get())),
 		subscribe,
 		view: (bc) => view(composeLens(lens, bc)),
+		transaction,
 	})
 	return {
 		set,
 		get,
 		subscribe,
 		view,
+		transaction,
 	}
 }
 

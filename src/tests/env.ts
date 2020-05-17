@@ -54,5 +54,6 @@ export const newVirtualClock = (initialTime: number): VirtualClock => {
 	return {
 		now: () => time,
 		next: () => ++time,
+		transaction: (thunk) => thunk(),
 	}
 }

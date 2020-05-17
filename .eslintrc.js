@@ -39,5 +39,6 @@ module.exports = {
 		'@typescript-eslint/naming-convention': 2,
 		'@typescript-eslint/no-unused-vars': 2,
 		'@typescript-eslint/no-empty-interface': 0,
+		'no-mixed-spaces-and-tabs': 0,
 	},
 }

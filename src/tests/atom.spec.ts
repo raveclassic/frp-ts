@@ -117,4 +117,55 @@ describe('atom', () => {
 			expect(a.get()).toEqual({ foo: { bar: 2 } })
 		})
 	})
+	describe('transaction', () => {
+		it('should only notify once', () => {
+			const a = newAtom(0)
+			const o = {
+				next: jest.fn(),
+			}
+			a.subscribe(o)
+			a.transaction(() => {
+				a.set(1)
+				a.set(2)
+				a.set(3)
+			})
+			expect(o.next).toHaveBeenCalledTimes(1)
+		})
+		it('should support distributed transactions', () => {
+			const a = newAtom(0)
+			const b = newAtom(0)
+			const ao = {
+				next: jest.fn(),
+			}
+			const bo = {
+				next: jest.fn(),
+			}
+			a.subscribe(ao)
+			b.subscribe(bo)
+			a.transaction(() => {
+				a.set(1)
+				a.set(2)
+				b.set(1)
+				b.set(2)
+			})
+			expect(ao.next).toHaveBeenCalledTimes(1)
+			expect(bo.next).toHaveBeenCalledTimes(1)
+		})
+		it('should support nesting', () => {
+			const a = newAtom(0)
+			const o = {
+				next: jest.fn(),
+			}
+			a.subscribe(o)
+			a.transaction(() => {
+				a.set(1)
+				a.set(2)
+				a.transaction(() => {
+					a.set(3)
+					a.set(4)
+				})
+			})
+			expect(o.next).toHaveBeenCalledTimes(1)
+		})
+	})
 })
