@@ -35,6 +35,23 @@ describe('atom', () => {
 		expect(f).toHaveBeenCalledTimes(0)
 		s.unsubscribe()
 	})
+	describe('modify', () => {
+		it('should apply updates in batch', () => {
+			const a = newAtom(0)
+			const o = {
+				next: jest.fn(),
+			}
+			a.subscribe(o)
+			a.modify(
+				(a) => a + 1,
+				(a) => a * 2,
+				(a) => a + 1,
+				(a) => a * 2,
+			)
+			expect(a.get()).toBe(6)
+			expect(o.next).toHaveBeenCalledTimes(1)
+		})
+	})
 	describe('view', () => {
 		it('should view', () => {
 			const a = newAtom({ foo: 0 })
@@ -115,6 +132,28 @@ describe('atom', () => {
 			expect(bo.next).toHaveBeenCalledTimes(2)
 			expect(b.get()).toEqual(2)
 			expect(a.get()).toEqual({ foo: { bar: 2 } })
+		})
+		it('should modify', () => {
+			const a = newAtom({ foo: 0 })
+			const b = a.view(prop('foo'))
+			const ao = {
+				next: jest.fn(),
+			}
+			const bo = {
+				next: jest.fn(),
+			}
+			a.subscribe(ao)
+			b.subscribe(bo)
+			b.modify(
+				(n) => n + 1,
+				(n) => n * 2,
+				(n) => n + 1,
+				(n) => n * 2,
+			)
+			expect(b.get()).toBe(6)
+			expect(a.get()).toEqual({ foo: 6 })
+			expect(ao.next).toHaveBeenCalledTimes(1)
+			expect(bo.next).toHaveBeenCalledTimes(1)
 		})
 	})
 })
