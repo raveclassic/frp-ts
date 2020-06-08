@@ -1,0 +1,412 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>frp-ts - v0.0.1</title>
+	<meta name="description" content="Documentation for frp-ts - v0.0.1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">frp-ts - v0.0.1</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>frp-ts - v0.0.1</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#frp-ts" id="frp-ts" style="color: inherit; text-decoration: none;">
+					<h1>FRP-TS</h1>
+				</a>
+				<p><a href="https://travis-ci.com/raveclassic/frp-ts"><img src="https://travis-ci.com/raveclassic/frp-ts.svg?branch=master" alt="Build Status"></a>
+					<a href="https://coveralls.io/github/raveclassic/frp-ts?branch=master"><img src="https://coveralls.io/repos/github/raveclassic/frp-ts/badge.svg?branch=master" alt="Coverage Status"></a>
+				<a href="https://david-dm.org/raveclassic/frp-ts"><img src="https://david-dm.org/raveclassic/frp-ts.svg" alt="Dependencies"></a></p>
+				<a href="#overview" id="overview" style="color: inherit; text-decoration: none;">
+					<h2>Overview</h2>
+				</a>
+				<p>This library provides an <strong>experimental</strong> <code>TypeScript</code> implementation of an &quot;Applicative Data-Driven Computation&quot;
+				described by <a href="http://conal.net/">Conal Elliot</a> in his <a href="http://conal.net/papers/data-driven/paper.pdf">paper</a>.</p>
+				<p>The implementation:</p>
+				<ul>
+					<li>is a push-pull model with atomic updates (means it is glitch-free, no <a href="https://stackoverflow.com/a/56523673/1961479">diamond shape problem</a>).</li>
+					<li>follows <a href="https://github.com/calmm-js/documentation/blob/master/introduction-to-calmm.md">calmm architecture</a>.</li>
+					<li>is based on and is ready to be used with the gorgeous <a href="https://github.com/gcanti/fp-ts">fp-ts</a>.</li>
+				</ul>
+				<p><strong>Table of contents</strong></p>
+				<ul>
+					<li><a href="#motivation">Motivation</a></li>
+					<li><a href="#api">Design</a></li>
+					<li><a href="#deep--dive">Deep Dive</a></li>
+					<li><a href="#installation--setup">Installation &amp; Setup</a></li>
+					<li><a href="#integrations">Integrations</a></li>
+					<li><a href="#changelog">Changelog</a></li>
+				</ul>
+				<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
+					<h2>Motivation</h2>
+				</a>
+				<p>Functional reactive programming is hard.
+					Coming up with a memory-leak-free, glitch-free, straightforward and intuitive implementation is even harder.
+					The goal of this library is to try to provide users with such implementation balancing between purity and ease of adoption
+				while still being fully type-safe, correct and <code>TypeScript</code>-oriented.</p>
+				<p>The library describes the concept of a &quot;value-over-time&quot;.
+					Basically it&#39;s a value that may change over time and subscribers can listen to updates of that value.
+				Such values are <em>not</em> described by <code>Behavior</code>s as a function of time from classical FRP, but by a mutable reactive <code>Atom</code>s.</p>
+				<p>On the other hand the library doesn&#39;t try to replace existing implementations of <code>Observer</code> pattern such as <a href="https://rxjs.dev/">rxjs</a>, <a href="https://mostcore.readthedocs.io/en/latest/">most</a> or others.
+					Instead, it adopts some advanced FP concepts like <code>HKT</code> (higher kinded types) and <code>tagless final</code> to allow using properties and atoms with any implementation of <code>Observable</code>.
+				This is where <a href="https://gcanti.github.io/fp-ts/">fp-ts</a> comes into play, but more on that later.</p>
+				<p>So if we refer to the paper, it highlights two main concepts for working with reactive data-driven computation: value extraction and change notification:</p>
+				<blockquote>
+					<p>Imperative programs implement data-driven computation using two
+						mechanisms: value extraction and change notification. Value extraction allows retrieval of a “current value” (e.g., via an input widget’s access method). Notification allows various states (e.g., an
+						output widget) to be updated, making them consistent with newly
+					changed values.</p>
+				</blockquote>
+				<p>The rest of the doc describes this API in details.</p>
+				<a href="#design" id="design" style="color: inherit; text-decoration: none;">
+					<h2>Design</h2>
+				</a>
+				<p>The library core consists of the following pieces which are borrowed from <a href="https://github.com/calmm-js/documentation/blob/master/introduction-to-calmm.md">calmm architecture</a>:</p>
+				<ul>
+					<li><p><code>Observable</code>, <code>Observer</code> and <code>Subscription</code> - the basic building blocks of <code>Observer</code>-pattern, which adhere <a href="https://github.com/tc39/proposal-observable">es-observables</a>.</p>
+					</li>
+					<li><p><code>Property</code> - describes a reactive &quot;value-over-time&quot;.
+							<code>Property</code> extends <code>Observable</code> in the way that it <em>always</em> has a value.
+							<code>Property</code> allows getting its current value while still notifying its subscribers about changes of that value.
+							A typical property could describe a value of an <code>input</code>, a count of clicks, current date etc.
+						This is the main difference from <code>Observable</code> which just describes an occurence of some event.</p>
+					</li>
+					<li><p><code>Atom</code> - describes a mutable reactive &quot;value-over-time&quot;.
+							<code>Atom</code> extends <code>Property</code> in the way that is allows mutating current value
+						still being capable of everything <code>Property</code> is capable of - holding the value and notifying about its changes.</p>
+					</li>
+					<li><p><code>Clock</code> - internal driver that makes things happen and allows notifications to actually work and updates to be delivered to listeners</p>
+					</li>
+				</ul>
+				<a href="#deep-dive" id="deep-dive" style="color: inherit; text-decoration: none;">
+					<h2>Deep Dive</h2>
+				</a>
+				<p>This section of the doc aims to give a better understanding of how the things work.
+				So to achieve that we&#39;ll build up a simple counter, reviewing all pieces of the design one-by-one.</p>
+				<a href="#clock" id="clock" style="color: inherit; text-decoration: none;">
+					<h3><code>Clock</code></h3>
+				</a>
+				<p>Let&#39;s start from the <code>Clock</code> because it&#39;s required for everything else to work.
+					A <code>Clock</code> is conceptually a way to get the current time of the execution.
+					It may be the unix epoch time, the time from start of the program or just an incrementing counter.
+				<code>frp-ts</code> ships a default simple counter clock:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { newCounterClock } <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/clock'</span>
+
+<span class="hljs-comment">// we create a new counter clock</span>
+<span class="hljs-keyword">const</span> counterClock = newCounterClock()
+<span class="hljs-built_in">console</span>.log(counterClock.now()) <span class="hljs-comment">// logs 0</span>
+<span class="hljs-built_in">console</span>.log(counterClock.now()) <span class="hljs-comment">// logs 1</span>
+<span class="hljs-built_in">console</span>.log(counterClock.now()) <span class="hljs-comment">// logs 2</span>
+
+<span class="hljs-comment">// or we can create our own clock base on Date</span>
+<span class="hljs-keyword">const</span> dateClock = {
+    now: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">Date</span>.now(),
+}
+
+<span class="hljs-comment">// or even a "virtual" clock which is "frozen" and requires manual time operation</span>
+<span class="hljs-comment">// such clock may be useful in tests when testing events occurring in the same tick</span>
+<span class="hljs-keyword">const</span> virtualClock = {
+    time: <span class="hljs-number">-1</span>,
+    now() {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.time
+    },
+    next() {
+        <span class="hljs-keyword">this</span>.time++
+    },
+}</code></pre>
+				<p>A <code>Clock#now</code> is similar to <code>rxjs</code> <a href="https://rxjs.dev/api/index/class/Scheduler#now">Scheduler#now</a>.</p>
+				<p>Now we can work with <code>Atom</code> and <code>Property</code>.</p>
+				<a href="#atom" id="atom" style="color: inherit; text-decoration: none;">
+					<h3><code>Atom</code></h3>
+				</a>
+				<p>Let&#39;s skip <code>Property</code> and move straight to <code>Atom</code> because essentially <code>Property</code> is
+					just a readonly <code>Atom</code> and mutability is required for the next example.
+				So, <code>Atom</code> adds mutability to <code>Property</code>. Let&#39;s create one:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { newAtom } <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/atom'</span>
+<span class="hljs-keyword">import</span> { newCounterClock } <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/clock'</span>
+
+<span class="hljs-comment">// We create an atom that will allow us to get values, update its value manually and listen to updates.</span>
+<span class="hljs-comment">// As mentioned earlier a `Atom` depends on a `Clock`</span>
+<span class="hljs-comment">// so wee need to pass it directly as part of environment</span>
+<span class="hljs-comment">// Yeah, that's a lot of boilerplate you may say, but more on that later. For now let's just pass the clock and initial value.</span>
+<span class="hljs-keyword">const</span> counter = newAtom({ clock: newCounterClock() })(<span class="hljs-number">0</span>)
+
+<span class="hljs-comment">// get the last value</span>
+<span class="hljs-built_in">console</span>.log(counter.get()) <span class="hljs-comment">// logs '0'</span>
+
+<span class="hljs-comment">// let's manually set the value</span>
+counter.set(<span class="hljs-number">1</span>)
+
+<span class="hljs-comment">// get the last value</span>
+<span class="hljs-built_in">console</span>.log(counter.get()) <span class="hljs-comment">// logs '1'</span>
+
+<span class="hljs-comment">// or we can modify instead of setting</span>
+counter.modify(<span class="hljs-function">(<span class="hljs-params">n</span>) =&gt;</span> n + <span class="hljs-number">1</span>)
+
+<span class="hljs-comment">// get the last value</span>
+<span class="hljs-built_in">console</span>.log(counter.get()) <span class="hljs-comment">// logs '2'</span></code></pre>
+				<p>That&#39;s it. Pretty easy, huh? What about updates?</p>
+				<pre><code class="language-typescript"><span class="hljs-comment">// subscribe to updates</span>
+counter.subscribe({
+    next: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`value: <span class="hljs-subst">${counter.<span class="hljs-keyword">get</span>()}</span>`</span>),
+})
+
+counter.set(<span class="hljs-number">3</span>) <span class="hljs-comment">// logs 'value: 3'</span></code></pre>
+				<p>We&#39;re done but there are two important things about the callback:</p>
+				<ul>
+					<li>it is in the form of <code>Observer</code>. This is because <code>frp-ts</code> implements <a href="https://github.com/tc39/proposal-observable">es-observables</a> so that it is seemlessly compatible with other implementations. Also there&#39;s no support for plain functions as callbacks for the sake of API simplicity.</li>
+					<li>it is <em>not</em> fired on subscription. This is because, although <code>Atom</code> (and <code>Property</code>) is <em>similar</em> to rxjs <a href="https://rxjs.dev/api/index/class/BehaviorSubject">BehaviorSubject</a>, it is fundamentally different in the way it works - it only notifies subscribers if the value <em>is changed</em>.</li>
+					<li>it is <em>not</em> supplied the changed value. This is how <code>frp-ts</code> solves glitches (diamond shape problem). There should always be a single source of truth for the value - either it is the callback&#39;s argument (like it&#39;s done in almost all reactive libraries) or the value of property/atom.</li>
+				</ul>
+				<p>More on this later.</p>
+				<a href="#property" id="property" style="color: inherit; text-decoration: none;">
+					<h3><code>Property</code></h3>
+				</a>
+				<p>As it was said before that <code>Property</code> is a readonly <code>Atom</code>, or vice-versa <code>Atom</code> is a mutable <code>Property</code>, there&#39;s actually nothing more to add on <code>Property</code>.
+					Properties are introduced as a way to restrict API.
+					Sometimes we don&#39;t want to expose mutable access to our state and <code>Property</code> is a perfect fit for such situations.
+				Now let&#39;s update our counter to restrict arbitrary mutations of its state:</p>
+				<pre><code class="language-typescript"><span class="hljs-comment">// we'll need an interface to describe our counter more precisely</span>
+<span class="hljs-keyword">interface</span> Counter <span class="hljs-keyword">extends</span> Property&lt;number&gt; {
+    readonly inc: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">void</span>
+}
+
+<span class="hljs-comment">// we'll also need a constructor that takes initial value</span>
+<span class="hljs-keyword">const</span> newCounter = (initial: <span class="hljs-built_in">number</span>): <span class="hljs-function"><span class="hljs-params">Counter</span> =&gt;</span> {
+    <span class="hljs-comment">// here we define local mutable state</span>
+    <span class="hljs-comment">// again, we won't need to set up newAtom each time this way, more on this later</span>
+    <span class="hljs-keyword">const</span> state = newAtom({ clock: newCounterClock() })(initial)
+    <span class="hljs-comment">// expose readonly API</span>
+    <span class="hljs-keyword">const</span> inc = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> state.modify(<span class="hljs-function">(<span class="hljs-params">n</span>) =&gt;</span> n + <span class="hljs-number">1</span>)
+    <span class="hljs-keyword">return</span> {
+        subscribe: state.subscribe,
+        <span class="hljs-keyword">get</span>: state.get,
+        inc,
+    }
+}
+
+<span class="hljs-comment">// now create counter and increment its value</span>
+<span class="hljs-keyword">const</span> counter = newCounter(<span class="hljs-number">0</span>)
+counter.inc()
+
+<span class="hljs-comment">// note that no there's no direct access to internal mutable state of our counter anymore</span></code></pre>
+				<a href="#lens" id="lens" style="color: inherit; text-decoration: none;">
+					<h3><code>Lens</code></h3>
+				</a>
+				<p>Besides being able to hold state and notify about state changes <code>Atom</code> is capable of another cool feature - lensing.
+					Although lenses are not a part of <code>frp-ts</code>, <code>Atom</code> supports them via an interface.
+				So <code>Lens</code> is a combination of a getter and an immutable setter. Its interface is pretty simple:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">interface</span> Lens&lt;S, A&gt; {
+    readonly <span class="hljs-keyword">get</span>: <span class="hljs-function">(<span class="hljs-params">s: S</span>) =&gt;</span> A
+    readonly <span class="hljs-keyword">set</span>: <span class="hljs-function">(<span class="hljs-params">a: A</span>) =&gt;</span> (s: S) =&gt; S
+}</code></pre>
+				<p>Lenses are extremely powerful when it comes to immutable updates of deeply-nested structure.
+				Let&#39;s try to build some example with lenses.</p>
+				<pre><code class="language-typescript"><span class="hljs-comment">// let's define a nested structure</span>
+<span class="hljs-keyword">import</span> { newCounterClock } <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/clock'</span>
+<span class="hljs-keyword">import</span> { newAtom, Lens } <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/atom'</span>
+<span class="hljs-keyword">interface</span> Person {
+    readonly name: <span class="hljs-built_in">string</span>
+    readonly age: <span class="hljs-built_in">number</span>
+}
+<span class="hljs-comment">// and create a person</span>
+<span class="hljs-keyword">const</span> mike = newAtom({ clock: newCounterClock() })({ name: <span class="hljs-string">'Mike'</span>, age: <span class="hljs-number">20</span> })
+
+<span class="hljs-comment">// now what if we have a user interface that allows changing person's name and age,</span>
+<span class="hljs-comment">// for example a form with two inputs?</span>
+<span class="hljs-comment">// if we want to stay immutable we would need to deal with nesting</span>
+<span class="hljs-comment">// each time we need to update nested value as well as read it:</span>
+<span class="hljs-keyword">const</span> setName = <span class="hljs-function">(<span class="hljs-params">name: <span class="hljs-built_in">string</span></span>) =&gt;</span> (person: Person): <span class="hljs-function"><span class="hljs-params">Person</span> =&gt;</span> ({ ...person, name })
+<span class="hljs-keyword">const</span> getName = (person: Person): <span class="hljs-function"><span class="hljs-params">string</span> =&gt;</span> person.name
+<span class="hljs-keyword">const</span> setAge = <span class="hljs-function">(<span class="hljs-params">age: <span class="hljs-built_in">number</span></span>) =&gt;</span> (person: Person): <span class="hljs-function"><span class="hljs-params">Person</span> =&gt;</span> ({ ...person, age })
+<span class="hljs-keyword">const</span> getAge = (person: Person): <span class="hljs-function"><span class="hljs-params">number</span> =&gt;</span> person.age
+
+<span class="hljs-comment">// then somewhere further in some kind of callback</span>
+<span class="hljs-keyword">const</span> handleNameChange = <span class="hljs-function">(<span class="hljs-params">newName: <span class="hljs-built_in">string</span></span>) =&gt;</span> mike.modify(setName(newName))
+<span class="hljs-keyword">const</span> handleAgeChange = <span class="hljs-function">(<span class="hljs-params">newAge: <span class="hljs-built_in">number</span></span>) =&gt;</span> mike.modify(setAge(newAge))
+
+<span class="hljs-comment">// this would quickly result in a lot of boilerplate</span>
+<span class="hljs-comment">// and here lenses come into play</span>
+<span class="hljs-keyword">const</span> nameLens: Lens&lt;Person, <span class="hljs-built_in">string</span>&gt; = {
+    <span class="hljs-keyword">get</span>: <span class="hljs-function">(<span class="hljs-params">person</span>) =&gt;</span> person.name,
+    <span class="hljs-keyword">set</span>: <span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> (person) =&gt; ({ ...person, name }),
+}
+<span class="hljs-keyword">const</span> ageLens: Lens&lt;Person, <span class="hljs-built_in">number</span>&gt; = {
+    <span class="hljs-keyword">get</span>: <span class="hljs-function">(<span class="hljs-params">person</span>) =&gt;</span> person.age,
+    <span class="hljs-keyword">set</span>: <span class="hljs-function">(<span class="hljs-params">age</span>) =&gt;</span> (person) =&gt; ({ ...person, age }),
+}
+
+<span class="hljs-comment">// now we can call `view` method which returns an `Atom`</span>
+<span class="hljs-comment">// "zoomed" to a field defined by lens</span>
+<span class="hljs-keyword">const</span> mikeName = mike.view(nameLens)
+<span class="hljs-comment">// note that subscriptions also work out of the box</span>
+mike.subscribe({
+    next: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'mike has changed'</span>),
+})
+mikeName.subscribe({
+    next: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'name has changed'</span>),
+})
+<span class="hljs-built_in">console</span>.log(mikeName.get()) <span class="hljs-comment">// logs 'Mike'</span>
+mikeName.set(<span class="hljs-string">'Patrik'</span>) <span class="hljs-comment">// logs 'mike has changed' and 'name has changed'</span>
+<span class="hljs-built_in">console</span>.log(mikeName.get()) <span class="hljs-comment">// logs 'Patrik'</span></code></pre>
+				<p>Cool, but that&#39;s not all.
+					As <code>view</code> method returns an <code>Atom</code>, then we can call <code>view</code> multiple times in a chain, and it will result in a &quot;lens composition&quot;!
+				This means that we can nest reads and writes infinitely in a safe and predictable manner.</p>
+				<p><code>frp-ts</code> does not ship with any <code>Lens</code> implementation leaving it for an external library.
+					One of them is <a href="https://gcanti.github.io/monocle-ts/">monocle-ts</a> and you can always build an adapter
+				around any other implementation which is not compatible with the supported interface.</p>
+				<a href="#installation-amp-setup" id="installation-amp-setup" style="color: inherit; text-decoration: none;">
+					<h2>Installation &amp; Setup</h2>
+				</a>
+				<p><code>frp-ts</code> is available as an <code>npm</code> package and requires <code>fp-ts</code> as peer dependency:</p>
+				<pre><code>npm <span class="hljs-keyword">install </span>frp-ts <span class="hljs-built_in">fp</span>-ts</code></pre><p>or</p>
+				<pre><code>yarn <span class="hljs-built_in">add</span> frp-<span class="hljs-keyword">ts</span> fp-<span class="hljs-keyword">ts</span></code></pre><p>After installation the library needs to be sort of set up.
+					We&#39;ve already seen that akward creation of <code>Clock</code> before we&#39;re able to use <code>newAtom</code>.
+					That&#39;s indeed awkward and generally not should be done. We should always have a single global clock for an application.
+					It may be created as a part of the setup required for some parts of this library including producers -
+				some helpers also require <code>Clock</code>.</p>
+				<p>So We need to create an environment for some parts of the library to work.
+					This environment should contain a single global instance of <code>Clock</code>.
+				So in general there should be created a module exporting parametrized functions:</p>
+				<pre><code class="language-typescript"><span class="hljs-comment">// /src/utils.ts</span>
+<span class="hljs-keyword">import</span> { newCounterClock } <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/clock'</span>
+<span class="hljs-keyword">import</span> { newAtom <span class="hljs-keyword">as</span> getNewAtom } <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/atom'</span>
+<span class="hljs-keyword">import</span> {
+    scan <span class="hljs-keyword">as</span> getScan,
+    fromObservable <span class="hljs-keyword">as</span> getFromObservable,
+    sample <span class="hljs-keyword">as</span> getSample,
+    sampleIO <span class="hljs-keyword">as</span> getSampleIO,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/property'</span>
+<span class="hljs-keyword">import</span> { Env } <span class="hljs-keyword">from</span> <span class="hljs-string">'frp-ts/lib/clock'</span>
+
+<span class="hljs-keyword">const</span> e: Env = {
+    clock: newCounterClock(),
+}
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> newProducer = getNewAtom(e)
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> scan = getScan(e)
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> fromObservable = getFromObservable(e)
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> sample = getSample(e)
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> sampleIO = getSampleIO(e)</code></pre>
+				<p>Now everything is ready, and the functions can be used directly from this module.</p>
+				<a href="#integrations" id="integrations" style="color: inherit; text-decoration: none;">
+					<h2>Integrations</h2>
+				</a>
+				<a href="#fp-ts" id="fp-ts" style="color: inherit; text-decoration: none;">
+					<h3><code>fp-ts</code></h3>
+				</a>
+				<p>The library is deeply integrated with <a href="https://github.com/gcanti/fp-ts/">fp-ts</a>.
+				It provides an instance of <a href="https://gcanti.github.io/fp-ts/modules/Applicative.ts.html">Applicative</a> for <code>Property</code> and <code>pipeable</code> top-level functions.</p>
+				<a href="#changelog" id="changelog" style="color: inherit; text-decoration: none;">
+					<h2>Changelog</h2>
+				</a>
+				<p>Read more <a href="./CHANGELOG.md">here</a></p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_atom_.html">&quot;atom&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_clock_.html">&quot;clock&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_emitter_.html">&quot;emitter&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_index_.html">&quot;index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_observable_.html">&quot;observable&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_property_.html">&quot;property&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

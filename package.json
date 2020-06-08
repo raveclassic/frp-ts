@@ -25,6 +25,7 @@
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
+    "typedoc": "typedoc",
     "version": "standard-version"
   },
   "publishConfig": {
@@ -53,6 +54,7 @@
     "standard-version": "^8.0.0",
     "ts-jest": "^26.0.0",
     "ts-node": "^8.10.1",
+    "typedoc": "^0.17.7",
     "typescript": "^3.9.2"
   },
   "husky": {

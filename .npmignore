@@ -10,3 +10,5 @@
 /tsconfig.build.json
 /tsconfig.json
 /commitlint.config.js
+/typedoc.json
+/doc

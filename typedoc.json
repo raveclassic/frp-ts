@@ -1,0 +1,10 @@
+{
+  "inputFiles": ["./src/index.ts"],
+  "mode": "modules",
+  "out": "doc",
+  "exclude": ["**/*.spec.ts", "perf/**/*.ts", "src/tests/**/*.ts"],
+  "excludeExternals": true,
+  "excludeNotExported": true,
+  "excludePrivate": true,
+  "includeVersion": true
+}
