@@ -1,7 +1,7 @@
 {
   "inputFiles": ["./src/index.ts"],
   "mode": "modules",
-  "out": "doc",
+  "out": "docs",
   "exclude": ["**/*.spec.ts", "perf/**/*.ts", "src/tests/**/*.ts"],
   "excludeExternals": true,
   "excludeNotExported": true,

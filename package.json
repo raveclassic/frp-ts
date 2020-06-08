@@ -26,7 +26,7 @@
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
     "typedoc": "typedoc",
-    "version": "standard-version"
+    "version": "npm run typedoc && git add docs && standard-version -a"
   },
   "publishConfig": {
     "access": "public"
