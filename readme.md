@@ -6,80 +6,77 @@
 
 ## Overview
 
-This library provides an **experimental** `TypeScript` implementation of an "Applicative Data-Driven Computation" described by [Conal Elliot](http://conal.net/) in his [paper](http://conal.net/papers/data-driven/paper.pdf).
-The implementation is a push-pull model with atomic updates (means it is glitch-free, no [diamond shape problem](https://stackoverflow.com/a/56523673/1961479)).
+This library provides an **experimental** `TypeScript` implementation of an "Applicative Data-Driven Computation"
+described by [Conal Elliot](http://conal.net/) in his [paper](http://conal.net/papers/data-driven/paper.pdf).
 
-Based on and is ready to be used with the gorgeous [fp-ts](https://github.com/gcanti/fp-ts).
+The implementation:
+
+-   is a push-pull model with atomic updates (means it is glitch-free, no [diamond shape problem](https://stackoverflow.com/a/56523673/1961479)).
+-   follows [calmm architecture](https://github.com/calmm-js/documentation/blob/master/introduction-to-calmm.md).
+-   is based on and is ready to be used with the gorgeous [fp-ts](https://github.com/gcanti/fp-ts).
 
 **Table of contents**
 
--   [Introduction](#introduction)
-    -   [Clock](#clock)
-    -   [Getter](#getter)
-    -   [Listener](#listener)
-    -   [Notifier](#notifier)
-    -   [Disposable](#disposable)
-    -   [Source & Producer](#source--producer)
+-   [Motivation](#motivation)
+-   [Design](#api)
+-   [Deep Dive](#deep--dive)
 -   [Installation & Setup](#installation--setup)
+-   [Integrations](#integrations)
 -   [Changelog](#changelog)
 
-## Introduction
+## Motivation
 
-As described in the paper:
+Functional reactive programming is hard.
+Coming up with a memory-leak-free, glitch-free, straightforward and intuitive implementation is even harder.
+The goal of this library is to try to provide users with such implementation balancing between purity and ease of adoption
+while still being fully type-safe, correct and `TypeScript`-oriented.
+
+The library describes the concept of a "value-over-time".
+Basically it's a value that may change over time and subscribers can listen to updates of that value.
+Such values are _not_ described by `Behavior`s as a function of time from classical FRP, but by a mutable reactive `Atom`s.
+
+On the other hand the library doesn't try to replace existing implementations of `Observer` pattern such as [rxjs](https://rxjs.dev/), [most](https://mostcore.readthedocs.io/en/latest/) or others.
+Instead, it adopts some advanced FP concepts like `HKT` (higher kinded types) and `tagless final` to allow using properties and atoms with any implementation of `Observable`.
+This is where [fp-ts](https://gcanti.github.io/fp-ts/) comes into play, but more on that later.
+
+So if we refer to the paper, it highlights two main concepts for working with reactive data-driven computation: value extraction and change notification:
 
 > Imperative programs implement data-driven computation using two
 > mechanisms: value extraction and change notification. Value extraction allows retrieval of a “current value” (e.g., via an input widget’s access method). Notification allows various states (e.g., an
 > output widget) to be updated, making them consistent with newly
-> changed values. Our representation of data-driven computations
-> encapsulates these two mechanisms, building them in tandem using a familiar set of combinators.
+> changed values.
 
-The library core consists of the following pieces:
+The rest of the doc describes this API in details.
 
--   `Getter` - a function for getting the last value from a computation
-    ```typescript
-    interface Getter<A> {
-    	(): A
-    }
-    ```
--   `Listener` - a callback for receiving update _notifications_ (not values) from a computation
-    ```typescript
-    interface Listener {
-    	(): void
-    }
-    ```
--   `Disposable` - a function with no arguments that returns nothing that is mainly used to free resources
-    ```typescript
-    interface Disposable {
-    	(): void
-    }
-    ```
--   `Notifier` - a function for listening for updates in a computation that accepts a `Listener` and returns a `Disposable`
-    ```typescript
-    interface Notifier {
-    	(listener: Listener): Disposable
-    }
-    ```
--   `Source<A>` - combination of a `Getter<A>` and a `Notifier` which describes a `value that changes over time`
-    ```typescript
-    interface Source<A> {
-    	readonly getter: Getter<A>
-    	readonly notifier: Notifier
-    }
-    ```
--   `Clock` - makes things happen, allows notifications to actually work and deliver updates to listeners
--   `Producer<A>` - combination of a `Source<A>` and a setter to update its value imperatively, requires a `Clock` to work
-    ```typescript
-    interface Producer<A> extends Source<A> {
-    	readonly next: (a: A) => void
-    }
-    ```
+## Design
 
-But let's review them one by one and to gain a better understanding of how the things work let's implement a counter.
+The library core consists of the following pieces which are borrowed from [calmm architecture](https://github.com/calmm-js/documentation/blob/master/introduction-to-calmm.md):
+
+-   `Observable`, `Observer` and `Subscription` - the basic building blocks of `Observer`-pattern, which adhere [es-observables](https://github.com/tc39/proposal-observable).
+
+-   `Property` - describes a reactive "value-over-time".
+    `Property` extends `Observable` in the way that it _always_ has a value.
+    `Property` allows getting its current value while still notifying its subscribers about changes of that value.
+    A typical property could describe a value of an `input`, a count of clicks, current date etc.
+    This is the main difference from `Observable` which just describes an occurence of some event.
+
+-   `Atom` - describes a mutable reactive "value-over-time".
+    `Atom` extends `Property` in the way that is allows mutating current value
+    still being capable of everything `Property` is capable of - holding the value and notifying about its changes.
+
+-   `Clock` - internal driver that makes things happen and allows notifications to actually work and updates to be delivered to listeners
+
+## Deep Dive
+
+This section of the doc aims to give a better understanding of how the things work.
+So to achieve that we'll build up a simple counter, reviewing all pieces of the design one-by-one.
 
 ### `Clock`
 
-Let's start from the `Clock` because it's required for everything else to work. A `Clock` is conceptually a way to get current time of execution. It may be the unix epoch time, the time from start of the program or just an incrementing counter.
-`frp-ts` ships a default simple counter clock
+Let's start from the `Clock` because it's required for everything else to work.
+A `Clock` is conceptually a way to get the current time of the execution.
+It may be the unix epoch time, the time from start of the program or just an incrementing counter.
+`frp-ts` ships a default simple counter clock:
 
 ```typescript
 import { newCounterClock } from 'frp-ts/lib/clock'
@@ -108,106 +105,168 @@ const virtualClock = {
 }
 ```
 
-A `Clock#now` is similar to `Scheduler#now` in [rxjs](https://rxjs.dev/).
+A `Clock#now` is similar to `rxjs` [Scheduler#now](https://rxjs.dev/api/index/class/Scheduler#now).
 
-Now we can work with producers which we will need for next examples.
+Now we can work with `Atom` and `Property`.
 
-### `Getter`
+### `Atom`
 
-A getter is a way to get the last/current value from the computation, for example the current value of a counter:
+Let's skip `Property` and move straight to `Atom` because essentially `Property` is
+just a readonly `Atom` and mutability is required for the next example.
+So, `Atom` adds mutability to `Property`. Let's create one:
 
 ```typescript
-import { newProducer } from 'frp-ts/lib/producer'
+import { newAtom } from 'frp-ts/lib/atom'
 import { newCounterClock } from 'frp-ts/lib/clock'
 
-// We create a producer that will allow us to get values, listen to updates and update its value manually
+// We create an atom that will allow us to get values, update its value manually and listen to updates.
 // As mentioned earlier a `Atom` depends on a `Clock`
 // so wee need to pass it directly as part of environment
-const counter = newProducer({ clock: newCounterClock() })(0)
+// Yeah, that's a lot of boilerplate you may say, but more on that later. For now let's just pass the clock and initial value.
+const counter = newAtom({ clock: newCounterClock() })(0)
+
+// get the last value
+console.log(counter.get()) // logs '0'
+
+// let's manually set the value
+counter.set(1)
 
 // get the last value
 console.log(counter.getter()) // logs '1'
 
-// let's update the value
-counter.next(1)
+// or we can modify instead of setting
+counter.modify((n) => n + 1)
 
 // get the last value
 console.log(counter.getter()) // logs '2'
 ```
 
-A getter is similar to `BehaviorSubject#getValue` in [rxjs](https://rxjs.dev/).
-
-However only a getter is not enough to build reactive computations, we need some way to notify about changes in the counter.
-
-### `Listener`
-
-A listener is just a callback that receives nothing... It may seem strange at first but it is implemented this way intentionally and it will be explained later why (at least I will try).
+That's it. Pretty easy, huh? What about updates?
 
 ```typescript
-import { Listener } from 'frp-ts/lib/emitter'
-const listener: Listener = () => console.log('I am called!')
+// subscribe to updates
+counter.subscribe({
+	next: () => console.log(`value: ${counter.get()}`),
+})
+
+counter.set(3) // logs 'value: 3'
 ```
 
-### `Notifier`
+We're done but there are two important things about the callback:
 
-A notifier is a way to tell subscribers/observers/whatever that some value has been changed. It accepts a callback that will be called when the value changes.
+-   it is in the form of `Observer`. This is because `frp-ts` implements [es-observables](https://github.com/tc39/proposal-observable) so that it is seemlessly compatible with other implementations. Also there's no support for plain functions as callbacks for the sake of API simplicity.
+-   it is _not_ fired on subscription. This is because, although `Atom` (and `Property`) is _similar_ to rxjs [BehaviorSubject](https://rxjs.dev/api/index/class/BehaviorSubject), it is fundamentally different in the way it works - it only notifies subscribers if the value _is changed_.
+-   it is _not_ supplied the changed value. This is how `frp-ts` solves glitches (diamond shape problem). There should always be a single source of truth for the value - either it is the callback's argument (like it's done in almost all reactive libraries) or the value of property/atom.
+
+More on this later.
+
+### `Property`
+
+As it was said before that `Property` is a readonly `Atom`, or vice-versa `Atom` is a mutable `Property`, there's actually nothing more to add on `Property`.
+Properties are introduced as a way to restrict API.
+Sometimes we don't want to expose mutable access to our state and `Property` is a perfect fit for such situations.
+Now let's update our counter to restrict arbitrary mutations of its state:
 
 ```typescript
-import { newProducer } from 'frp-ts/lib/producer'
+// we'll need an interface to describe our counter more precisely
+interface Counter extends Property<number> {
+	readonly inc: () => void
+}
+
+// we'll also need a constructor that takes initial value
+const newCounter = (initial: number): Counter => {
+	// here we define local mutable state
+	// again, we won't need to set up newAtom each time this way, more on this later
+	const state = newAtom({ clock: newCounterClock() })(initial)
+	// expose readonly API
+	const inc = () => state.modify((n) => n + 1)
+	return {
+		subscribe: state.subscribe,
+		get: state.get,
+		inc,
+	}
+}
+
+// now create counter and increment its value
+const counter = newCounter(0)
+counter.inc()
+
+// note that no there's no direct access to internal mutable state of our counter anymore
+```
+
+### `Lens`
+
+Besides being able to hold state and notify about state changes `Atom` is capable of another cool feature - lensing.
+Although lenses are not a part of `frp-ts`, `Atom` supports them via an interface.
+So `Lens` is a combination of a getter and an immutable setter. Its interface is pretty simple:
+
+```typescript
+interface Lens<S, A> {
+	readonly get: (s: S) => A
+	readonly set: (a: A) => (s: S) => S
+}
+```
+
+Lenses are extremely powerful when it comes to immutable updates of deeply-nested structure.
+Let's try to build some example with lenses.
+
+```typescript
+// let's define a nested structure
 import { newCounterClock } from 'frp-ts/lib/clock'
+import { newAtom, Lens } from 'frp-ts/lib/atom'
+interface Person {
+	readonly name: string
+	readonly age: number
+}
+// and create a person
+const mike = newAtom({ clock: newCounterClock() })({ name: 'Mike', age: 20 })
 
-// we create a producer
-const counter = newProducer({ clock: newCounterClock() })(0)
+// now what if we have a user interface that allows changing person's name and age,
+// for example a form with two inputs?
+// if we want to stay immutable we would need to deal with nesting
+// each time we need to update nested value as well as read it:
+const setName = (name: string) => (person: Person): Person => ({ ...person, name })
+const getName = (person: Person): string => person.name
+const setAge = (age: number) => (person: Person): Person => ({ ...person, age })
+const getAge = (person: Person): number => person.age
 
-// we create a listener to be notified about updates of our counter
-const listener = () => console.log('The value has changed!', counter.getter())
+// then somewhere further in some kind of callback
+const handleNameChange = (newName: string) => mike.modify(setName(newName))
+const handleAgeChange = (newAge: number) => mike.modify(setAge(newAge))
 
-// now we need to subscribe to notifications
-counter.notifier(listener)
+// this would quickly result in a lot of boilerplate
+// and here lenses come into play
+const nameLens: Lens<Person, string> = {
+	get: (person) => person.name,
+	set: (name) => (person) => ({ ...person, name }),
+}
+const ageLens: Lens<Person, number> = {
+	get: (person) => person.age,
+	set: (age) => (person) => ({ ...person, age }),
+}
 
-// and we're set up
-// now let's update the counter
-counter.next(1) // logs 'The value has changed! 1'
-counter.next(2) // logs 'The value has changed! 2'
+// now we can call `view` method which returns an `Atom`
+// "zoomed" to a field defined by lens
+const mikeName = mike.view(nameLens)
+// note that subscriptions also work out of the box
+mike.subscribe({
+	next: () => console.log('mike has changed'),
+})
+mikeName.subscribe({
+	next: () => console.log('name has changed'),
+})
+console.log(mikeName.get()) // logs 'Mike'
+mikeName.set('Patrik') // logs 'mike has changed' and 'name has changed'
+console.log(mikeName.get()) // logs 'Patrik'
 ```
 
-A notifier is similar to `Observable#subscribe` in [rxjs](https://rxjs.dev/).
+Cool, but that's not all.
+As `view` method returns an `Atom`, then we can call `view` multiple times in a chain, and it will result in a "lens composition"!
+This means that we can nest reads and writes infinitely in a safe and predictable manner.
 
-### `Disposable`
-
-It's always good to free resources and we should always remember to free them. For this exact purpose a `Notifier` returns a callback which should be called when we are no longer interested in receiving change notification and want to free resources. In other words a `Disposable`.
-
-```typescript
-import { newProducer } from 'frp-ts/lib/producer'
-import { newCounterClock } from 'frp-ts/lib/clock'
-
-// let's create a counter and a listener
-const counter = newProducer({ clock: newCounterClock() })(0)
-const listener = () => console.log('The value has changed!', counter.getter())
-
-// now we store the output of notifier in a disposable
-const dispose = counter.notifier(listener)
-
-// try to update the counter
-counter.next(1) // logs 'The value has changed! 1'
-
-// now try to free our listener
-dispose()
-
-// and try to update the counter once again
-counter.next(2) // nothing happens! we've disposed our listener
-
-// but the actual value is still updated
-console.log(counter.getter()) // logs 2
-```
-
-`Disposable` is similar to `Subscription#unsubscribe` in [rxjs](https://rxjs.dev/).
-
-### `Source` & `Producer`
-
-Now we are ready to grasp the most useful parts of the library - `Source` and `Producer`. But wait, we've already seen everything we need in previous examples: how to create producers, how to get and update the values inside them and finally how to listen to that changes.
-
-However it may seem awkward to create a new clock for each producer. That's indeed awkward and generally not should be done. We should always have a single global clock for an application. It may be created as a part of the setup required for some parts of this library including producers - some helpers also require `Clock`. More on that later.
+`frp-ts` does not ship with any `Lens` implementation leaving it for an external library.
+One of them is [monocle-ts](https://gcanti.github.io/monocle-ts/) and you can always build an adapter
+around any other implementation which is not compatible with the supported interface.
 
 ## Installation & Setup
 
@@ -223,24 +282,32 @@ or
 yarn add frp-ts fp-ts
 ```
 
-After installation the library needs to be sort of set up. We need to create an environment for some parts of the library to work. This environment should contain a single global instance of `Clock`. So in general there should be created a module exporting parametrized functions:
+After installation the library needs to be sort of set up.
+We've already seen that akward creation of `Clock` before we're able to use `newAtom`.
+That's indeed awkward and generally not should be done. We should always have a single global clock for an application.
+It may be created as a part of the setup required for some parts of this library including producers -
+some helpers also require `Clock`.
+
+So We need to create an environment for some parts of the library to work.
+This environment should contain a single global instance of `Clock`.
+So in general there should be created a module exporting parametrized functions:
 
 ```typescript
 // /src/utils.ts
 import { newCounterClock } from 'frp-ts/lib/clock'
-import { newProducer as getNewProducer } from 'frp-ts/lib/producer'
+import { newAtom as getNewAtom } from 'frp-ts/lib/atom'
 import {
 	scan as getScan,
 	fromObservable as getFromObservable,
 	sample as getSample,
 	sampleIO as getSampleIO,
-} from 'frp-ts/lib/source'
+} from 'frp-ts/lib/property'
 import { Env } from 'frp-ts/lib/clock'
 
 const e: Env = {
 	clock: newCounterClock(),
 }
-export const newProducer = getNewProducer(e)
+export const newProducer = getNewAtom(e)
 export const scan = getScan(e)
 export const fromObservable = getFromObservable(e)
 export const sample = getSample(e)
@@ -249,10 +316,12 @@ export const sampleIO = getSampleIO(e)
 
 Now everything is ready, and the functions can be used directly from this module.
 
-## Integration with `fp-ts`
+## Integrations
+
+### `fp-ts`
 
 The library is deeply integrated with [fp-ts](https://github.com/gcanti/fp-ts/).
-It provides an instance of [Applicative](https://gcanti.github.io/fp-ts/modules/Applicative.ts.html) for `Source` and `pipeable` top-level functions.
+It provides an instance of [Applicative](https://gcanti.github.io/fp-ts/modules/Applicative.ts.html) for `Property` and `pipeable` top-level functions.
 
 ## Changelog
 
