@@ -23,6 +23,7 @@ The implementation:
 -   [Installation & Setup](#installation--setup)
 -   [Integrations](#integrations)
 -   [Changelog](#changelog)
+-   [API Reference](https://raveclassic.github.io/frp-ts/)
 
 ## Motivation
 
