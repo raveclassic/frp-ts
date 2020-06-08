@@ -132,13 +132,13 @@ console.log(counter.get()) // logs '0'
 counter.set(1)
 
 // get the last value
-console.log(counter.getter()) // logs '1'
+console.log(counter.get()) // logs '1'
 
 // or we can modify instead of setting
 counter.modify((n) => n + 1)
 
 // get the last value
-console.log(counter.getter()) // logs '2'
+console.log(counter.get()) // logs '2'
 ```
 
 That's it. Pretty easy, huh? What about updates?
