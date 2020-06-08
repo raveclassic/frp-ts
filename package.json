@@ -1,6 +1,6 @@
 {
   "name": "frp-ts",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Functional reactive values-over-time",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -26,7 +26,7 @@
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
     "typedoc": "typedoc",
-    "version": "npm run typedoc && git add docs && standard-version -a"
+    "version": "npm run typedoc && cp jekyll_config.yml docs/_config.yml && git add docs && standard-version -a"
   },
   "publishConfig": {
     "access": "public"
