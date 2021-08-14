@@ -1,6 +1,7 @@
 import { newAtom } from './env'
 import { Lens } from '../atom'
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 const prop = <O extends object, K extends keyof O>(key: K): Lens<O, O[K]> => ({
 	get: (s) => s[key],
 	set: (a) => (s) => ({ ...s, [key]: a }),

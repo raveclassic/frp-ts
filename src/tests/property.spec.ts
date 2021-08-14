@@ -1,4 +1,4 @@
-import { flatten, instance, sample, sequence, Property, sampleIO } from '../property'
+import { flatten, instance, sample, sequence, Property, sampleIO, combine } from '../property'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { constFalse, constTrue, constVoid } from 'fp-ts/lib/function'
 import { Observable, Subject } from 'rxjs'
@@ -518,6 +518,69 @@ describe('property', () => {
 			s.next(1)
 			expect(cb).toHaveBeenCalledTimes(1)
 			expect(getA()).toBe(3)
+		})
+	})
+	describe('combine', () => {
+		const setup = () => ({
+			a: newAtom('foo'),
+			b: newAtom(42),
+			project: (a: string, b: number) => a + b.toString(),
+		})
+		it('applies project function to the final value', () => {
+			const { a, b, project } = setup()
+			const result = combine(a, b, project)
+
+			expect(result.get()).toEqual(project(a.get(), b.get()))
+		})
+		it('recomputes when upstream values change', () => {
+			const { a, b, project } = setup()
+			const result = combine(a, b, project)
+
+			a.set('baz')
+			b.set(10)
+
+			expect(result.get()).toEqual(project(a.get(), b.get()))
+		})
+		it('notifies when upstream values change', () => {
+			const { project } = setup()
+			const clock = newVirtualClock(0)
+			const newProducer = getNewProducer({ clock })
+			const a = newProducer('0')
+			const b = newProducer(0)
+
+			const listener = jest.fn()
+			const result = combine(a, b, project)
+
+			result.subscribe({ next: listener })
+			expect(listener).toHaveBeenCalledTimes(0)
+
+			a.set('newA')
+			clock.next()
+			expect(listener).toHaveBeenCalledTimes(1)
+
+			b.set(10)
+			clock.next()
+			expect(listener).toHaveBeenCalledTimes(2)
+		})
+		it('calls upstream disposes on dispose', () => {
+			const disposeA = jest.fn()
+			const disposeB = jest.fn()
+
+			const setupObj = setup()
+
+			const a = attachSubscription(setupObj.a, { unsubscribe: disposeA })
+			const b = attachSubscription(setupObj.b, { unsubscribe: disposeB })
+
+			const result = combine(a, b, setupObj.project)
+			const disposableResult = result.subscribe({ next: jest.fn() })
+
+			expect(disposeA).toHaveBeenCalledTimes(0)
+			expect(disposeB).toHaveBeenCalledTimes(0)
+
+			disposableResult.unsubscribe()
+
+			expect(disposeA).toHaveBeenCalledTimes(1)
+			expect(disposeB).toHaveBeenCalledTimes(1)
 		})
 	})
 })

@@ -2,3 +2,6 @@ node_modules
 lib
 coverage
 docs
+package-lock.json
+perf/emitter/emitter.spec.ts
+perf/source/source.spec.ts

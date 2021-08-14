@@ -125,7 +125,7 @@ describe('Emitter', () => {
 			}
 			const d = n.subscribe(observer)
 			expect(addEventListener).toHaveBeenCalledTimes(1)
-			expect(addEventListener).toHaveBeenCalledWith('click', jasmine.any(Function), options)
+			expect(addEventListener).toHaveBeenCalledWith('click', expect.any(Function), options)
 			// should also multicast
 			const d2 = n.subscribe(observer)
 			expect(addEventListener).toHaveBeenCalledTimes(1)

@@ -36,7 +36,14 @@ module.exports = {
 		'@typescript-eslint/await-thenable': 2,
 		'@typescript-eslint/ban-types': 2,
 		'@typescript-eslint/class-literal-property-style': 2,
-		'@typescript-eslint/naming-convention': 2,
+		'@typescript-eslint/naming-convention': [
+			2,
+			{
+				selector: 'parameter',
+				format: ['camelCase', 'PascalCase'],
+				leadingUnderscore: 'allow',
+			},
+		],
 		'@typescript-eslint/no-unused-vars': 2,
 		'@typescript-eslint/no-empty-interface': 0,
 	},

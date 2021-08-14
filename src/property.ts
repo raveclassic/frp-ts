@@ -23,6 +23,11 @@ declare module 'fp-ts/lib/HKT' {
 	}
 }
 
+type PropertyValue<A> = A extends Property<infer U> ? U : never
+type MapPropsToValues<PS extends [Property<unknown>, ...Property<unknown>[]]> = {
+	[K in keyof PS]: PropertyValue<PS[K]>
+}
+
 const memo2 = <A, B, C>(f: (a: A, b: B) => C): ((a: A, b: B) => C) => {
 	let hasValue = false
 	let lastA: A
@@ -144,7 +149,7 @@ export function fromObservable(env: Env): <A>(initial: A, ma: Observable<A>) => 
 		)
 }
 
-export function scan<M>(
+export function scan(
 	env: Env,
 ): <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Observable<A>) => [Property<B>, Subscription] {
 	const producer = newAtom(env)
@@ -199,4 +204,16 @@ export function sampleIO<F extends URIS>(
 export function sampleIO<F>(F: Functor<F>): <A, B>(property: Property<A>, sampler: HKT<F, B>) => HKT<F, IO<A>>
 export function sampleIO<F>(F: Functor<F>): <A, B>(property: Property<A>, sampler: HKT<F, B>) => HKT<F, IO<A>> {
 	return (property, sampler) => F.map(sampler, () => property.get)
+}
+
+export function combine<PS extends [Property<unknown>, ...Property<unknown>[]], B>(
+	...args: [...PS, (...values: MapPropsToValues<PS>) => B]
+): Property<B> {
+	const last = args.length - 1
+	const fas = args.slice(0, last) as PS
+	const project = args[last] as (...args: unknown[]) => B
+	return pipe(
+		sequence(fas),
+		map((as) => project(...as)),
+	)
 }
