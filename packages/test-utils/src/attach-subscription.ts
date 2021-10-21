@@ -1,14 +1,23 @@
+interface Observer<A> {
+	readonly next: (a: A) => void
+}
+
+interface Subscription {
+	readonly unsubscribe: () => void
+}
+
+interface Observable<A> {
+	readonly subscribe: (observer: Observer<A>) => Subscription
+}
+
 export const attachSubscription = <A, S extends Observable<A>>(source: S, subscription: Subscription): S => ({
 	...source,
 	subscribe: (l) => {
 		const sourceSubscription = source.subscribe(l)
-		const additionalSubscription = additional.subscribe({
-			next: () => {},
-		})
 		return {
 			unsubscribe: () => {
 				sourceSubscription.unsubscribe()
-				additionalSubscription.unsubscribe()
+				subscription.unsubscribe()
 			},
 		}
 	},

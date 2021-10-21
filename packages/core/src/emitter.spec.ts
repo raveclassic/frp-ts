@@ -1,7 +1,7 @@
 import { EventTarget, AddEventListenerOptions, newEmitter, fromEvent } from './emitter'
 import { constVoid } from 'fp-ts/lib/function'
 import { Time } from './clock'
-import { virtualClock } from '@frp-ts/test-utils'
+import { newVirtualClock } from '@frp-ts/test-utils'
 
 interface Event {
 	readonly type: string
@@ -34,10 +34,6 @@ const newEventTarget = (): TestEventTarget => {
 		},
 	}
 }
-
-// const fromEvent = emitter.fromEvent({
-// 	clock: newCounterClock(),
-// })
 
 describe('Emitter', () => {
 	describe('newEmitter', () => {
@@ -119,7 +115,7 @@ describe('Emitter', () => {
 				once: true,
 				passive: true,
 			}
-			const clock = virtualClock.newVirtualClock(0)
+			const clock = newVirtualClock(0)
 			const n = fromEvent({ clock })(target, 'click', options)
 			// should subscribe
 			expect(addEventListener).toHaveBeenCalledTimes(0)
