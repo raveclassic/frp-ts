@@ -43,16 +43,18 @@ export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscri
 	]
 }
 
-export const tap = <A>(f: (a: A) => unknown) => (fa: Property<A>): Property<A> => ({
-	get: fa.get,
-	subscribe: (observer) =>
-		fa.subscribe({
-			next: (t) => {
-				f(fa.get())
-				observer.next(t)
-			},
-		}),
-})
+export const tap =
+	<A>(f: (a: A) => unknown) =>
+	(fa: Property<A>): Property<A> => ({
+		get: fa.get,
+		subscribe: (observer) =>
+			fa.subscribe({
+				next: (t) => {
+					f(fa.get())
+					observer.next(t)
+				},
+			}),
+	})
 
 export const fromObservable = (env: Env): (<A>(initial: A, ma: Observable<A>) => [Property<A>, Subscription]) => {
 	const s = scan(env)
