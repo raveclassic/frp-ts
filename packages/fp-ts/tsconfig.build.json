@@ -3,6 +3,5 @@
   "compilerOptions": {
     "outDir": "./lib"
   },
-  "include": ["./src/index.ts"],
-  "exclude": ["./src/env.ts"]
+  "include": ["./src/index.ts"]
 }

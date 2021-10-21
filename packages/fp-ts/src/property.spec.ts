@@ -1,10 +1,31 @@
-import { Observable } from 'rxjs'
+import { Observable, map } from 'rxjs'
 
-import { Observer, observable, Property } from '@frp-ts/core'
-import { newAtom, testObservable } from './env'
+import { Observer, observable, Property, atom, clock, Env } from '@frp-ts/core'
 import { constVoid } from '@frp-ts/utils'
 import { ap, instance, sample, sampleIO } from './property'
 import { property } from './index'
+import { attachSubscription } from '@frp-ts/test-utils'
+
+import { Functor1 } from 'fp-ts/lib/Functor'
+
+const TEST_OBSERVABLE_URI = 'frp-ts/fp-ts/TestObservable'
+type TEST_OBSERVABLE_URI = typeof TEST_OBSERVABLE_URI
+declare module 'fp-ts/lib/HKT' {
+	interface URItoKind<A> {
+		readonly [TEST_OBSERVABLE_URI]: Observable<A>
+	}
+}
+
+export const testObservable: Functor1<TEST_OBSERVABLE_URI> = {
+	URI: TEST_OBSERVABLE_URI,
+	map: (fa, f) => fa.pipe(map(f)),
+}
+
+const defaultEnv: Env = {
+	clock: clock.newCounterClock(),
+}
+
+export const newAtom = atom.newAtom(defaultEnv)
 
 describe('sample', () => {
 	it('sample testObservable', () => {
@@ -16,7 +37,7 @@ describe('sample', () => {
 		})
 		const nextObserver = (n: number) => observer.next(n)
 		const unsubscribe = jest.fn(constVoid)
-		const source = observable.attach(newAtom(0), { subscribe: () => ({ unsubscribe }) })
+		const source = attachSubscription(newAtom(0), { unsubscribe })
 		const sampleObservable = sample(testObservable)
 		const sampled = sampleObservable(source, sampler)
 		const next = jest.fn()
@@ -94,7 +115,7 @@ describe('sample', () => {
 })
 
 describe('ap', () => {
-	it('should ap', () => {
+	it('aps', () => {
 		const f = (n: number) => n + 1
 		const g = (n: number) => n / 2
 		const fab = newAtom(f)
@@ -108,7 +129,7 @@ describe('ap', () => {
 		fab.set(f)
 		expect(b.get()).toBe(f(1))
 	})
-	it('should multicast', () => {
+	it('multicasts', () => {
 		const f = (n: number) => n + 1
 		const fab = newAtom(f)
 		const fa = newAtom(0)
@@ -130,7 +151,7 @@ describe('ap', () => {
 		s1.unsubscribe()
 		s2.unsubscribe()
 	})
-	it('should memo', () => {
+	it('memoizes', () => {
 		const f = jest.fn((n: number) => n + 1)
 		const fab = instance.of(f)
 		const fa = instance.of(0)
@@ -144,7 +165,7 @@ describe('ap', () => {
 })
 
 describe('sample', () => {
-	it('should sample testObservable', () => {
+	it('samples testObservable', () => {
 		let observer: Observer<number>
 		const disposeSampler = jest.fn()
 		const sampler = new Observable<number>((obs) => {
@@ -153,7 +174,7 @@ describe('sample', () => {
 		})
 		const nextObserver = (n: number) => observer.next(n)
 		const unsubscribe = jest.fn()
-		const source = observable.attach(newAtom(0), { subscribe: () => ({ unsubscribe }) })
+		const source = attachSubscription(newAtom(0), { unsubscribe })
 		const sampleObservable = property.sample(testObservable)
 		const sampled = sampleObservable(source, sampler)
 		const next = jest.fn()
@@ -190,7 +211,7 @@ describe('sample', () => {
 })
 
 describe('of', () => {
-	it('should store initial value and never notify', () => {
+	it('stores initial value and never notifies', () => {
 		const { get, subscribe } = instance.of(0)
 		const f = jest.fn()
 		const s = subscribe({ next: f })
