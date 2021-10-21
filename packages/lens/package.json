@@ -1,0 +1,35 @@
+{
+  "name": "@frp-ts/lens",
+  "version": "0.0.2",
+  "description": "Lenses for frp-ts atoms",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "author": "raveclassic",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raveclassic/frp-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raveclassic/frp-ts/issues"
+  },
+  "homepage": "https://github.com/raveclassic/frp-ts#readme",
+  "scripts": {
+    "typecheck": "tsc",
+    "clean": "rimraf lib",
+    "prebuild": "yarn clean",
+    "build": "tsc --project ./tsconfig.build.json",
+    "start": "yarn build --watch"
+  },
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@frp-ts/core": "^0.0.2"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.4"
+  }
+}

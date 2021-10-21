@@ -5,6 +5,6 @@ export { AddEventListenerOptions, EventListenerOptions, EventTarget, Emitter } f
 export * as observable from './observable'
 export { Observer, Subscription, Observable } from './observable'
 export * as atom from './atom'
-export { Lens, Atom } from './atom'
+export { Atom, Update } from './atom'
 export * as property from './property'
 export { Property } from './property'

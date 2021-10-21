@@ -1,12 +1,12 @@
 import { Atom, newAtom as getNewProducer } from './atom'
 
-import { attach, never, newObservable } from './observable'
+import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
 import { combine, flatten, Property, tap } from './property'
 import { Observable, Subject } from 'rxjs'
 import { Env, newCounterClock } from './clock'
 import { atom, property } from '.'
-import { virtualClock } from '@frp-ts/test-utils'
+import { newVirtualClock, attachSubscription } from '@frp-ts/test-utils'
 
 const env: Env = {
 	clock: newCounterClock(),
@@ -20,12 +20,8 @@ describe('property', () => {
 	it('combine', () => {
 		const disposeA = jest.fn(constVoid)
 		const disposeB = jest.fn(constVoid)
-		const a = attach(newAtom(0), {
-			subscribe: () => ({
-				unsubscribe: disposeA,
-			}),
-		})
-		const b = attach(newAtom(1), { subscribe: () => ({ unsubscribe: disposeB }) })
+		const a = attachSubscription(newAtom(0), { unsubscribe: disposeA })
+		const b = attachSubscription(newAtom(1), { unsubscribe: disposeB })
 		const { get: getC, subscribe: c } = combine(a, b, (...args) => args)
 		expect(getC()).toEqual([0, 1])
 		const listenerC = jest.fn()
@@ -144,7 +140,7 @@ describe('property', () => {
 		it('should dispose previous subscription to inner source on passed source emit', () => {
 			const a = newAtom(0)
 			const inner1Dispose = jest.fn()
-			const innerSource1 = attach(newAtom(''), { subscribe: () => ({ unsubscribe: inner1Dispose }) })
+			const innerSource1 = attachSubscription(newAtom(''), { unsubscribe: inner1Dispose })
 			const inner2 = newAtom('')
 			const [{ subscribe: b }] = flatten(combine(a, (a) => (a === 0 ? innerSource1 : inner2)))
 			const cb = jest.fn()
@@ -227,7 +223,7 @@ describe('property', () => {
 			sub.unsubscribe()
 		})
 		it('should notify combined on each different source emit in different ticks', () => {
-			const clock = virtualClock.newVirtualClock(0)
+			const clock = newVirtualClock(0)
 			const newProducer = getNewProducer({
 				clock,
 			})

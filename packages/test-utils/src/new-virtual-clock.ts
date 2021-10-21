@@ -1,4 +1,4 @@
-export interface VirtualClock {
+interface VirtualClock {
 	readonly now: () => number
 	readonly next: () => void
 }
