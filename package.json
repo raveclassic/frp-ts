@@ -1,9 +1,7 @@
 {
-  "name": "frp-ts",
+  "name": "@frp-ts/monorepo",
   "version": "0.0.2",
-  "description": "Functional reactive values-over-time",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "description": "Monorepo for @frp-ts project",
   "author": "raveclassic",
   "license": "MIT",
   "repository": {
@@ -14,52 +12,59 @@
     "url": "https://github.com/raveclassic/frp-ts/issues"
   },
   "homepage": "https://github.com/raveclassic/frp-ts#readme",
+  "workspaces": [
+    "./packages/core",
+    "./packages/fp-ts",
+    "./packages/test-utils",
+    "./packages/utils"
+  ],
   "scripts": {
     "prepublishOnly": "npm run test && npm run build",
-    "build": "tsc --project ./tsconfig.build.json",
-    "test": "npm run prettier && npm run eslint && npm run jest",
+    "typecheck": "lerna run typecheck",
+    "build": "lerna run build",
+    "test": "yarn prettier && yarn eslint && yarn jest",
     "eslint": "eslint . --ext .js,.ts,.json",
-    "eslint:fix": "eslint --fix . --ext .js,.ts,.json",
+    "eslint:fix": "eslint --fix . --ext .js,.ts,.json,.md",
     "jest": "jest --no-cache --collectCoverage=true",
     "jest:watch": "jest --watch",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
     "typedoc": "typedoc",
-    "version": "npm run typedoc && cp jekyll_config.yml docs/_config.yml && git add docs && standard-version -a"
+    "version": "yarn typedoc && cp jekyll_config.yml docs/_config.yml && git add docs && standard-version -a"
   },
+  "private": true,
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {},
-  "peerDependencies": {
-    "fp-ts": "^2.5.3"
-  },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
     "@commitlint/travis-cli": "^8.3.5",
-    "@types/benchmark": "^1.0.31",
+    "@octokit/core": "^3.5.1",
     "@types/jest": "^25.2.2",
-    "@typescript-eslint/eslint-plugin": "^2.33.0",
-    "@typescript-eslint/parser": "^2.33.0",
-    "benchmark": "^2.1.4",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
     "coveralls": "^3.0.13",
-    "eslint": "^7.0.0",
-    "fp-ts": "^2.6.1",
+    "eslint": "^7.32.0",
     "husky": "^4.2.5",
     "jest": "^26.0.1",
+    "lerna": "^3.22.1",
     "prettier": "^2.0.4",
     "rxjs": "^6.5.5",
     "standard-version": "^8.0.0",
     "ts-jest": "^26.0.0",
     "ts-node": "^8.10.1",
     "typedoc": "^0.17.7",
-    "typescript": "^3.9.2"
+    "typescript": "^4.4.3"
   },
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "resolutions": {
+    "tslib": "^2.1.0"
   }
 }

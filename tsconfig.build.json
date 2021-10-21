@@ -3,6 +3,5 @@
   "compilerOptions": {
     "noEmit": false
   },
-  "include": ["./src/index.ts"],
-  "exclude": ["**/__tests__", "dist", "perf", "docs"]
+  "exclude": ["**/*.spec.ts", "lib"]
 }

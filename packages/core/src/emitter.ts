@@ -18,7 +18,7 @@ export const newEmitter = (): Emitter => {
 			if (lastNotifiedTime !== time) {
 				lastNotifiedTime = time
 				isNotifying = true
-				for (const listener of listeners) {
+				for (const listener of Array.from(listeners)) {
 					listener.next(time)
 				}
 				isNotifying = false
@@ -110,17 +110,15 @@ export interface EventTarget {
 	readonly addEventListener: (event: string, handler: () => void, options?: AddEventListenerOptions | boolean) => void
 	readonly removeEventListener: (event: string, handler: () => void, options?: EventListenerOptions | boolean) => void
 }
-export const fromEvent = (e: Env) => (
-	target: EventTarget,
-	event: string,
-	options?: AddEventListenerOptions,
-): Observable<Time> =>
-	multicast({
-		subscribe: (listener) => {
-			const handler = () => listener.next(e.clock.now())
-			target.addEventListener(event, handler, options)
-			return {
-				unsubscribe: () => target.removeEventListener(event, handler, options),
-			}
-		},
-	})
+export const fromEvent =
+	(e: Env) =>
+	(target: EventTarget, event: string, options?: AddEventListenerOptions): Observable<Time> =>
+		multicast({
+			subscribe: (listener) => {
+				const handler = () => listener.next(e.clock.now())
+				target.addEventListener(event, handler, options)
+				return {
+					unsubscribe: () => target.removeEventListener(event, handler, options),
+				}
+			},
+		})

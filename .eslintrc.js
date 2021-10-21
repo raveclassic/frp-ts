@@ -36,8 +36,9 @@ module.exports = {
 		'@typescript-eslint/await-thenable': 2,
 		'@typescript-eslint/ban-types': 2,
 		'@typescript-eslint/class-literal-property-style': 2,
-		'@typescript-eslint/naming-convention': 2,
 		'@typescript-eslint/no-unused-vars': 2,
 		'@typescript-eslint/no-empty-interface': 0,
+		'@typescript-eslint/no-explicit-any': 2,
+		'no-restricted-syntax': [2, "TSAsExpression[typeAnnotation.typeName.name!='const']"],
 	},
 }
