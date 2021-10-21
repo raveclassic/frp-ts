@@ -68,12 +68,12 @@ module.exports = {
 				devDependencies: [
 					'./*.@(js|ts|tsx)',
 					'./scripts/**/*.@(js|ts|tsx)',
-					...lernaJson.packages.map((directory) => `${directory}/**/*.@(stories|mock|test).@(ts|tsx)`),
+					...lernaJson.packages.map((directory) => `${directory}/**/*.@(stories|mock|test|spec).@(ts|tsx)`),
 				],
 			},
 		],
 		'import/namespace': 0,
-		'unicorn/consistent-function-scoping': 2,
+		'unicorn/consistent-function-scoping': 0,
 		'unicorn/custom-error-definition': 2,
 		'unicorn/filename-case': [
 			2,

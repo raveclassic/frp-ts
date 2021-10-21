@@ -1,6 +1,7 @@
 module.exports = {
 	preset: 'ts-jest',
 	testEnvironment: 'node',
+	testRunner: 'jasmine2',
 	collectCoverage: false,
 	coverageThreshold: {
 		global: {
@@ -11,7 +12,7 @@ module.exports = {
 		},
 	},
 	collectCoverageFrom: ['./**/src/**/*.ts'],
-	coveragePathIgnorePatterns: ['env.ts', 'index.ts'],
+	coveragePathIgnorePatterns: ['index.ts'],
 	testMatch: ['./**/*.spec.ts'],
 	testPathIgnorePatterns: ['/coverage/', '/node_modules/', '/lib/'],
 }

@@ -14,7 +14,7 @@ const env: Env = {
 const newLensedAtom = lensedAtom.newLensedAtom(env)
 
 describe('view', () => {
-	it('should view', () => {
+	it('views', () => {
 		const a = newLensedAtom({ foo: 0 })
 		const b = a.view(prop('foo'))
 		const o = {
@@ -27,21 +27,21 @@ describe('view', () => {
 		expect(o.next).toHaveBeenCalledTimes(1)
 		b.set(2)
 	})
-	it('should get', () => {
+	it('gets', () => {
 		const a = newLensedAtom({ foo: 0 })
 		const b = a.view(prop('foo'))
 		expect(b.get()).toEqual(0)
 		a.set({ foo: 1 })
 		expect(b.get()).toEqual(1)
 	})
-	it('should set', () => {
+	it('sets', () => {
 		const a = newLensedAtom({ foo: 0 })
 		const b = a.view(prop('foo'))
 		b.set(1)
 		expect(b.get()).toEqual(1)
 		expect(a.get()).toEqual({ foo: 1 })
 	})
-	it('should notify', () => {
+	it('notifies', () => {
 		const a = newLensedAtom({ foo: 0 })
 		const b = a.view(prop('foo'))
 		const bo = {
@@ -61,7 +61,7 @@ describe('view', () => {
 		expect(ao.next).toHaveBeenCalledTimes(2)
 		expect(bo.next).toHaveBeenCalledTimes(2)
 	})
-	it('should compose', () => {
+	it('composes', () => {
 		interface Foo {
 			foo: {
 				bar: number
@@ -94,7 +94,7 @@ describe('view', () => {
 		expect(b.get()).toEqual(2)
 		expect(a.get()).toEqual({ foo: { bar: 2 } })
 	})
-	it('should modify', () => {
+	it('modifies', () => {
 		const a = newLensedAtom({ foo: 0 })
 		const b = a.view(prop('foo'))
 		const ao = {

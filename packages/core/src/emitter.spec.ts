@@ -29,7 +29,7 @@ const newEventTarget = (): TestEventTarget => {
 		dispatchEvent(event: Event) {
 			const stored = storage.get(event.type)
 			if (stored) {
-				stored.forEach((listener) => listener())
+				for (const listener of stored) listener()
 			}
 		},
 	}
@@ -37,7 +37,7 @@ const newEventTarget = (): TestEventTarget => {
 
 describe('Emitter', () => {
 	describe('newEmitter', () => {
-		it('should multicast', () => {
+		it('multicasts', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
 			const f2 = jest.fn()
@@ -47,7 +47,7 @@ describe('Emitter', () => {
 			expect(f1).toHaveBeenCalledWith(0)
 			expect(f2).toHaveBeenCalledWith(0)
 		})
-		it('should not emit if notified within the same tick', () => {
+		it('does not emit if notified within the same tick', () => {
 			const e = newEmitter()
 			const f = jest.fn()
 			e.subscribe({ next: f })
@@ -56,7 +56,7 @@ describe('Emitter', () => {
 			e.next(0)
 			expect(f).toHaveBeenCalledTimes(1)
 		})
-		it('should remove subscriptions immediately even while notifying', () => {
+		it('removes subscriptions immediately even while notifying', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
 			const s1 = jest.fn(e.subscribe({ next: f1 }).unsubscribe)
@@ -76,7 +76,7 @@ describe('Emitter', () => {
 			expect(f3).toHaveBeenCalledTimes(1)
 			expect(s3).toHaveBeenCalledTimes(0)
 		})
-		it('should not notify new subscriptions added immediately while notifying', () => {
+		it('does not notify new subscriptions added immediately while notifying', () => {
 			const e = newEmitter()
 			const f1 = jest.fn()
 			const s1 = jest.fn(e.subscribe({ next: f1 }).unsubscribe)
@@ -106,7 +106,7 @@ describe('Emitter', () => {
 		})
 	})
 	describe('fromEvent', () => {
-		it('should subscribe', () => {
+		it('subscribes', () => {
 			const target = newEventTarget()
 			const addEventListener = jest.spyOn(target, 'addEventListener')
 			const removeEventListener = jest.spyOn(target, 'removeEventListener')

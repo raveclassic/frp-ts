@@ -1,5 +1,5 @@
-import { Observable, Subscription, subscriptionNone } from './observable'
-import { newEmitter } from './emitter'
+import { never, Observable, Subscription, subscriptionNone } from './observable'
+import { mergeMany, newEmitter } from './emitter'
 import { newAtom } from './atom'
 import { Env, Time } from './clock'
 import { memoMany } from '@frp-ts/utils'
@@ -88,17 +88,11 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	// eslint-disable-next-line no-restricted-syntax
 	const properties: Properties = args.slice(0, args.length - 1) as never
 	const memoProject = memoMany(project)
+	const get = () => memoProject(...properties.map((property) => property.get()))
+	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
+	const subscribe = doesNotEmit ? never.subscribe : mergeMany(properties).subscribe
 	return {
-		get: () => memoProject(properties.map((property) => property.get())),
-		subscribe: (observer) => {
-			const subscriptions = properties.map((property) => property.subscribe(observer))
-			return {
-				unsubscribe: () => {
-					for (let i = 0, l = subscriptions.length; i < l; i++) {
-						subscriptions[i].unsubscribe()
-					}
-				},
-			}
-		},
+		get,
+		subscribe,
 	}
 }

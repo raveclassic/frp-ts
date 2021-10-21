@@ -7,17 +7,17 @@ const env: Env = {
 const newAtom = atom.newAtom(env)
 
 describe('atom', () => {
-	it('should store initial value', () => {
+	it('stores initial value', () => {
 		const p = newAtom(0)
 		expect(p.get()).toBe(0)
 	})
-	it('should update value', () => {
+	it('updates value', () => {
 		const p = newAtom(0)
 		expect(p.get()).toBe(0)
 		p.set(1)
 		expect(p.get()).toBe(1)
 	})
-	it('should notify about changes', () => {
+	it('notifies about changes', () => {
 		const { set, subscribe } = newAtom(0)
 		const f = jest.fn()
 		const s = subscribe({ next: f })
@@ -26,7 +26,7 @@ describe('atom', () => {
 		expect(f).toHaveBeenCalledTimes(1)
 		s.unsubscribe()
 	})
-	it('should skip duplicates', () => {
+	it('skips duplicates', () => {
 		const { set, subscribe } = newAtom(0)
 		const f = jest.fn()
 		const s = subscribe({ next: f })
@@ -36,7 +36,7 @@ describe('atom', () => {
 		s.unsubscribe()
 	})
 	describe('modify', () => {
-		it('should apply updates in batch', () => {
+		it('applies updates in batch', () => {
 			const a = newAtom(0)
 			const o = {
 				next: jest.fn(),
