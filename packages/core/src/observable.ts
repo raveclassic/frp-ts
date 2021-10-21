@@ -1,6 +1,6 @@
 // minimal required interface adhering https://github.com/tc39/proposal-observable
 
-import { constVoid } from 'fp-ts/lib/function'
+import { constVoid } from '@frp-ts/utils'
 
 export interface Observer<A> {
 	readonly next: (a: A) => void

@@ -11,6 +11,5 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true
   },
-  "include": ["src", "perf"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "lib", "coverage", "node_modules"]
 }

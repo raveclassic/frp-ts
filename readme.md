@@ -226,9 +226,13 @@ const mike = newAtom({ clock: newCounterClock() })({ name: 'Mike', age: 20 })
 // for example a form with two inputs?
 // if we want to stay immutable we would need to deal with nesting
 // each time we need to update nested value as well as read it:
-const setName = (name: string) => (person: Person): Person => ({ ...person, name })
+const setName =
+	(name: string) =>
+	(person: Person): Person => ({ ...person, name })
 const getName = (person: Person): string => person.name
-const setAge = (age: number) => (person: Person): Person => ({ ...person, age })
+const setAge =
+	(age: number) =>
+	(person: Person): Person => ({ ...person, age })
 const getAge = (person: Person): number => person.age
 
 // then somewhere further in some kind of callback

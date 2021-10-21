@@ -1,6 +1,13 @@
-import { newAtom } from './env'
-import { Lens } from '../atom'
+import { Lens } from './atom'
+import { Env, newCounterClock } from './clock'
+import { atom } from '.'
 
+const env: Env = {
+	clock: newCounterClock(),
+}
+const newAtom = atom.newAtom(env)
+
+// eslint-disable-next-line @typescript-eslint/ban-types
 const prop = <O extends object, K extends keyof O>(key: K): Lens<O, O[K]> => ({
 	get: (s) => s[key],
 	set: (a) => (s) => ({ ...s, [key]: a }),

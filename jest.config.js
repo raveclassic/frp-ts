@@ -10,5 +10,8 @@ module.exports = {
 			statements: 100,
 		},
 	},
-	testPathIgnorePatterns: ['node_modules', 'perf'],
+	collectCoverageFrom: ['./**/src/**/*.ts'],
+	coveragePathIgnorePatterns: ['env.ts', 'index.ts'],
+	testMatch: ['./**/*.spec.ts'],
+	testPathIgnorePatterns: ['/coverage/', '/node_modules/', '/lib/'],
 }
