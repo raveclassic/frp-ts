@@ -14,9 +14,9 @@ described by [Conal Elliot](http://conal.net/) in his [paper](http://conal.net/p
 
 The implementation:
 
--   is a push-pull model with atomic updates (means it is glitch-free, no [diamond shape problem](https://stackoverflow.com/a/56523673/1961479)).
--   follows [calmm architecture](https://github.com/calmm-js/documentation/blob/master/introduction-to-calmm.md).
--   is based on and is ready to be used with the gorgeous [fp-ts](https://github.com/gcanti/fp-ts).
+- is a push-pull model with atomic updates (means it is glitch-free, no [diamond shape problem](https://stackoverflow.com/a/56523673/1961479));
+- follows [calmm architecture](https://github.com/calmm-js/documentation/blob/master/introduction-to-calmm.md);
+- is strictly typed.
 
 **Table of contents**
 
