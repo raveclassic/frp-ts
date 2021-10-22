@@ -18,9 +18,9 @@ The implementation:
 
 -   [Motivation](#motivation)
 -   [Design](#api)
--   [Deep Dive](#deep--dive)
+-   [Deep Dive](#deep-dive)
+-   [Advanced](#advanced)
 -   [Installation & Setup](#installation--setup)
--   [Integrations](#integrations)
 -   [Changelog](#changelog)
 -   [API Reference](https://raveclassic.github.io/frp-ts/)
 
@@ -37,7 +37,7 @@ Such values are _not_ described by `Behavior`s as a function of time from classi
 
 On the other hand the library doesn't try to replace existing implementations of `Observer` pattern such as [rxjs](https://rxjs.dev/), [most](https://mostcore.readthedocs.io/en/latest/) or others.
 Instead, it adopts some advanced FP concepts like `HKT` (higher kinded types) and `tagless final` to allow using properties and atoms with any implementation of `Observable`.
-This is where [fp-ts](https://gcanti.github.io/fp-ts/) comes into play, but more on that later.
+This is where [fp-ts](https://gcanti.github.io/fp-ts/) comes into play.
 
 So if we refer to the paper, it highlights two main concepts for working with reactive data-driven computation: value extraction and change notification:
 
@@ -79,10 +79,10 @@ It may be the unix epoch time, the time from start of the program or just an inc
 `frp-ts` ships a default simple counter clock:
 
 ```typescript
-import { newCounterClock } from 'frp-ts/lib/clock'
+import { clock } from '@frp-ts/core'
 
 // we create a new counter clock
-const counterClock = newCounterClock()
+const counterClock = clock.newCounterClock()
 console.log(counterClock.now()) // logs 0
 console.log(counterClock.now()) // logs 1
 console.log(counterClock.now()) // logs 2
@@ -116,14 +116,13 @@ just a readonly `Atom` and mutability is required for the next example.
 So, `Atom` adds mutability to `Property`. Let's create one:
 
 ```typescript
-import { newAtom } from 'frp-ts/lib/atom'
-import { newCounterClock } from 'frp-ts/lib/clock'
+import { atom, clock } from '@frp-ts/core'
 
 // We create an atom that will allow us to get values, update its value manually and listen to updates.
 // As mentioned earlier a `Atom` depends on a `Clock`
 // so wee need to pass it directly as part of environment
 // Yeah, that's a lot of boilerplate you may say, but more on that later. For now let's just pass the clock and initial value.
-const counter = newAtom({ clock: newCounterClock() })(0)
+const counter = atom.newAtom({ clock: clock.newCounterClock() })(0)
 
 // get the last value
 console.log(counter.get()) // logs '0'
@@ -168,6 +167,8 @@ Sometimes we don't want to expose mutable access to our state and `Property` is 
 Now let's update our counter to restrict arbitrary mutations of its state:
 
 ```typescript
+import { clock } from '@frp-ts/core'
+
 // we'll need an interface to describe our counter more precisely
 interface Counter extends Property<number> {
 	readonly inc: () => void
@@ -177,7 +178,7 @@ interface Counter extends Property<number> {
 const newCounter = (initial: number): Counter => {
 	// here we define local mutable state
 	// again, we won't need to set up newAtom each time this way, more on this later
-	const state = newAtom({ clock: newCounterClock() })(initial)
+	const state = newAtom({ clock: clock.newCounterClock() })(initial)
 	// expose readonly API
 	const inc = () => state.modify((n) => n + 1)
 	return {
@@ -194,10 +195,17 @@ counter.inc()
 // note that no there's no direct access to internal mutable state of our counter anymore
 ```
 
+## Advanced
+
+This section covers advanced use cases covering lenses and integration with [fp-ts](https://gcanti.github.io/fp-ts/).
+
 ### `Lens`
 
-Besides being able to hold state and notify about state changes `Atom` is capable of another cool feature - lensing.
-Although lenses are not a part of `frp-ts`, `Atom` supports them via an interface.
+Lensing is a feature that allows easier read/write access to deep nested structures stored in atoms.
+
+Package `@frp-ts/lens` includes a `LensedAtom` interface which extends `Atom` with a `view` method.
+Although lenses are not a part of `@frp-ts/lens`, `LensedAtom` supports them via an interface.
+
 So `Lens` is a combination of a getter and an immutable setter. Its interface is pretty simple:
 
 ```typescript
@@ -212,14 +220,15 @@ Let's try to build some example with lenses.
 
 ```typescript
 // let's define a nested structure
-import { newCounterClock } from 'frp-ts/lib/clock'
-import { newAtom, Lens } from 'frp-ts/lib/atom'
+import { clock } from '@frp-ts/core'
+import { newLensedAtom, Lens } from '@frp-ts/lens'
+
 interface Person {
 	readonly name: string
 	readonly age: number
 }
 // and create a person
-const mike = newAtom({ clock: newCounterClock() })({ name: 'Mike', age: 20 })
+const mike = newLensedAtom({ clock: clock.newCounterClock() })({ name: 'Mike', age: 20 })
 
 // now what if we have a user interface that allows changing person's name and age,
 // for example a form with two inputs?
@@ -265,30 +274,44 @@ console.log(mikeName.get()) // logs 'Patrik'
 ```
 
 Cool, but that's not all.
-As `view` method returns an `Atom`, then we can call `view` multiple times in a chain, and it will result in a "lens composition"!
+As `view` method returns a `LensedAtom`, then we can call `view` multiple times in a chain, and it will result in a "lens composition"!
 This means that we can nest reads and writes infinitely in a safe and predictable manner.
 
-`frp-ts` does not ship with any `Lens` implementation leaving it for an external library.
+As mentioned above, `@frp-ts/lens` does not ship with a `Lens` implementation leaving it for an external library.
 One of them is [monocle-ts](https://gcanti.github.io/monocle-ts/) and you can always build an adapter
 around any other implementation which is not compatible with the supported interface.
 
+### `fp-ts`
+
+`fp-ts` is a purely functional library that implements a "Light-weight Higher-kinded Polymorphism" in TypeScript.
+This allows for many advanced FP techniques such as HKT (higher-kinded types).
+
+The package `@frp-ts/fp-ts` exports an instance of [Applicative](https://gcanti.github.io/fp-ts/modules/Applicative.ts.html) for `Property` and `pipeable` top-level functions.
+It also exports some extra helpers for working with the library (e.g. `map`, `ap`, `sequenceT`, `sample`, `sampleIO` etc.).
+Please refer to the package documentation for more info.
+
 ## Installation & Setup
 
-`frp-ts` is available as an `npm` package and requires `fp-ts` as peer dependency:
+`frp-ts` is available as a set of `npm` packages, neither of which require any external peer dependencies:
 
-```
-npm install frp-ts fp-ts
-```
+### Core
 
-or
+The core package (`@frp-ts/core`) contains a minimal API required for working with the properties and atoms.
 
-```
-yarn add frp-ts fp-ts
-```
+### Lens
 
-After installation the library needs to be sort of set up.
+The lens package (`@frp-ts/core`) contains APIs for working with lenses.
+
+### Fp-ts
+
+The fp-ts integration package (`@frp-ts/fp-ts`) contains an integration layer with `fp-ts` including `HKT` registration and helpers for working with higher-kinded types.
+
+---
+
+After installation of the core, the library needs to be sort of set up.
 We've already seen that akward creation of `Clock` before we're able to use `newAtom`.
-That's indeed awkward and generally not should be done. We should always have a single global clock for an application.
+That's indeed awkward and generally not should be done.
+Instead, it's recommended to prepare the library before using it and have a single global clock for an application.
 It may be created as a part of the setup required for some parts of this library including producers -
 some helpers also require `Clock`.
 
@@ -298,8 +321,7 @@ So in general there should be created a module exporting parametrized functions:
 
 ```typescript
 // /src/utils.ts
-import { newCounterClock } from 'frp-ts/lib/clock'
-import { newAtom as getNewAtom } from 'frp-ts/lib/atom'
+import { clock, atom, observable, emitter } from '@frp-ts/core'
 import {
 	scan as getScan,
 	fromObservable as getFromObservable,
@@ -309,23 +331,15 @@ import {
 import { Env } from 'frp-ts/lib/clock'
 
 const e: Env = {
-	clock: newCounterClock(),
+	clock: clock.newCounterClock(),
 }
-export const newProducer = getNewAtom(e)
-export const scan = getScan(e)
-export const fromObservable = getFromObservable(e)
-export const sample = getSample(e)
-export const sampleIO = getSampleIO(e)
+export const newAtom = atom.newAtome(e)
+export const fromEvent = emitter.fromEvent(e)
+export const fromObservable = observable.fromObservable(e)
+export const scan = observable.scan(e)
 ```
 
 Now everything is ready, and the functions can be used directly from this module.
-
-## Integrations
-
-### `fp-ts`
-
-The library is deeply integrated with [fp-ts](https://github.com/gcanti/fp-ts/).
-It provides an instance of [Applicative](https://gcanti.github.io/fp-ts/modules/Applicative.ts.html) for `Property` and `pipeable` top-level functions.
 
 ## Changelog
 
