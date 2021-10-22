@@ -4,6 +4,7 @@
   "description": "Utilities for @frp-ts project",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "typedocMain": "./src/index.ts",
   "author": "raveclassic",
   "license": "MIT",
   "repository": {

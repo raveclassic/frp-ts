@@ -1,10 +1,18 @@
 {
-  "inputFiles": ["./src/index.ts"],
-  "mode": "modules",
+  "name": "frp-ts",
+  "entryPointStrategy": "Packages",
+  "entryPoints": [
+    "./packages/core",
+    "./packages/fp-ts",
+    "./packages/lens",
+    "./packages/test-utils",
+    "./packages/utils"
+  ],
   "out": "docs",
-  "exclude": ["**/*.spec.ts", "perf/**/*.ts", "src/tests/**/*.ts"],
-  "excludeExternals": true,
-  "excludeNotExported": true,
+  "exclude": ["./packages/**/*.spec.ts"],
+  "excludeExternals": false,
+  "excludeInternal": true,
   "excludePrivate": true,
-  "includeVersion": true
+  "excludeNotDocumented": false,
+  "excludeProtected": true
 }

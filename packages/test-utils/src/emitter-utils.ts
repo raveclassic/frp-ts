@@ -1,12 +1,12 @@
-interface Observer<A> {
+export interface Observer<A> {
 	readonly next: (a: A) => void
 }
 
-interface Subscription {
+export interface Subscription {
 	readonly unsubscribe: () => void
 }
 
-interface Observable<A> {
+export interface Observable<A> {
 	readonly subscribe: (observer: Observer<A>) => Subscription
 }
 

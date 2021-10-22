@@ -4,6 +4,7 @@
   "description": "Bindings to fp-ts library",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "typedocMain": "./src/index.ts",
   "author": "raveclassic",
   "license": "MIT",
   "repository": {
