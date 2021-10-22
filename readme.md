@@ -16,6 +16,7 @@ The implementation:
 
 **Table of contents**
 
+-   [Updates](#updates)
 -   [Motivation](#motivation)
 -   [Design](#api)
 -   [Deep Dive](#deep-dive)
@@ -23,6 +24,10 @@ The implementation:
 -   [Installation & Setup](#installation--setup)
 -   [Changelog](#changelog)
 -   [API Reference](https://raveclassic.github.io/frp-ts/)
+
+## Updates
+
+Please refer to the [Updates](./UPDATES.md) section for more info on the changes in the API.
 
 ## Motivation
 
