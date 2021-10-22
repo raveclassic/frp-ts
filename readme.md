@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.com/raveclassic/frp-ts.svg?branch=master)](https://travis-ci.com/raveclassic/frp-ts)
 [![Coverage Status](https://coveralls.io/repos/github/raveclassic/frp-ts/badge.svg?branch=master)](https://coveralls.io/github/raveclassic/frp-ts?branch=master)
-[![Dependencies](https://david-dm.org/raveclassic/frp-ts.svg)](https://david-dm.org/raveclassic/frp-ts)
 
 ## Overview
 
