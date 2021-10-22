@@ -1,7 +1,8 @@
-import { EventTarget, AddEventListenerOptions, newEmitter, fromEvent } from './emitter'
+import { EventTarget, AddEventListenerOptions, newEmitter, fromEvent, mergeMany } from './emitter'
 import { constVoid } from 'fp-ts/lib/function'
 import { Time } from './clock'
-import { newVirtualClock } from '@frp-ts/test-utils'
+import { never } from './observable'
+import { clockUtils } from '@frp-ts/test-utils'
 
 interface Event {
 	readonly type: string
@@ -115,7 +116,7 @@ describe('Emitter', () => {
 				once: true,
 				passive: true,
 			}
-			const clock = newVirtualClock(0)
+			const clock = clockUtils.newVirtualClock(0)
 			const n = fromEvent({ clock })(target, 'click', options)
 			// should subscribe
 			expect(addEventListener).toHaveBeenCalledTimes(0)
@@ -152,5 +153,26 @@ describe('Emitter', () => {
 			d.unsubscribe()
 			expect(removeEventListener).toHaveBeenCalledTimes(1)
 		})
+	})
+})
+
+describe('mergeMany', () => {
+	it('never emits for 0 arguments', () => {
+		expect(mergeMany([])).toBe(never)
+	})
+	it('solves diamond-shape problem', () => {
+		const a = newEmitter()
+		const b = newEmitter()
+		const c = newEmitter()
+		const result = mergeMany([a, b, c])
+		const cb = jest.fn()
+		result.subscribe({
+			next: cb,
+		})
+		// simulate several events on one tick, 1 is the Time
+		a.next(1)
+		b.next(1)
+		c.next(1)
+		expect(cb).toBeCalledTimes(1)
 	})
 })

@@ -6,7 +6,7 @@ import { combine, flatten, Property, tap } from './property'
 import { Observable, Subject } from 'rxjs'
 import { Env, newCounterClock } from './clock'
 import { atom, property } from '.'
-import { newVirtualClock, attachSubscription } from '@frp-ts/test-utils'
+import { clockUtils, emitterUtils } from '@frp-ts/test-utils'
 
 const env: Env = {
 	clock: newCounterClock(),
@@ -20,8 +20,8 @@ describe('combine', () => {
 	it('combines', () => {
 		const disposeA = jest.fn(constVoid)
 		const disposeB = jest.fn(constVoid)
-		const a = attachSubscription(newAtom(0), { unsubscribe: disposeA })
-		const b = attachSubscription(newAtom(1), { unsubscribe: disposeB })
+		const a = emitterUtils.attachSubscription(newAtom(0), { unsubscribe: disposeA })
+		const b = emitterUtils.attachSubscription(newAtom(1), { unsubscribe: disposeB })
 		const { get: getC, subscribe: c } = combine(a, b, (...args) => args)
 		expect(getC()).toEqual([0, 1])
 		const listenerC = jest.fn()
@@ -140,7 +140,7 @@ describe('flatten', () => {
 	it('disposes previous subscription to inner source on passed source emit', () => {
 		const a = newAtom(0)
 		const inner1Dispose = jest.fn()
-		const innerSource1 = attachSubscription(newAtom(''), { unsubscribe: inner1Dispose })
+		const innerSource1 = emitterUtils.attachSubscription(newAtom(''), { unsubscribe: inner1Dispose })
 		const inner2 = newAtom('')
 		const [{ subscribe: b }] = flatten(combine(a, (a) => (a === 0 ? innerSource1 : inner2)))
 		const cb = jest.fn()
@@ -225,7 +225,7 @@ describe('diamond flow', () => {
 		sub.unsubscribe()
 	})
 	it('notifies combined on each different source emit in different ticks', () => {
-		const clock = newVirtualClock(0)
+		const clock = clockUtils.newVirtualClock(0)
 		const newProducer = atom.newAtom({
 			clock,
 		})
