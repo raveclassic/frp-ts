@@ -1,5 +1,5 @@
 {
-  "name": "@frp-ts/monorepo",
+  "name": "frp-ts",
   "version": "0.0.2",
   "description": "Monorepo for @frp-ts project",
   "author": "raveclassic",
@@ -31,8 +31,8 @@
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
-    "typedoc": "typedoc",
-    "version": "yarn typedoc && cp jekyll_config.yml docs/_config.yml && git add docs && standard-version -a"
+    "typedoc": "typedoc && cp jekyll_config.yml docs/_config.yml",
+    "version": "yarn typedoc && git add docs && standard-version -a"
   },
   "private": true,
   "publishConfig": {

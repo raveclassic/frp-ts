@@ -4,6 +4,7 @@
   "description": "Lenses for frp-ts atoms",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "typedocMain": "./src/index.ts",
   "author": "raveclassic",
   "license": "MIT",
   "repository": {

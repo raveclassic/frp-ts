@@ -74,8 +74,8 @@ export function scan(
 	}
 }
 
-type PropertyValue<Target> = Target extends Property<infer A> ? A : never
-type MapPropertiesToValues<Target extends readonly Property<unknown>[]> = {
+export type PropertyValue<Target> = Target extends Property<infer A> ? A : never
+export type MapPropertiesToValues<Target extends readonly Property<unknown>[]> = {
 	readonly [Index in keyof Target]: PropertyValue<Target[Index]>
 }
 export const combine = <Properties extends readonly Property<unknown>[], Result>(
