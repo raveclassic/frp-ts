@@ -3,3 +3,4 @@ lib
 coverage
 docs
 .eslintrc.js
+*.md
