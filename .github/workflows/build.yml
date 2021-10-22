@@ -15,6 +15,9 @@ jobs:
     # Checkout code
     steps:
       - uses: actions/checkout@v2
+        with:
+          # we actually need "github.event.pull_request.commits + 1" commit
+          fetch-depth: 0
 
       # Setup node
       - uses: actions/setup-node@v1
@@ -27,11 +30,11 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-node-v${{ env.NODE_VERSION }}-${{ hashFiles('**/yarn.lock') }}
 
-      # Commitlint
-      - run: npx commitlint --from HEAD~1 --to HEAD --verbose
-
       # Install dependencies
       - run: yarn install --frozen-lockfile
+
+      # Lint
+      - run: npx commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
 
       # Typecheck
       - run: yarn typecheck
