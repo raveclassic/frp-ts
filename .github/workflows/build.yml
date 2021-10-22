@@ -36,11 +36,11 @@ jobs:
       # Lint
       - run: npx commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
 
-      # Typecheck
-      - run: yarn typecheck
-
       # Build
       - run: yarn build
+
+      # Typecheck
+      - run: yarn typecheck
 
       # Test
       - run: yarn test
