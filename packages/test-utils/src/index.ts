@@ -1,2 +1,2 @@
-export { newVirtualClock } from './new-virtual-clock'
-export { attachSubscription } from './attach-subscription'
+export * as clockUtils from './clock-utils'
+export * as emitterUtils from './emitter-utils'

@@ -32,7 +32,7 @@ export const instance: Applicative1<URI> = {
 	of: (a) => ({ get: () => a, subscribe: observable.never.subscribe }),
 	ap: (fab, fa) => ({
 		get: () => memoApply(fab.get(), fa.get()),
-		subscribe: emitter.merge(fab, fa).subscribe,
+		subscribe: emitter.mergeMany([fab, fa]).subscribe,
 	}),
 }
 

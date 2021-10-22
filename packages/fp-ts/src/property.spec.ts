@@ -4,7 +4,7 @@ import { Observer, observable, Property, atom, clock, Env } from '@frp-ts/core'
 import { constVoid } from '@frp-ts/utils'
 import { ap, instance, sample, sampleIO } from './property'
 import { property } from './index'
-import { attachSubscription } from '@frp-ts/test-utils'
+import { emitterUtils } from '@frp-ts/test-utils'
 
 import { Functor1 } from 'fp-ts/lib/Functor'
 
@@ -37,7 +37,7 @@ describe('sample', () => {
 		})
 		const nextObserver = (n: number) => observer.next(n)
 		const unsubscribe = jest.fn(constVoid)
-		const source = attachSubscription(newAtom(0), { unsubscribe })
+		const source = emitterUtils.attachSubscription(newAtom(0), { unsubscribe })
 		const sampleObservable = sample(testObservable)
 		const sampled = sampleObservable(source, sampler)
 		const next = jest.fn()
@@ -174,7 +174,7 @@ describe('sample', () => {
 		})
 		const nextObserver = (n: number) => observer.next(n)
 		const unsubscribe = jest.fn()
-		const source = attachSubscription(newAtom(0), { unsubscribe })
+		const source = emitterUtils.attachSubscription(newAtom(0), { unsubscribe })
 		const sampleObservable = property.sample(testObservable)
 		const sampled = sampleObservable(source, sampler)
 		const next = jest.fn()

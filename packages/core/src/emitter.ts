@@ -1,5 +1,5 @@
 import { Env, Time } from './clock'
-import { Observable, Observer, subscriptionNone } from './observable'
+import { never, Observable, Observer, subscriptionNone } from './observable'
 
 /**
  * Synchronous time-based emitter
@@ -69,37 +69,13 @@ const multicast = (a: Observable<Time>): Observable<Time> => {
 	}
 }
 
-export const merge = (a: Observable<Time>, b: Observable<Time>): Observable<Time> => {
-	let lastNotifiedTime = Infinity
-	return multicast({
-		subscribe: (listener) => {
-			const sa = a.subscribe({
-				next: (t) => {
-					if (t !== lastNotifiedTime) {
-						lastNotifiedTime = t
-						listener.next(t)
-					}
-				},
-			})
-			const sb = b.subscribe({
-				next: (t) => {
-					if (t !== lastNotifiedTime) {
-						lastNotifiedTime = t
-						listener.next(t)
-					}
-				},
-			})
-			return {
-				unsubscribe: () => {
-					sa.unsubscribe()
-					sb.unsubscribe()
-				},
-			}
-		},
-	})
-}
-
 export const mergeMany = (observables: readonly Observable<Time>[]): Observable<Time> => {
+	if (observables.length === 0) {
+		return never
+	}
+	if (observables.length === 1) {
+		return multicast(observables[0])
+	}
 	let lastNotifiedTime = Infinity
 	return multicast({
 		subscribe: (listener) => {
