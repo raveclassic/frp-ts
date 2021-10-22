@@ -44,3 +44,6 @@ jobs:
 
       # Test
       - run: yarn test
+
+      # Coveralls
+      - run: yarn coveralls
