@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/raveclassic/frp-ts.svg?branch=master)](https://travis-ci.com/raveclassic/frp-ts)
 [![Coverage Status](https://coveralls.io/repos/github/raveclassic/frp-ts/badge.svg?branch=master)](https://coveralls.io/github/raveclassic/frp-ts?branch=master)
 
-**This is the documentation for the upcomfing v1.0.0.**
+**This is the documentation for the upcoming v1.0.0.**
 
 **Documentation for v0.x.x is available [here](https://github.com/raveclassic/frp-ts/tree/0.x.x).**
 
