@@ -45,5 +45,7 @@ jobs:
       # Test
       - run: yarn test
 
-      # Coveralls
-      - run: yarn coveralls
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
