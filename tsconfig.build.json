@@ -3,5 +3,5 @@
   "compilerOptions": {
     "noEmit": false
   },
-  "exclude": ["**/*.spec.ts", "lib"]
+  "exclude": ["**/*.spec.ts", "**/*.spec.tsx", "lib"]
 }
