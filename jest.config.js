@@ -13,6 +13,6 @@ module.exports = {
 	},
 	collectCoverageFrom: ['./**/src/**/*.ts'],
 	coveragePathIgnorePatterns: ['index.ts'],
-	testMatch: ['./**/*.spec.ts'],
+	testMatch: ['./**/*.spec.(ts|tsx)'],
 	testPathIgnorePatterns: ['/coverage/', '/node_modules/', '/lib/'],
 }
