@@ -299,6 +299,11 @@ The package `@frp-ts/fp-ts` exports an instance of [Applicative](https://gcanti.
 It also exports some extra helpers for working with the library (e.g. `map`, `ap`, `sequenceT`, `sample`, `sampleIO` etc.).
 Please refer to the package documentation for more info.
 
+### React
+
+`@frp-ts/react` package provides a React hook to work with `Property` values.
+The hook immdetiately returns current value of a `Property` and subscribes to updates via `useEffect`.
+
 ## Installation & Setup
 
 `frp-ts` is available as a set of `npm` packages, neither of which require any external peer dependencies:
