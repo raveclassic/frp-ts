@@ -39,9 +39,6 @@
     "audit:fix:force": "yarn-audit-fix --force"
   },
   "private": true,
-  "publishConfig": {
-    "access": "public"
-  },
   "dependencies": {},
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
