@@ -2,7 +2,7 @@ import { Property, Env, clock, atom } from '@frp-ts/core'
 import React from 'react'
 import { useProperty } from './use-property'
 import { constVoid } from '@frp-ts/utils'
-import { render } from '@testing-library/react'
+import { render, act } from '@testing-library/react'
 
 interface TestProps<A> {
 	readonly property: Property<A>
@@ -29,7 +29,7 @@ describe('useProperty', () => {
 		const a = newAtom(123)
 		const cb = jest.fn(constVoid)
 		render(<Test property={a} onValue={cb} />)
-		a.set(456)
+		act(() => a.set(456))
 		expect(cb).toHaveBeenLastCalledWith(456)
 	})
 })

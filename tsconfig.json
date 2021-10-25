@@ -9,7 +9,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true
+    "noEmit": true,
+    "jsx": "react"
   },
   "exclude": ["dist", "lib", "coverage", "node_modules"]
 }
