@@ -16,6 +16,7 @@
     "./packages/core",
     "./packages/lens",
     "./packages/fp-ts",
+    "./packages/react",
     "./packages/test-utils",
     "./packages/utils"
   ],
@@ -48,6 +49,7 @@
     "@commitlint/travis-cli": "^8.3.5",
     "@octokit/core": "^3.5.1",
     "@types/jest": "^25.2.2",
+    "@types/node": "^14.17.30",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
     "coveralls": "^3.0.13",
