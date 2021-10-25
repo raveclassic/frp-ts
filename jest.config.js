@@ -1,6 +1,6 @@
 module.exports = {
 	preset: 'ts-jest',
-	testEnvironment: 'node',
+	testEnvironment: 'jsdom',
 	testRunner: 'jasmine2',
 	collectCoverage: false,
 	coverageThreshold: {
