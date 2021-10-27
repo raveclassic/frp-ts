@@ -12,14 +12,23 @@
     "url": "https://github.com/raveclassic/frp-ts/issues"
   },
   "homepage": "https://github.com/raveclassic/frp-ts#readme",
-  "workspaces": [
-    "./packages/core",
-    "./packages/lens",
-    "./packages/fp-ts",
-    "./packages/react",
-    "./packages/test-utils",
-    "./packages/utils"
-  ],
+  "workspaces": {
+    "packages": [
+      "./packages/core",
+      "./packages/dom",
+      "./packages/lens",
+      "./packages/fp-ts",
+      "./packages/react",
+      "./packages/test-utils",
+      "./packages/utils"
+    ],
+    "nohoist": [
+      "@frp-ts/react/react",
+      "@frp-ts/react/react-dom",
+      "@frp-ts/react/@types/react",
+      "@frp-ts/react/@types/react-dom"
+    ]
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "nx run-many --target=build --all --parallel",
@@ -58,6 +67,8 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-jest": "^25.2.2",
+    "eslint-plugin-react": "^7.26.1",
+    "eslint-plugin-react-app": "^6.2.2",
     "eslint-plugin-unicorn": "^37.0.1",
     "husky": "^4.2.5",
     "jest": "^27.3.1",

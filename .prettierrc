@@ -21,6 +21,13 @@
 				"useTabs": false,
 				"tabWidth": 2
 			}
+		},
+		{
+			"files": "*.html",
+			"options": {
+				"useTabs": false,
+				"tabWidth": 2
+			}
 		}
 	]
 }

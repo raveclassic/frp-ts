@@ -1,0 +1,42 @@
+{
+  "name": "@frp-ts/dom",
+  "version": "0.0.2",
+  "description": "DOM renderer for @frp-ts project",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "typedocMain": "./src/index.ts",
+  "author": "raveclassic",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raveclassic/frp-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raveclassic/frp-ts/issues"
+  },
+  "homepage": "https://github.com/raveclassic/frp-ts#readme",
+  "scripts": {
+    "typecheck": "tsc",
+    "clean": "rimraf lib",
+    "prebuild": "yarn clean",
+    "build": "tsc --project ./tsconfig.build.json",
+    "start": "yarn build --watch",
+    "demo:start": "webpack server --config ./demo/webpack.config.ts --open"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "csstype": "^3.0.9"
+  },
+  "devDependencies": {
+    "@types/html-webpack-plugin": "^3.2.6",
+    "html-webpack-plugin": "^5.5.0",
+    "rimraf": "^3.0.2",
+    "ts-loader": "^7.0.5",
+    "typescript": "^4.4.4",
+    "webpack": "^5.60.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.3.1"
+  }
+}

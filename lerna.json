@@ -1,6 +1,7 @@
 {
   "packages": [
     "./packages/core",
+    "./packages/dom",
     "./packages/lens",
     "./packages/fp-ts",
     "./packages/react",
