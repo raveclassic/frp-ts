@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "jsx": "react",
+    "jsxFactory": "h.createElement",
+    "jsxFragmentFactory": "h.createFragment"
   },
   "include": ["./src"]
 }

@@ -23,14 +23,15 @@
     "start": "yarn build --watch",
     "demo:start": "webpack server --config ./demo/webpack.config.ts --open"
   },
+  "private": true,
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
+    "@frp-ts/core": "^0.0.2",
     "csstype": "^3.0.9"
   },
   "devDependencies": {
-    "@types/html-webpack-plugin": "^3.2.6",
     "html-webpack-plugin": "^5.5.0",
     "rimraf": "^3.0.2",
     "ts-loader": "^7.0.5",

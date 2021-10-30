@@ -1,5 +1,7 @@
 import { Property } from '@frp-ts/core'
 import { EventTarget } from '@frp-ts/core/src'
+// no idea why eslint doesn't see this package
+// eslint-disable-next-line import/no-unresolved
 import * as CSS from 'csstype'
 
 type NativeAnimationEvent = AnimationEvent
@@ -25,7 +27,7 @@ export declare namespace JSXInternal {
 	type NativeElementChildren = ElementChildren | readonly ElementChildren[]
 
 	//#region TypeScript
-	type Element = HTMLElement | DocumentFragment | Node
+	type Element = PrimitiveElementChild
 	interface ElementChildrenAttribute {
 		children: unknown
 	}
@@ -724,7 +726,7 @@ export declare namespace JSXInternal {
 		autoCapitalize?: string | undefined
 		autoCorrect?: string | undefined
 		autoSave?: string | undefined
-		color?: string | undefined | Property<string | undefined>
+		color?: string | undefined
 		itemProp?: string | undefined
 		itemScope?: boolean | undefined
 		itemType?: string | undefined
@@ -1647,183 +1649,885 @@ export declare namespace JSXInternal {
 
 	interface IntrinsicElements {
 		// HTML
-		a: AnchorHTMLAttributes<HTMLAnchorElement>
-		abbr: HTMLAttributes<HTMLElement>
-		address: HTMLAttributes<HTMLElement>
-		area: AreaHTMLAttributes<HTMLAreaElement>
-		article: HTMLAttributes<HTMLElement>
-		aside: HTMLAttributes<HTMLElement>
-		audio: AudioHTMLAttributes<HTMLAudioElement>
-		b: HTMLAttributes<HTMLElement>
-		base: BaseHTMLAttributes<HTMLBaseElement>
-		bdi: HTMLAttributes<HTMLElement>
-		bdo: HTMLAttributes<HTMLElement>
-		big: HTMLAttributes<HTMLElement>
-		blockquote: BlockquoteHTMLAttributes<HTMLElement>
-		body: HTMLAttributes<HTMLBodyElement>
-		br: HTMLAttributes<HTMLBRElement>
-		button: ButtonHTMLAttributes<HTMLButtonElement>
-		canvas: CanvasHTMLAttributes<HTMLCanvasElement>
-		caption: HTMLAttributes<HTMLElement>
-		cite: HTMLAttributes<HTMLElement>
-		code: HTMLAttributes<HTMLElement>
-		col: ColHTMLAttributes<HTMLTableColElement>
-		colgroup: ColgroupHTMLAttributes<HTMLTableColElement>
-		data: DataHTMLAttributes<HTMLDataElement>
-		datalist: HTMLAttributes<HTMLDataListElement>
-		dd: HTMLAttributes<HTMLElement>
-		del: DelHTMLAttributes<HTMLElement>
-		details: DetailsHTMLAttributes<HTMLElement>
-		dfn: HTMLAttributes<HTMLElement>
-		dialog: DialogHTMLAttributes<HTMLDialogElement>
-		div: HTMLAttributes<HTMLDivElement>
-		dl: HTMLAttributes<HTMLDListElement>
-		dt: HTMLAttributes<HTMLElement>
-		em: HTMLAttributes<HTMLElement>
-		embed: EmbedHTMLAttributes<HTMLEmbedElement>
-		fieldset: FieldsetHTMLAttributes<HTMLFieldSetElement>
-		figcaption: HTMLAttributes<HTMLElement>
-		figure: HTMLAttributes<HTMLElement>
-		footer: HTMLAttributes<HTMLElement>
-		form: FormHTMLAttributes<HTMLFormElement>
-		h1: HTMLAttributes<HTMLHeadingElement>
-		h2: HTMLAttributes<HTMLHeadingElement>
-		h3: HTMLAttributes<HTMLHeadingElement>
-		h4: HTMLAttributes<HTMLHeadingElement>
-		h5: HTMLAttributes<HTMLHeadingElement>
-		h6: HTMLAttributes<HTMLHeadingElement>
-		head: HTMLAttributes<HTMLHeadElement>
-		header: HTMLAttributes<HTMLElement>
-		hgroup: HTMLAttributes<HTMLElement>
-		hr: HTMLAttributes<HTMLHRElement>
-		html: HtmlHTMLAttributes<HTMLHtmlElement>
-		i: HTMLAttributes<HTMLElement>
-		iframe: IframeHTMLAttributes<HTMLIFrameElement>
-		img: ImgHTMLAttributes<HTMLImageElement>
-		input: InputHTMLAttributes<HTMLInputElement>
-		ins: InsHTMLAttributes<HTMLModElement>
-		kbd: HTMLAttributes<HTMLElement>
-		keygen: KeygenHTMLAttributes<HTMLElement>
-		label: LabelHTMLAttributes<HTMLLabelElement>
-		legend: HTMLAttributes<HTMLLegendElement>
-		li: LiHTMLAttributes<HTMLLIElement>
-		link: LinkHTMLAttributes<HTMLLinkElement>
-		main: HTMLAttributes<HTMLElement>
-		map: MapHTMLAttributes<HTMLMapElement>
-		mark: HTMLAttributes<HTMLElement>
-		menu: MenuHTMLAttributes<HTMLElement>
-		menuitem: HTMLAttributes<HTMLElement>
-		meta: MetaHTMLAttributes<HTMLMetaElement>
-		meter: MeterHTMLAttributes<HTMLElement>
-		nav: HTMLAttributes<HTMLElement>
-		noindex: HTMLAttributes<HTMLElement>
-		noscript: HTMLAttributes<HTMLElement>
-		object: ObjectHTMLAttributes<HTMLObjectElement>
-		ol: OlHTMLAttributes<HTMLOListElement>
-		optgroup: OptgroupHTMLAttributes<HTMLOptGroupElement>
-		option: OptionHTMLAttributes<HTMLOptionElement>
-		output: OutputHTMLAttributes<HTMLElement>
-		p: HTMLAttributes<HTMLParagraphElement>
-		param: ParamHTMLAttributes<HTMLParamElement>
-		picture: HTMLAttributes<HTMLElement>
-		pre: HTMLAttributes<HTMLPreElement>
-		progress: ProgressHTMLAttributes<HTMLProgressElement>
-		q: QuoteHTMLAttributes<HTMLQuoteElement>
-		rp: HTMLAttributes<HTMLElement>
-		rt: HTMLAttributes<HTMLElement>
-		ruby: HTMLAttributes<HTMLElement>
-		s: HTMLAttributes<HTMLElement>
-		samp: HTMLAttributes<HTMLElement>
-		slot: SlotHTMLAttributes<HTMLSlotElement>
-		script: ScriptHTMLAttributes<HTMLScriptElement>
-		section: HTMLAttributes<HTMLElement>
-		select: SelectHTMLAttributes<HTMLSelectElement>
-		small: HTMLAttributes<HTMLElement>
-		source: SourceHTMLAttributes<HTMLSourceElement>
-		span: HTMLAttributes<HTMLSpanElement>
-		strong: HTMLAttributes<HTMLElement>
-		style: StyleHTMLAttributes<HTMLStyleElement>
-		sub: HTMLAttributes<HTMLElement>
-		summary: HTMLAttributes<HTMLElement>
-		sup: HTMLAttributes<HTMLElement>
-		table: TableHTMLAttributes<HTMLTableElement>
-		template: HTMLAttributes<HTMLTemplateElement>
-		tbody: HTMLAttributes<HTMLTableSectionElement>
-		td: TdHTMLAttributes<HTMLTableDataCellElement>
-		textarea: TextareaHTMLAttributes<HTMLTextAreaElement>
-		tfoot: HTMLAttributes<HTMLTableSectionElement>
-		th: ThHTMLAttributes<HTMLTableHeaderCellElement>
-		thead: HTMLAttributes<HTMLTableSectionElement>
-		time: TimeHTMLAttributes<HTMLElement>
-		title: HTMLAttributes<HTMLTitleElement>
-		tr: HTMLAttributes<HTMLTableRowElement>
-		track: TrackHTMLAttributes<HTMLTrackElement>
-		u: HTMLAttributes<HTMLElement>
-		ul: HTMLAttributes<HTMLUListElement>
-		var: HTMLAttributes<HTMLElement>
-		video: VideoHTMLAttributes<HTMLVideoElement>
-		wbr: HTMLAttributes<HTMLElement>
-		webview: WebViewHTMLAttributes<HTMLWebViewElement>
+		a: {
+			[P in keyof AnchorHTMLAttributes<HTMLAnchorElement>]:
+				| AnchorHTMLAttributes<HTMLAnchorElement>[P]
+				| Property<AnchorHTMLAttributes<HTMLAnchorElement>[P]>
+		}
+		abbr: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		address: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		area: {
+			[P in keyof AreaHTMLAttributes<HTMLAreaElement>]:
+				| AreaHTMLAttributes<HTMLAreaElement>[P]
+				| Property<AreaHTMLAttributes<HTMLAreaElement>[P]>
+		}
+		article: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		aside: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		audio: {
+			[P in keyof AudioHTMLAttributes<HTMLAudioElement>]:
+				| AudioHTMLAttributes<HTMLAudioElement>[P]
+				| Property<AudioHTMLAttributes<HTMLAudioElement>[P]>
+		}
+		b: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		base: {
+			[P in keyof BaseHTMLAttributes<HTMLBaseElement>]:
+				| BaseHTMLAttributes<HTMLBaseElement>[P]
+				| Property<BaseHTMLAttributes<HTMLBaseElement>[P]>
+		}
+		bdi: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		bdo: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		big: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		blockquote: {
+			[P in keyof BlockquoteHTMLAttributes<HTMLElement>]:
+				| BlockquoteHTMLAttributes<HTMLElement>[P]
+				| Property<BlockquoteHTMLAttributes<HTMLElement>[P]>
+		}
+		body: {
+			[P in keyof HTMLAttributes<HTMLBodyElement>]:
+				| HTMLAttributes<HTMLBodyElement>[P]
+				| Property<HTMLAttributes<HTMLBodyElement>[P]>
+		}
+		br: {
+			[P in keyof HTMLAttributes<HTMLBRElement>]:
+				| HTMLAttributes<HTMLBRElement>[P]
+				| Property<HTMLAttributes<HTMLBRElement>[P]>
+		}
+		button: {
+			[P in keyof ButtonHTMLAttributes<HTMLButtonElement>]:
+				| ButtonHTMLAttributes<HTMLButtonElement>[P]
+				| Property<ButtonHTMLAttributes<HTMLButtonElement>[P]>
+		}
+		canvas: {
+			[P in keyof CanvasHTMLAttributes<HTMLCanvasElement>]:
+				| CanvasHTMLAttributes<HTMLCanvasElement>[P]
+				| Property<CanvasHTMLAttributes<HTMLCanvasElement>[P]>
+		}
+		caption: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		cite: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		code: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		col: {
+			[P in keyof ColHTMLAttributes<HTMLTableColElement>]:
+				| ColHTMLAttributes<HTMLTableColElement>[P]
+				| Property<ColHTMLAttributes<HTMLTableColElement>[P]>
+		}
+		colgroup: {
+			[P in keyof ColgroupHTMLAttributes<HTMLTableColElement>]:
+				| ColgroupHTMLAttributes<HTMLTableColElement>[P]
+				| Property<ColgroupHTMLAttributes<HTMLTableColElement>[P]>
+		}
+		data: {
+			[P in keyof DataHTMLAttributes<HTMLDataElement>]:
+				| DataHTMLAttributes<HTMLDataElement>[P]
+				| Property<DataHTMLAttributes<HTMLDataElement>[P]>
+		}
+		datalist: {
+			[P in keyof HTMLAttributes<HTMLDataListElement>]:
+				| HTMLAttributes<HTMLDataListElement>[P]
+				| Property<HTMLAttributes<HTMLDataListElement>[P]>
+		}
+		dd: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		del: {
+			[P in keyof DelHTMLAttributes<HTMLElement>]:
+				| DelHTMLAttributes<HTMLElement>[P]
+				| Property<DelHTMLAttributes<HTMLElement>[P]>
+		}
+		details: {
+			[P in keyof DetailsHTMLAttributes<HTMLElement>]:
+				| DetailsHTMLAttributes<HTMLElement>[P]
+				| Property<DetailsHTMLAttributes<HTMLElement>[P]>
+		}
+		dfn: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		dialog: {
+			[P in keyof DialogHTMLAttributes<HTMLDialogElement>]:
+				| DialogHTMLAttributes<HTMLDialogElement>[P]
+				| Property<DialogHTMLAttributes<HTMLDialogElement>[P]>
+		}
+		div: {
+			[P in keyof HTMLAttributes<HTMLDivElement>]:
+				| HTMLAttributes<HTMLDivElement>[P]
+				| Property<HTMLAttributes<HTMLDivElement>[P]>
+		}
+		dl: {
+			[P in keyof HTMLAttributes<HTMLDListElement>]:
+				| HTMLAttributes<HTMLDListElement>[P]
+				| Property<HTMLAttributes<HTMLDListElement>[P]>
+		}
+		dt: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		em: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		embed: {
+			[P in keyof EmbedHTMLAttributes<HTMLEmbedElement>]:
+				| EmbedHTMLAttributes<HTMLEmbedElement>[P]
+				| Property<EmbedHTMLAttributes<HTMLEmbedElement>[P]>
+		}
+		fieldset: {
+			[P in keyof FieldsetHTMLAttributes<HTMLFieldSetElement>]:
+				| FieldsetHTMLAttributes<HTMLFieldSetElement>[P]
+				| Property<FieldsetHTMLAttributes<HTMLFieldSetElement>[P]>
+		}
+		figcaption: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		figure: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		footer: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		form: {
+			[P in keyof FormHTMLAttributes<HTMLFormElement>]:
+				| FormHTMLAttributes<HTMLFormElement>[P]
+				| Property<FormHTMLAttributes<HTMLFormElement>[P]>
+		}
+		h1: {
+			[P in keyof HTMLAttributes<HTMLHeadingElement>]:
+				| HTMLAttributes<HTMLHeadingElement>[P]
+				| Property<HTMLAttributes<HTMLHeadingElement>[P]>
+		}
+		h2: {
+			[P in keyof HTMLAttributes<HTMLHeadingElement>]:
+				| HTMLAttributes<HTMLHeadingElement>[P]
+				| Property<HTMLAttributes<HTMLHeadingElement>[P]>
+		}
+		h3: {
+			[P in keyof HTMLAttributes<HTMLHeadingElement>]:
+				| HTMLAttributes<HTMLHeadingElement>[P]
+				| Property<HTMLAttributes<HTMLHeadingElement>[P]>
+		}
+		h4: {
+			[P in keyof HTMLAttributes<HTMLHeadingElement>]:
+				| HTMLAttributes<HTMLHeadingElement>[P]
+				| Property<HTMLAttributes<HTMLHeadingElement>[P]>
+		}
+		h5: {
+			[P in keyof HTMLAttributes<HTMLHeadingElement>]:
+				| HTMLAttributes<HTMLHeadingElement>[P]
+				| Property<HTMLAttributes<HTMLHeadingElement>[P]>
+		}
+		h6: {
+			[P in keyof HTMLAttributes<HTMLHeadingElement>]:
+				| HTMLAttributes<HTMLHeadingElement>[P]
+				| Property<HTMLAttributes<HTMLHeadingElement>[P]>
+		}
+		head: {
+			[P in keyof HTMLAttributes<HTMLHeadElement>]:
+				| HTMLAttributes<HTMLHeadElement>[P]
+				| Property<HTMLAttributes<HTMLHeadElement>[P]>
+		}
+		header: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		hgroup: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		hr: {
+			[P in keyof HTMLAttributes<HTMLHRElement>]:
+				| HTMLAttributes<HTMLHRElement>[P]
+				| Property<HTMLAttributes<HTMLHRElement>[P]>
+		}
+		html: {
+			[P in keyof HtmlHTMLAttributes<HTMLHtmlElement>]:
+				| HtmlHTMLAttributes<HTMLHtmlElement>[P]
+				| Property<HtmlHTMLAttributes<HTMLHtmlElement>[P]>
+		}
+		i: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		iframe: {
+			[P in keyof IframeHTMLAttributes<HTMLIFrameElement>]:
+				| IframeHTMLAttributes<HTMLIFrameElement>[P]
+				| Property<IframeHTMLAttributes<HTMLIFrameElement>[P]>
+		}
+		img: {
+			[P in keyof ImgHTMLAttributes<HTMLImageElement>]:
+				| ImgHTMLAttributes<HTMLImageElement>[P]
+				| Property<ImgHTMLAttributes<HTMLImageElement>[P]>
+		}
+		input: {
+			[P in keyof InputHTMLAttributes<HTMLInputElement>]:
+				| InputHTMLAttributes<HTMLInputElement>[P]
+				| Property<InputHTMLAttributes<HTMLInputElement>[P]>
+		}
+		ins: {
+			[P in keyof InsHTMLAttributes<HTMLModElement>]:
+				| InsHTMLAttributes<HTMLModElement>[P]
+				| Property<InsHTMLAttributes<HTMLModElement>[P]>
+		}
+		kbd: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		keygen: {
+			[P in keyof KeygenHTMLAttributes<HTMLElement>]:
+				| KeygenHTMLAttributes<HTMLElement>[P]
+				| Property<KeygenHTMLAttributes<HTMLElement>[P]>
+		}
+		label: {
+			[P in keyof LabelHTMLAttributes<HTMLLabelElement>]:
+				| LabelHTMLAttributes<HTMLLabelElement>[P]
+				| Property<LabelHTMLAttributes<HTMLLabelElement>[P]>
+		}
+		legend: {
+			[P in keyof HTMLAttributes<HTMLLegendElement>]:
+				| HTMLAttributes<HTMLLegendElement>[P]
+				| Property<HTMLAttributes<HTMLLegendElement>[P]>
+		}
+		li: {
+			[P in keyof LiHTMLAttributes<HTMLLIElement>]:
+				| LiHTMLAttributes<HTMLLIElement>[P]
+				| Property<LiHTMLAttributes<HTMLLIElement>[P]>
+		}
+		link: {
+			[P in keyof LinkHTMLAttributes<HTMLLinkElement>]:
+				| LinkHTMLAttributes<HTMLLinkElement>[P]
+				| Property<LinkHTMLAttributes<HTMLLinkElement>[P]>
+		}
+		main: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		map: {
+			[P in keyof MapHTMLAttributes<HTMLMapElement>]:
+				| MapHTMLAttributes<HTMLMapElement>[P]
+				| Property<MapHTMLAttributes<HTMLMapElement>[P]>
+		}
+		mark: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		menu: {
+			[P in keyof MenuHTMLAttributes<HTMLElement>]:
+				| MenuHTMLAttributes<HTMLElement>[P]
+				| Property<MenuHTMLAttributes<HTMLElement>[P]>
+		}
+		menuitem: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		meta: {
+			[P in keyof MetaHTMLAttributes<HTMLMetaElement>]:
+				| MetaHTMLAttributes<HTMLMetaElement>[P]
+				| Property<MetaHTMLAttributes<HTMLMetaElement>[P]>
+		}
+		meter: {
+			[P in keyof MeterHTMLAttributes<HTMLElement>]:
+				| MeterHTMLAttributes<HTMLElement>[P]
+				| Property<MeterHTMLAttributes<HTMLElement>[P]>
+		}
+		nav: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		noindex: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		noscript: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		object: {
+			[P in keyof ObjectHTMLAttributes<HTMLObjectElement>]:
+				| ObjectHTMLAttributes<HTMLObjectElement>[P]
+				| Property<ObjectHTMLAttributes<HTMLObjectElement>[P]>
+		}
+		ol: {
+			[P in keyof OlHTMLAttributes<HTMLOListElement>]:
+				| OlHTMLAttributes<HTMLOListElement>[P]
+				| Property<OlHTMLAttributes<HTMLOListElement>[P]>
+		}
+		optgroup: {
+			[P in keyof OptgroupHTMLAttributes<HTMLOptGroupElement>]:
+				| OptgroupHTMLAttributes<HTMLOptGroupElement>[P]
+				| Property<OptgroupHTMLAttributes<HTMLOptGroupElement>[P]>
+		}
+		option: {
+			[P in keyof OptionHTMLAttributes<HTMLOptionElement>]:
+				| OptionHTMLAttributes<HTMLOptionElement>[P]
+				| Property<OptionHTMLAttributes<HTMLOptionElement>[P]>
+		}
+		output: {
+			[P in keyof OutputHTMLAttributes<HTMLElement>]:
+				| OutputHTMLAttributes<HTMLElement>[P]
+				| Property<OutputHTMLAttributes<HTMLElement>[P]>
+		}
+		p: {
+			[P in keyof HTMLAttributes<HTMLParagraphElement>]:
+				| HTMLAttributes<HTMLParagraphElement>[P]
+				| Property<HTMLAttributes<HTMLParagraphElement>[P]>
+		}
+		param: {
+			[P in keyof ParamHTMLAttributes<HTMLParamElement>]:
+				| ParamHTMLAttributes<HTMLParamElement>[P]
+				| Property<ParamHTMLAttributes<HTMLParamElement>[P]>
+		}
+		picture: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		pre: {
+			[P in keyof HTMLAttributes<HTMLPreElement>]:
+				| HTMLAttributes<HTMLPreElement>[P]
+				| Property<HTMLAttributes<HTMLPreElement>[P]>
+		}
+		progress: {
+			[P in keyof ProgressHTMLAttributes<HTMLProgressElement>]:
+				| ProgressHTMLAttributes<HTMLProgressElement>[P]
+				| Property<ProgressHTMLAttributes<HTMLProgressElement>[P]>
+		}
+		q: {
+			[P in keyof QuoteHTMLAttributes<HTMLQuoteElement>]:
+				| QuoteHTMLAttributes<HTMLQuoteElement>[P]
+				| Property<QuoteHTMLAttributes<HTMLQuoteElement>[P]>
+		}
+		rp: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		rt: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		ruby: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		s: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		samp: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		slot: {
+			[P in keyof SlotHTMLAttributes<HTMLSlotElement>]:
+				| SlotHTMLAttributes<HTMLSlotElement>[P]
+				| Property<SlotHTMLAttributes<HTMLSlotElement>[P]>
+		}
+		script: {
+			[P in keyof ScriptHTMLAttributes<HTMLScriptElement>]:
+				| ScriptHTMLAttributes<HTMLScriptElement>[P]
+				| Property<ScriptHTMLAttributes<HTMLScriptElement>[P]>
+		}
+		section: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		select: {
+			[P in keyof SelectHTMLAttributes<HTMLSelectElement>]:
+				| SelectHTMLAttributes<HTMLSelectElement>[P]
+				| Property<SelectHTMLAttributes<HTMLSelectElement>[P]>
+		}
+		small: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		source: {
+			[P in keyof SourceHTMLAttributes<HTMLSourceElement>]:
+				| SourceHTMLAttributes<HTMLSourceElement>[P]
+				| Property<SourceHTMLAttributes<HTMLSourceElement>[P]>
+		}
+		span: {
+			[P in keyof HTMLAttributes<HTMLSpanElement>]:
+				| HTMLAttributes<HTMLSpanElement>[P]
+				| Property<HTMLAttributes<HTMLSpanElement>[P]>
+		}
+		strong: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		style: {
+			[P in keyof StyleHTMLAttributes<HTMLStyleElement>]:
+				| StyleHTMLAttributes<HTMLStyleElement>[P]
+				| Property<StyleHTMLAttributes<HTMLStyleElement>[P]>
+		}
+		sub: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		summary: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		sup: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		table: {
+			[P in keyof TableHTMLAttributes<HTMLTableElement>]:
+				| TableHTMLAttributes<HTMLTableElement>[P]
+				| Property<TableHTMLAttributes<HTMLTableElement>[P]>
+		}
+		template: {
+			[P in keyof HTMLAttributes<HTMLTemplateElement>]:
+				| HTMLAttributes<HTMLTemplateElement>[P]
+				| Property<HTMLAttributes<HTMLTemplateElement>[P]>
+		}
+		tbody: {
+			[P in keyof HTMLAttributes<HTMLTableSectionElement>]:
+				| HTMLAttributes<HTMLTableSectionElement>[P]
+				| Property<HTMLAttributes<HTMLTableSectionElement>[P]>
+		}
+		td: {
+			[P in keyof TdHTMLAttributes<HTMLTableDataCellElement>]:
+				| TdHTMLAttributes<HTMLTableDataCellElement>[P]
+				| Property<TdHTMLAttributes<HTMLTableDataCellElement>[P]>
+		}
+		textarea: {
+			[P in keyof TextareaHTMLAttributes<HTMLTextAreaElement>]:
+				| TextareaHTMLAttributes<HTMLTextAreaElement>[P]
+				| Property<TextareaHTMLAttributes<HTMLTextAreaElement>[P]>
+		}
+		tfoot: {
+			[P in keyof HTMLAttributes<HTMLTableSectionElement>]:
+				| HTMLAttributes<HTMLTableSectionElement>[P]
+				| Property<HTMLAttributes<HTMLTableSectionElement>[P]>
+		}
+		th: {
+			[P in keyof ThHTMLAttributes<HTMLTableHeaderCellElement>]:
+				| ThHTMLAttributes<HTMLTableHeaderCellElement>[P]
+				| Property<ThHTMLAttributes<HTMLTableHeaderCellElement>[P]>
+		}
+		thead: {
+			[P in keyof HTMLAttributes<HTMLTableSectionElement>]:
+				| HTMLAttributes<HTMLTableSectionElement>[P]
+				| Property<HTMLAttributes<HTMLTableSectionElement>[P]>
+		}
+		time: {
+			[P in keyof TimeHTMLAttributes<HTMLElement>]:
+				| TimeHTMLAttributes<HTMLElement>[P]
+				| Property<TimeHTMLAttributes<HTMLElement>[P]>
+		}
+		title: {
+			[P in keyof HTMLAttributes<HTMLTitleElement>]:
+				| HTMLAttributes<HTMLTitleElement>[P]
+				| Property<HTMLAttributes<HTMLTitleElement>[P]>
+		}
+		tr: {
+			[P in keyof HTMLAttributes<HTMLTableRowElement>]:
+				| HTMLAttributes<HTMLTableRowElement>[P]
+				| Property<HTMLAttributes<HTMLTableRowElement>[P]>
+		}
+		track: {
+			[P in keyof TrackHTMLAttributes<HTMLTrackElement>]:
+				| TrackHTMLAttributes<HTMLTrackElement>[P]
+				| Property<TrackHTMLAttributes<HTMLTrackElement>[P]>
+		}
+		u: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		ul: {
+			[P in keyof HTMLAttributes<HTMLUListElement>]:
+				| HTMLAttributes<HTMLUListElement>[P]
+				| Property<HTMLAttributes<HTMLUListElement>[P]>
+		}
+		var: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		video: {
+			[P in keyof VideoHTMLAttributes<HTMLVideoElement>]:
+				| VideoHTMLAttributes<HTMLVideoElement>[P]
+				| Property<VideoHTMLAttributes<HTMLVideoElement>[P]>
+		}
+		wbr: {
+			[P in keyof HTMLAttributes<HTMLElement>]:
+				| HTMLAttributes<HTMLElement>[P]
+				| Property<HTMLAttributes<HTMLElement>[P]>
+		}
+		webview: {
+			[P in keyof WebViewHTMLAttributes<HTMLWebViewElement>]:
+				| WebViewHTMLAttributes<HTMLWebViewElement>[P]
+				| Property<WebViewHTMLAttributes<HTMLWebViewElement>[P]>
+		}
 
 		// SVG
-		svg: SVGAttributes<SVGSVGElement>
+		svg: {
+			[P in keyof SVGAttributes<SVGSVGElement>]:
+				| SVGAttributes<SVGSVGElement>[P]
+				| Property<SVGAttributes<SVGSVGElement>[P]>
+		}
 
-		animate: SVGAttributes<SVGElement> // TODO: It is SVGAnimateElement but is not in TypeScript's lib.dom.d.ts for now.
-		animateMotion: SVGAttributes<SVGElement>
-		animateTransform: SVGAttributes<SVGElement> // TODO: It is SVGAnimateTransformElement but is not in TypeScript's lib.dom.d.ts for now.
-		circle: SVGAttributes<SVGCircleElement>
-		clipPath: SVGAttributes<SVGClipPathElement>
-		defs: SVGAttributes<SVGDefsElement>
-		desc: SVGAttributes<SVGDescElement>
-		ellipse: SVGAttributes<SVGEllipseElement>
-		feBlend: SVGAttributes<SVGFEBlendElement>
-		feColorMatrix: SVGAttributes<SVGFEColorMatrixElement>
-		feComponentTransfer: SVGAttributes<SVGFEComponentTransferElement>
-		feComposite: SVGAttributes<SVGFECompositeElement>
-		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>
-		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>
-		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>
-		feDistantLight: SVGAttributes<SVGFEDistantLightElement>
-		feDropShadow: SVGAttributes<SVGFEDropShadowElement>
-		feFlood: SVGAttributes<SVGFEFloodElement>
-		feFuncA: SVGAttributes<SVGFEFuncAElement>
-		feFuncB: SVGAttributes<SVGFEFuncBElement>
-		feFuncG: SVGAttributes<SVGFEFuncGElement>
-		feFuncR: SVGAttributes<SVGFEFuncRElement>
-		feGaussianBlur: SVGAttributes<SVGFEGaussianBlurElement>
-		feImage: SVGAttributes<SVGFEImageElement>
-		feMerge: SVGAttributes<SVGFEMergeElement>
-		feMergeNode: SVGAttributes<SVGFEMergeNodeElement>
-		feMorphology: SVGAttributes<SVGFEMorphologyElement>
-		feOffset: SVGAttributes<SVGFEOffsetElement>
-		fePointLight: SVGAttributes<SVGFEPointLightElement>
-		feSpecularLighting: SVGAttributes<SVGFESpecularLightingElement>
-		feSpotLight: SVGAttributes<SVGFESpotLightElement>
-		feTile: SVGAttributes<SVGFETileElement>
-		feTurbulence: SVGAttributes<SVGFETurbulenceElement>
-		filter: SVGAttributes<SVGFilterElement>
-		foreignObject: SVGAttributes<SVGForeignObjectElement>
-		g: SVGAttributes<SVGGElement>
-		image: SVGAttributes<SVGImageElement>
-		line: SVGAttributes<SVGLineElement>
-		linearGradient: SVGAttributes<SVGLinearGradientElement>
-		marker: SVGAttributes<SVGMarkerElement>
-		mask: SVGAttributes<SVGMaskElement>
-		metadata: SVGAttributes<SVGMetadataElement>
-		mpath: SVGAttributes<SVGElement>
-		path: SVGAttributes<SVGPathElement>
-		pattern: SVGAttributes<SVGPatternElement>
-		polygon: SVGAttributes<SVGPolygonElement>
-		polyline: SVGAttributes<SVGPolylineElement>
-		radialGradient: SVGAttributes<SVGRadialGradientElement>
-		rect: SVGAttributes<SVGRectElement>
-		stop: SVGAttributes<SVGStopElement>
-		switch: SVGAttributes<SVGSwitchElement>
-		symbol: SVGAttributes<SVGSymbolElement>
-		text: SVGAttributes<SVGTextElement>
-		textPath: SVGAttributes<SVGTextPathElement>
-		tspan: SVGAttributes<SVGTSpanElement>
-		use: SVGAttributes<SVGUseElement>
-		view: SVGAttributes<SVGViewElement>
+		// TODO: It is SVGAnimateElement but is not in TypeScript's lib.dom.d.ts for now.
+		animate: {
+			[P in keyof SVGAttributes<SVGElement>]:
+				| SVGAttributes<SVGElement>[P]
+				| Property<SVGAttributes<SVGElement>[P]>
+		}
+		animateMotion: {
+			[P in keyof SVGAttributes<SVGElement>]:
+				| SVGAttributes<SVGElement>[P]
+				| Property<SVGAttributes<SVGElement>[P]>
+		}
+		// TODO: It is SVGAnimateTransformElement but is not in TypeScript's lib.dom.d.ts for now.
+		animateTransform: {
+			[P in keyof SVGAttributes<SVGElement>]:
+				| SVGAttributes<SVGElement>[P]
+				| Property<SVGAttributes<SVGElement>[P]>
+		}
+		circle: {
+			[P in keyof SVGAttributes<SVGCircleElement>]:
+				| SVGAttributes<SVGCircleElement>[P]
+				| Property<SVGAttributes<SVGCircleElement>[P]>
+		}
+		clipPath: {
+			[P in keyof SVGAttributes<SVGClipPathElement>]:
+				| SVGAttributes<SVGClipPathElement>[P]
+				| Property<SVGAttributes<SVGClipPathElement>[P]>
+		}
+		defs: {
+			[P in keyof SVGAttributes<SVGDefsElement>]:
+				| SVGAttributes<SVGDefsElement>[P]
+				| Property<SVGAttributes<SVGDefsElement>[P]>
+		}
+		desc: {
+			[P in keyof SVGAttributes<SVGDescElement>]:
+				| SVGAttributes<SVGDescElement>[P]
+				| Property<SVGAttributes<SVGDescElement>[P]>
+		}
+		ellipse: {
+			[P in keyof SVGAttributes<SVGEllipseElement>]:
+				| SVGAttributes<SVGEllipseElement>[P]
+				| Property<SVGAttributes<SVGEllipseElement>[P]>
+		}
+		feBlend: {
+			[P in keyof SVGAttributes<SVGFEBlendElement>]:
+				| SVGAttributes<SVGFEBlendElement>[P]
+				| Property<SVGAttributes<SVGFEBlendElement>[P]>
+		}
+		feColorMatrix: {
+			[P in keyof SVGAttributes<SVGFEColorMatrixElement>]:
+				| SVGAttributes<SVGFEColorMatrixElement>[P]
+				| Property<SVGAttributes<SVGFEColorMatrixElement>[P]>
+		}
+		feComponentTransfer: {
+			[P in keyof SVGAttributes<SVGFEComponentTransferElement>]:
+				| SVGAttributes<SVGFEComponentTransferElement>[P]
+				| Property<SVGAttributes<SVGFEComponentTransferElement>[P]>
+		}
+		feComposite: {
+			[P in keyof SVGAttributes<SVGFECompositeElement>]:
+				| SVGAttributes<SVGFECompositeElement>[P]
+				| Property<SVGAttributes<SVGFECompositeElement>[P]>
+		}
+		feConvolveMatrix: {
+			[P in keyof SVGAttributes<SVGFEConvolveMatrixElement>]:
+				| SVGAttributes<SVGFEConvolveMatrixElement>[P]
+				| Property<SVGAttributes<SVGFEConvolveMatrixElement>[P]>
+		}
+		feDiffuseLighting: {
+			[P in keyof SVGAttributes<SVGFEDiffuseLightingElement>]:
+				| SVGAttributes<SVGFEDiffuseLightingElement>[P]
+				| Property<SVGAttributes<SVGFEDiffuseLightingElement>[P]>
+		}
+		feDisplacementMap: {
+			[P in keyof SVGAttributes<SVGFEDisplacementMapElement>]:
+				| SVGAttributes<SVGFEDisplacementMapElement>[P]
+				| Property<SVGAttributes<SVGFEDisplacementMapElement>[P]>
+		}
+		feDistantLight: {
+			[P in keyof SVGAttributes<SVGFEDistantLightElement>]:
+				| SVGAttributes<SVGFEDistantLightElement>[P]
+				| Property<SVGAttributes<SVGFEDistantLightElement>[P]>
+		}
+		feDropShadow: {
+			[P in keyof SVGAttributes<SVGFEDropShadowElement>]:
+				| SVGAttributes<SVGFEDropShadowElement>[P]
+				| Property<SVGAttributes<SVGFEDropShadowElement>[P]>
+		}
+		feFlood: {
+			[P in keyof SVGAttributes<SVGFEFloodElement>]:
+				| SVGAttributes<SVGFEFloodElement>[P]
+				| Property<SVGAttributes<SVGFEFloodElement>[P]>
+		}
+		feFuncA: {
+			[P in keyof SVGAttributes<SVGFEFuncAElement>]:
+				| SVGAttributes<SVGFEFuncAElement>[P]
+				| Property<SVGAttributes<SVGFEFuncAElement>[P]>
+		}
+		feFuncB: {
+			[P in keyof SVGAttributes<SVGFEFuncBElement>]:
+				| SVGAttributes<SVGFEFuncBElement>[P]
+				| Property<SVGAttributes<SVGFEFuncBElement>[P]>
+		}
+		feFuncG: {
+			[P in keyof SVGAttributes<SVGFEFuncGElement>]:
+				| SVGAttributes<SVGFEFuncGElement>[P]
+				| Property<SVGAttributes<SVGFEFuncGElement>[P]>
+		}
+		feFuncR: {
+			[P in keyof SVGAttributes<SVGFEFuncRElement>]:
+				| SVGAttributes<SVGFEFuncRElement>[P]
+				| Property<SVGAttributes<SVGFEFuncRElement>[P]>
+		}
+		feGaussianBlur: {
+			[P in keyof SVGAttributes<SVGFEGaussianBlurElement>]:
+				| SVGAttributes<SVGFEGaussianBlurElement>[P]
+				| Property<SVGAttributes<SVGFEGaussianBlurElement>[P]>
+		}
+		feImage: {
+			[P in keyof SVGAttributes<SVGFEImageElement>]:
+				| SVGAttributes<SVGFEImageElement>[P]
+				| Property<SVGAttributes<SVGFEImageElement>[P]>
+		}
+		feMerge: {
+			[P in keyof SVGAttributes<SVGFEMergeElement>]:
+				| SVGAttributes<SVGFEMergeElement>[P]
+				| Property<SVGAttributes<SVGFEMergeElement>[P]>
+		}
+		feMergeNode: {
+			[P in keyof SVGAttributes<SVGFEMergeNodeElement>]:
+				| SVGAttributes<SVGFEMergeNodeElement>[P]
+				| Property<SVGAttributes<SVGFEMergeNodeElement>[P]>
+		}
+		feMorphology: {
+			[P in keyof SVGAttributes<SVGFEMorphologyElement>]:
+				| SVGAttributes<SVGFEMorphologyElement>[P]
+				| Property<SVGAttributes<SVGFEMorphologyElement>[P]>
+		}
+		feOffset: {
+			[P in keyof SVGAttributes<SVGFEOffsetElement>]:
+				| SVGAttributes<SVGFEOffsetElement>[P]
+				| Property<SVGAttributes<SVGFEOffsetElement>[P]>
+		}
+		fePointLight: {
+			[P in keyof SVGAttributes<SVGFEPointLightElement>]:
+				| SVGAttributes<SVGFEPointLightElement>[P]
+				| Property<SVGAttributes<SVGFEPointLightElement>[P]>
+		}
+		feSpecularLighting: {
+			[P in keyof SVGAttributes<SVGFESpecularLightingElement>]:
+				| SVGAttributes<SVGFESpecularLightingElement>[P]
+				| Property<SVGAttributes<SVGFESpecularLightingElement>[P]>
+		}
+		feSpotLight: {
+			[P in keyof SVGAttributes<SVGFESpotLightElement>]:
+				| SVGAttributes<SVGFESpotLightElement>[P]
+				| Property<SVGAttributes<SVGFESpotLightElement>[P]>
+		}
+		feTile: {
+			[P in keyof SVGAttributes<SVGFETileElement>]:
+				| SVGAttributes<SVGFETileElement>[P]
+				| Property<SVGAttributes<SVGFETileElement>[P]>
+		}
+		feTurbulence: {
+			[P in keyof SVGAttributes<SVGFETurbulenceElement>]:
+				| SVGAttributes<SVGFETurbulenceElement>[P]
+				| Property<SVGAttributes<SVGFETurbulenceElement>[P]>
+		}
+		filter: {
+			[P in keyof SVGAttributes<SVGFilterElement>]:
+				| SVGAttributes<SVGFilterElement>[P]
+				| Property<SVGAttributes<SVGFilterElement>[P]>
+		}
+		foreignObject: {
+			[P in keyof SVGAttributes<SVGForeignObjectElement>]:
+				| SVGAttributes<SVGForeignObjectElement>[P]
+				| Property<SVGAttributes<SVGForeignObjectElement>[P]>
+		}
+		g: {
+			[P in keyof SVGAttributes<SVGGElement>]:
+				| SVGAttributes<SVGGElement>[P]
+				| Property<SVGAttributes<SVGGElement>[P]>
+		}
+		image: {
+			[P in keyof SVGAttributes<SVGImageElement>]:
+				| SVGAttributes<SVGImageElement>[P]
+				| Property<SVGAttributes<SVGImageElement>[P]>
+		}
+		line: {
+			[P in keyof SVGAttributes<SVGLineElement>]:
+				| SVGAttributes<SVGLineElement>[P]
+				| Property<SVGAttributes<SVGLineElement>[P]>
+		}
+		linearGradient: {
+			[P in keyof SVGAttributes<SVGLinearGradientElement>]:
+				| SVGAttributes<SVGLinearGradientElement>[P]
+				| Property<SVGAttributes<SVGLinearGradientElement>[P]>
+		}
+		marker: {
+			[P in keyof SVGAttributes<SVGMarkerElement>]:
+				| SVGAttributes<SVGMarkerElement>[P]
+				| Property<SVGAttributes<SVGMarkerElement>[P]>
+		}
+		mask: {
+			[P in keyof SVGAttributes<SVGMaskElement>]:
+				| SVGAttributes<SVGMaskElement>[P]
+				| Property<SVGAttributes<SVGMaskElement>[P]>
+		}
+		metadata: {
+			[P in keyof SVGAttributes<SVGMetadataElement>]:
+				| SVGAttributes<SVGMetadataElement>[P]
+				| Property<SVGAttributes<SVGMetadataElement>[P]>
+		}
+		mpath: {
+			[P in keyof SVGAttributes<SVGElement>]:
+				| SVGAttributes<SVGElement>[P]
+				| Property<SVGAttributes<SVGElement>[P]>
+		}
+		path: {
+			[P in keyof SVGAttributes<SVGPathElement>]:
+				| SVGAttributes<SVGPathElement>[P]
+				| Property<SVGAttributes<SVGPathElement>[P]>
+		}
+		pattern: {
+			[P in keyof SVGAttributes<SVGPatternElement>]:
+				| SVGAttributes<SVGPatternElement>[P]
+				| Property<SVGAttributes<SVGPatternElement>[P]>
+		}
+		polygon: {
+			[P in keyof SVGAttributes<SVGPolygonElement>]:
+				| SVGAttributes<SVGPolygonElement>[P]
+				| Property<SVGAttributes<SVGPolygonElement>[P]>
+		}
+		polyline: {
+			[P in keyof SVGAttributes<SVGPolylineElement>]:
+				| SVGAttributes<SVGPolylineElement>[P]
+				| Property<SVGAttributes<SVGPolylineElement>[P]>
+		}
+		radialGradient: {
+			[P in keyof SVGAttributes<SVGRadialGradientElement>]:
+				| SVGAttributes<SVGRadialGradientElement>[P]
+				| Property<SVGAttributes<SVGRadialGradientElement>[P]>
+		}
+		rect: {
+			[P in keyof SVGAttributes<SVGRectElement>]:
+				| SVGAttributes<SVGRectElement>[P]
+				| Property<SVGAttributes<SVGRectElement>[P]>
+		}
+		stop: {
+			[P in keyof SVGAttributes<SVGStopElement>]:
+				| SVGAttributes<SVGStopElement>[P]
+				| Property<SVGAttributes<SVGStopElement>[P]>
+		}
+		switch: {
+			[P in keyof SVGAttributes<SVGSwitchElement>]:
+				| SVGAttributes<SVGSwitchElement>[P]
+				| Property<SVGAttributes<SVGSwitchElement>[P]>
+		}
+		symbol: {
+			[P in keyof SVGAttributes<SVGSymbolElement>]:
+				| SVGAttributes<SVGSymbolElement>[P]
+				| Property<SVGAttributes<SVGSymbolElement>[P]>
+		}
+		text: {
+			[P in keyof SVGAttributes<SVGTextElement>]:
+				| SVGAttributes<SVGTextElement>[P]
+				| Property<SVGAttributes<SVGTextElement>[P]>
+		}
+		textPath: {
+			[P in keyof SVGAttributes<SVGTextPathElement>]:
+				| SVGAttributes<SVGTextPathElement>[P]
+				| Property<SVGAttributes<SVGTextPathElement>[P]>
+		}
+		tspan: {
+			[P in keyof SVGAttributes<SVGTSpanElement>]:
+				| SVGAttributes<SVGTSpanElement>[P]
+				| Property<SVGAttributes<SVGTSpanElement>[P]>
+		}
+		use: {
+			[P in keyof SVGAttributes<SVGUseElement>]:
+				| SVGAttributes<SVGUseElement>[P]
+				| Property<SVGAttributes<SVGUseElement>[P]>
+		}
+		view: {
+			[P in keyof SVGAttributes<SVGViewElement>]:
+				| SVGAttributes<SVGViewElement>[P]
+				| Property<SVGAttributes<SVGViewElement>[P]>
+		}
 	}
 }

@@ -1,22 +1,22 @@
-/* eslint-disable @typescript-eslint/no-namespace,@typescript-eslint/ban-types */
 import { JSXInternal } from './jsx'
+import { Property } from '@frp-ts/core'
+import { CURRENT_CONTEXT } from './context'
+export import PrimitiveElementChild = JSXInternal.PrimitiveElementChild
 export import ElementChild = JSXInternal.ElementChild
 export import ElementChildren = JSXInternal.ElementChildren
 import NativeElementChildren = JSXInternal.NativeElementChildren
-import { Property, Subscription } from '@frp-ts/core'
 import CSSProperties = JSXInternal.CSSProperties
 
 type PrimitivePropertyValue = string | number | boolean | undefined | null | CSSProperties | EventListener
 type PropertyValue = PrimitivePropertyValue | Property<PrimitivePropertyValue>
 type Props = null | Record<PropertyKey, PropertyValue>
 
-const SUBSCRIPTIONS = Symbol('Subscriptions')
-
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace h {
 	export interface ComponentType<Props> {
-		(props: Props): JSXInternal.Element
+		(props: Props): PrimitiveElementChild
 	}
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 	export import JSX = JSXInternal
 
 	export function createElement(
@@ -24,11 +24,11 @@ export namespace h {
 		props: Props,
 		...children: readonly ElementChildren[]
 	): JSX.Element {
-		console.group('createElement')
-		console.log('type', type)
-		console.log('props', props)
-		console.log('children', children)
-		console.groupEnd()
+		// console.group('createElement')
+		// console.log('type', type)
+		// console.log('props', props)
+		// console.log('children', children)
+		// console.groupEnd()
 		if (typeof type === 'string') {
 			// HTML Element
 			return createHTMLElement(type, props, ...children)
@@ -39,12 +39,21 @@ export namespace h {
 		}
 		if (typeof type === 'function') {
 			// ComponentType
-			return type({ ...props, children })
+			return type({
+				...props,
+				children: children.length === 1 ? children[0] : children,
+			})
 		}
-		throw new Error('cannot create component')
+		throw new Error(`Cannot create component: ${JSON.stringify(type)}`)
 	}
 
 	export const createFragment = () => {}
+}
+
+export const render = (element: PrimitiveElementChild, target?: Element | null): void => {
+	if (target && element !== null && element !== undefined) {
+		target.append(element instanceof Node ? element : element.toString())
+	}
 }
 
 const setStyleAttribute = (target: HTMLElement, name: string, value: PropertyValue): boolean => {
@@ -144,29 +153,6 @@ const setAttribute = (target: HTMLElement, name: string, value: PropertyValue): 
 	}
 }
 
-const attachDisposer = (target: Node) => {
-	// if this marker is connected, this means the target is also connected
-	const childMarker = document.createTextNode('')
-	const observer = new MutationObserver((list, observer) => {
-		// Use traditional 'for loops' for IE 11
-		for (const mutation of list) {
-			if (mutation.type === 'childList') {
-				console.log('A child node has been added or removed.')
-			} else if (mutation.type === 'attributes') {
-				console.log(`The ${mutation.attributeName ?? ''} attribute was modified.`)
-			}
-		}
-	})
-	observer.observe(target, {
-		subtree: true,
-		attributes: true,
-		attributeOldValue: true,
-		characterData: true,
-		characterDataOldValue: true,
-		childList: true,
-	})
-}
-
 const createDocumentFragment = (...children: readonly ElementChildren[]): DocumentFragment => {
 	const fragment = document.createDocumentFragment()
 	append(fragment, children)
@@ -183,9 +169,8 @@ const createHTMLElement = (type: string, props: Props, ...children: readonly Ele
 }
 
 const bindAttribute = (target: HTMLElement, name: string, value: Property<PrimitivePropertyValue>): void => {
-	const subscriptions = getSubscriptions(target)
 	const update = () => setAttribute(target, name, value.get())
-	subscriptions.add(value.subscribe({ next: update }))
+	CURRENT_CONTEXT.cleanups.add(value.subscribe({ next: update }).unsubscribe)
 	update()
 }
 
@@ -219,9 +204,7 @@ const renderChild = (child: ElementChild, currentReactiveRoot: Node): Node => {
 				endMarker.parentNode?.insertBefore(renderChildren(value, currentReactiveRoot), endMarker)
 			},
 		})
-		console.log('adding subscription to', currentReactiveRoot)
-		const subscriptions = getSubscriptions(currentReactiveRoot)
-		subscriptions.add(subscription)
+		CURRENT_CONTEXT.cleanups.add(subscription.unsubscribe)
 		return fragment
 	} else if (child instanceof Node) {
 		return child
@@ -252,14 +235,3 @@ const isRecord = (value: unknown): value is Record<PropertyKey, unknown> => type
 const isProperty = (value: unknown): value is Property<unknown> => isRecord(value) && typeof value['get'] === 'function'
 const isNonNullable = <T>(value: NonNullable<T> | null | undefined): value is NonNullable<T> =>
 	value !== null && value !== undefined
-
-// eslint-disable-next-line no-restricted-syntax
-const getField = <Value>(target: object, key: PropertyKey): Value | undefined => (target as never)[key]
-
-const getSubscriptions = (target: Node): Set<Subscription> => {
-	let subscriptions = getField<Set<Subscription>>(target, SUBSCRIPTIONS)
-	if (subscriptions === undefined) {
-		subscriptions = new Set()
-	}
-	return subscriptions
-}
