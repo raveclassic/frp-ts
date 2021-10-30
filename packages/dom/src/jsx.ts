@@ -19,8 +19,9 @@ type NativeWheelEvent = WheelEvent
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace JSXInternal {
-	type PrimitiveElementChild = Node | string | number | boolean | null | undefined
-	type ElementChild = PrimitiveElementChild | Property<PrimitiveElementChild>
+	type Primitive = string | number | boolean | null | undefined
+	type PrimitiveElementChild = Node | Primitive
+	type ElementChild = PrimitiveElementChild | Property<Primitive>
 	type ElementChildren = ElementChild | readonly ElementChild[]
 
 	// readonly ElementChildren[] allows passing {props.children} directly to native elements as content

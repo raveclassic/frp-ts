@@ -1,5 +1,5 @@
-import { ElementChildren, h, If, render } from '../src'
-import { clock, atom } from '@frp-ts/core'
+import { Bind, ElementChildren, h, If, render } from '../src'
+import { clock, atom, property } from '@frp-ts/core'
 
 const newAtom = atom.newAtom({
 	clock: clock.newCounterClock(),
@@ -49,8 +49,12 @@ function PropertyAttribute() {
 	const showNested = newAtom(false)
 	const handleNestedClick = () => showNested.modify((value) => !value)
 	return (
-		<div color={value}>
-			{/*{() => <div>hey</div>}*/}
+		<div>
+			<Bind>
+				{property.combine(showNested, (showNested) =>
+					showNested ? <div>TRUE: {showNested}</div> : <div>FALSE: {showNested}</div>,
+				)}
+			</Bind>
 			{value}
 			<button onClick={handleColorClick}>toggle color</button>
 			<If value={showNested} then={() => <div>then: {value}</div>} else={() => <div>else</div>} />
