@@ -9,17 +9,18 @@ export interface IfProps {
 }
 
 export function If(props: IfProps): PrimitiveElementChild {
-	return <Bind>{property.combine(props.value, (value) => (value ? props.then() : props.else?.()))}</Bind>
+	return <Bind name={'If'}>{property.combine(props.value, (value) => (value ? props.then() : props.else?.()))}</Bind>
 }
 
 export interface BindProps {
+	name?: string
 	children: Property<PrimitiveElementChild>
 }
 
 export function Bind(props: BindProps) {
 	let childContext: Context | undefined = undefined
 
-	const result = withContext('Bind Child', (context) => {
+	const result = withContext(props.name ?? 'Bind', (context) => {
 		childContext = context
 		let shouldDisposeChildContext = false
 		return property.combine(props.children, (children) => {
