@@ -1,20 +1,21 @@
 import { JSXInternal } from './jsx'
 import { Property } from '@frp-ts/core'
-import { CURRENT_CONTEXT } from './context'
+import { cleanup, CURRENT_CONTEXT } from './context'
 export import PrimitiveElementChild = JSXInternal.PrimitiveElementChild
 export import ElementChild = JSXInternal.ElementChild
 export import ElementChildren = JSXInternal.ElementChildren
 import NativeElementChildren = JSXInternal.NativeElementChildren
 import CSSProperties = JSXInternal.CSSProperties
+import Primitive = JSXInternal.Primitive
 
-type PrimitivePropertyValue = string | number | boolean | undefined | null | CSSProperties | EventListener
+type PrimitivePropertyValue = Primitive | CSSProperties | EventListener
 type PropertyValue = PrimitivePropertyValue | Property<PrimitivePropertyValue>
 type Props = null | Record<PropertyKey, PropertyValue>
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace h {
 	export interface ComponentType<Props> {
-		(props: Props): PrimitiveElementChild
+		(props: Props): JSX.Element | null
 	}
 
 	export import JSX = JSXInternal
@@ -44,7 +45,6 @@ export namespace h {
 				children: children.length === 1 ? children[0] : children,
 			})
 		}
-		throw new Error(`Cannot create component: ${JSON.stringify(type)}`)
 	}
 
 	export const createFragment = () => {}
@@ -56,13 +56,9 @@ export const render = (element: PrimitiveElementChild, target?: Element | null):
 	}
 }
 
-const setStyleAttribute = (target: HTMLElement, name: string, value: PropertyValue): boolean => {
+const processStyle = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
 	if (isNonNullable(value)) {
-		if (isProperty(value)) {
-			// reactive style attribute
-			bindAttribute(target, name, value)
-			return true
-		} else if (typeof value === 'string') {
+		if (typeof value === 'string') {
 			// style: string
 			target.style.cssText = value
 		} else if (typeof value === 'object') {
@@ -70,86 +66,82 @@ const setStyleAttribute = (target: HTMLElement, name: string, value: PropertyVal
 			for (const cssProperty in value) {
 				// eslint-disable-next-line no-restricted-syntax
 				const cssValue: unknown = (value as never)[cssProperty]
-				// ignore null as `setAttribute` is called once per element instantiation
 				if (typeof cssValue === 'string') {
 					target.style.setProperty(cssProperty, cssValue)
 				} else {
-					throw new TypeError(
-						`Style property "${cssProperty}" should have string type. Received ${JSON.stringify(cssValue)}`,
-					)
+					if (isNonNullable(cssValue)) {
+						throw new TypeError(
+							`Style property "${cssProperty}" should have string type or be undefined or null. Received ${JSON.stringify(
+								cssValue,
+							)}`,
+						)
+					}
 				}
 			}
 		}
 	} else {
 		target.style.cssText = ''
 	}
-	return false
 }
 
-const setEventHandler = (target: HTMLElement, name: string, value: PropertyValue): boolean => {
-	// event handler
-	const trimmedName = name.slice(2).toLowerCase()
-	// todo this wont work
-	const handler: EventListener = (e) => {
-		typeof value === 'function' && value(e)
+interface EventProxy extends Record<string, EventListener> {}
+const EVENT_PROXY = new WeakMap<object, EventProxy>()
+const getEventProxy = (target: object): EventProxy => {
+	let proxy = EVENT_PROXY.get(target)
+	if (!proxy) {
+		proxy = {}
+		EVENT_PROXY.set(target, proxy)
 	}
+	return proxy
+}
+function handleEvent(this: HTMLElement, event: Event): void {
+	const handler = getEventProxy(this)[event.type]
+	handler?.(event)
+}
+const processEventHandler = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
+	const trimmedName = name.slice(2).toLowerCase()
 	if (isNonNullable(value)) {
-		if (isProperty(value)) {
-			// reactive event handler
-			bindAttribute(target, name, value)
-			return true
-		} else {
-			target.addEventListener(trimmedName, handler)
+		if (typeof value === 'function') {
+			getEventProxy(target)[trimmedName] = value
+			target.addEventListener(trimmedName, handleEvent)
 		}
 	} else {
-		target.removeEventListener(trimmedName, handler)
+		delete getEventProxy(target)[trimmedName]
+		target.removeEventListener(trimmedName, handleEvent)
 	}
-
-	return false
 }
 
-const setClassName = (target: HTMLElement, name: string, value: PropertyValue): boolean => {
-	if (isNonNullable(value)) {
-		if (isProperty(value)) {
-			// reactive className
-			bindAttribute(target, name, value)
-			return true
-		} else {
-			target.className = value.toString()
-		}
-	}
-	return false
+const processClassName = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
+	target.className = isNonNullable(value) ? value.toString() : ''
 }
 
-const setArbitraryProperty = (target: HTMLElement, name: string, value: PropertyValue): boolean => {
+const processArbitraryAttribute = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
 	if (isNonNullable(value)) {
-		if (isProperty(value)) {
-			// arbitrary reactive attribute
-			bindAttribute(target, name, value)
-			return true
-		} else {
-			target.setAttribute(name, value.toString())
-		}
+		target.setAttribute(name, value.toString())
 	} else {
 		target.removeAttribute(name)
 	}
-	return false
 }
 
-/**
- * Binds `value` to the `target` under `name`.
- * If `value` is a `Property`, subscribes to changes
- * @returns {boolean} - inidicates whether the function requires cleanup due to possible subscriptions to {@link Property}
- */
-const setAttribute = (target: HTMLElement, name: string, value: PropertyValue): boolean => {
+const processAttribute = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
 	if (name === 'style') {
-		return setStyleAttribute(target, name, value)
+		processStyle(target, name, value)
 	} else if (name.startsWith('on')) {
-		return setEventHandler(target, name, value)
+		processEventHandler(target, name, value)
 	} else if (name === 'className') {
-		return setClassName(target, name, value)
+		processClassName(target, name, value)
 	} else {
-		return setArbitraryProperty(target, name, value)
+		processArbitraryAttribute(target, name, value)
+	}
+}
+
+const processProp = (target: HTMLElement, name: string, value: PropertyValue): void => {
+	if (isProperty(value)) {
+		const update = () => processAttribute(target, name, value.get())
+		cleanup(value.subscribe({ next: update }).unsubscribe)
+		update()
+	} else {
+		processAttribute(target, name, value)
 	}
 }
 
@@ -162,16 +154,10 @@ const createDocumentFragment = (...children: readonly ElementChildren[]): Docume
 const createHTMLElement = (type: string, props: Props, ...children: readonly ElementChildren[]): HTMLElement => {
 	const element = document.createElement(type)
 	for (const name in props) {
-		setAttribute(element, name, props[name])
+		processProp(element, name, props[name])
 	}
 	append(element, children)
 	return element
-}
-
-const bindAttribute = (target: HTMLElement, name: string, value: Property<PrimitivePropertyValue>): void => {
-	const update = () => setAttribute(target, name, value.get())
-	CURRENT_CONTEXT.cleanups.add(value.subscribe({ next: update }).unsubscribe)
-	update()
 }
 
 /**
@@ -190,48 +176,82 @@ const clearBetween = (startMarker: Node, endMarker: Node): void => {
 	}
 }
 
-const renderChild = (child: ElementChild, currentReactiveRoot: Node): Node => {
+const renderChild = (child: ElementChild): Node | undefined => {
 	if (isProperty(child)) {
 		const fragment = document.createDocumentFragment()
 		const startMarker = document.createTextNode('')
 		const endMarker = document.createTextNode('')
-		const node = renderChildren(child.get(), currentReactiveRoot)
-		fragment.append(startMarker, node, endMarker)
+		fragment.append(startMarker)
+		const rendered = renderChildren(child.get())
+		if (rendered) {
+			if (rendered instanceof Node) {
+				fragment.append(rendered)
+			} else {
+				fragment.append(...rendered)
+			}
+		}
+		fragment.append(endMarker)
 		const subscription = child.subscribe({
 			next: () => {
 				const value = child.get()
 				clearBetween(startMarker, endMarker)
-				endMarker.parentNode?.insertBefore(renderChildren(value, currentReactiveRoot), endMarker)
+				if (endMarker.parentNode) {
+					const rendered = renderChildren(value)
+					if (rendered) {
+						if (rendered instanceof Node) {
+							endMarker.parentNode.insertBefore(rendered, endMarker)
+						} else {
+							const fragment = document.createDocumentFragment()
+							fragment.append(...rendered)
+							endMarker.parentNode.insertBefore(fragment, endMarker)
+						}
+					}
+				}
 			},
 		})
 		CURRENT_CONTEXT.cleanups.add(subscription.unsubscribe)
 		return fragment
 	} else if (child instanceof Node) {
 		return child
-	} else if (isNonNullable(child)) {
+	} else if (isNonNullable(child) && typeof child !== 'boolean') {
 		return document.createTextNode(child.toString())
-	} else {
-		return document.createDocumentFragment()
 	}
 }
 
-const renderChildren = (children: NativeElementChildren, reactiveRoot: Node): Node => {
+const renderChildren = (children: NativeElementChildren): Node | readonly Node[] | undefined => {
 	if (isElementChild(children)) {
 		// single child
-		return renderChild(children, reactiveRoot)
+		return renderChild(children)
 	} else {
 		// multiple children
-		const fragment = document.createDocumentFragment()
-		fragment.append(...children.map((child) => renderChildren(child, reactiveRoot)))
-		return fragment
+		const result: Node[] = []
+		for (const child of children) {
+			const rendered = renderChildren(child)
+			if (rendered) {
+				if (rendered instanceof Node) {
+					result.push(rendered)
+				} else {
+					result.push(...rendered)
+				}
+			}
+		}
+		return result
 	}
 }
-const append = (target: Element | DocumentFragment, children: NativeElementChildren) => {
-	target.append(renderChildren(children, target))
+
+const append = (target: Element | DocumentFragment, children: NativeElementChildren): void => {
+	const rendered = renderChildren(children)
+	if (rendered) {
+		if (rendered instanceof Node) {
+			target.append(rendered)
+		} else {
+			target.append(...rendered)
+		}
+	}
 }
 
 const isElementChild = (value: NativeElementChildren): value is ElementChild => !Array.isArray(value)
-const isRecord = (value: unknown): value is Record<PropertyKey, unknown> => typeof value === 'object'
+const isRecord = (value: unknown): value is Record<PropertyKey, unknown> => typeof value === 'object' && value !== null
 const isProperty = (value: unknown): value is Property<unknown> => isRecord(value) && typeof value['get'] === 'function'
 const isNonNullable = <T>(value: NonNullable<T> | null | undefined): value is NonNullable<T> =>
 	value !== null && value !== undefined

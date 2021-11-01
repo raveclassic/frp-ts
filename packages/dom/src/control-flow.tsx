@@ -1,5 +1,5 @@
 import { PrimitiveElementChild, h } from './h'
-import { cleanup, Context, disposeContext, withContext } from './context'
+import { disposeContext, withContext } from './context'
 import { property, Property } from '@frp-ts/core'
 
 export interface IfProps {
@@ -17,11 +17,8 @@ export interface BindProps {
 	children: Property<PrimitiveElementChild>
 }
 
-export function Bind(props: BindProps) {
-	let childContext: Context | undefined = undefined
-
-	const result = withContext(props.name ?? 'Bind', (context) => {
-		childContext = context
+export function Bind(props: BindProps): PrimitiveElementChild {
+	const [result, childContext] = withContext(props.name ?? 'Bind', () => {
 		let shouldDisposeChildContext = false
 		return property.combine(props.children, (children) => {
 			shouldDisposeChildContext && childContext && disposeContext(childContext)
@@ -29,8 +26,6 @@ export function Bind(props: BindProps) {
 			return children
 		})
 	})
-
-	cleanup(() => (childContext = undefined))
 
 	return <>{result}</>
 }

@@ -49,12 +49,18 @@ function PropertyAttribute() {
 	const showNested = newAtom(false)
 	const handleNestedClick = () => showNested.modify((value) => !value)
 	return (
-		<div>
+		<div style={newAtom(undefined)} className={newAtom(undefined)}>
 			<Bind>
 				{property.combine(showNested, (showNested) =>
 					showNested ? <div>TRUE: {showNested}</div> : <div>FALSE: {showNested}</div>,
 				)}
 			</Bind>
+			<>
+				{property.combine(showNested, (showNested) =>
+					showNested ? <div>TRUE: {showNested}</div> : <div>FALSE: {showNested}</div>,
+				)}
+			</>
+			<>{() => 123}</>
 			{value}
 			<button onClick={handleColorClick}>toggle color</button>
 			<If value={showNested} then={() => <div>then: {value}</div>} else={() => <div>else</div>} />
@@ -64,9 +70,14 @@ function PropertyAttribute() {
 	)
 }
 
+const Foo2 = () => {
+	return undefined
+}
+
 // render
 render(
 	<>
+		<Foo2 />
 		<App foo={'foo'}>Child</App>
 		<PropertyAttribute />
 	</>,

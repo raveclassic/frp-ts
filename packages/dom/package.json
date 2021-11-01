@@ -32,6 +32,7 @@
     "csstype": "^3.0.9"
   },
   "devDependencies": {
+    "@frp-ts/utils": "^0.0.2",
     "html-webpack-plugin": "^5.5.0",
     "rimraf": "^3.0.2",
     "ts-loader": "^7.0.5",
