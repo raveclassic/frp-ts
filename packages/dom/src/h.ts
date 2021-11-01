@@ -224,7 +224,7 @@ const renderChild = (child: ElementChild): Node | undefined => {
 				}
 			},
 		})
-		CURRENT_CONTEXT.cleanups.add(subscription.unsubscribe)
+		cleanup(subscription.unsubscribe)
 		return fragment
 	} else if (child instanceof Node) {
 		return child

@@ -23,34 +23,185 @@ describe('createElement', () => {
 			})
 		})
 		describe('children', () => {
-			it('adds string content', () => {
-				const div = h.createElement('div', null, 'foo')
-				expect(getChildNodes(div)).toEqual([document.createTextNode('foo')])
+			describe('string', () => {
+				it('renders text node', () => {
+					const div = h.createElement('div', null, 'foo')
+					expect(getChildNodes(div)).toEqual([document.createTextNode('foo')])
+				})
+				it('renders text node for initial Property value', () => {
+					const div = h.createElement('div', null, newAtom('foo'))
+					expect(getChildNodes(div)).toEqual([
+						document.createTextNode(''),
+						document.createTextNode('foo'),
+						document.createTextNode(''),
+					])
+				})
+				it('updates text node for Property updates', () => {
+					const children = newAtom('foo')
+					const div = h.createElement('div', null, children)
+					children.set('bar')
+					expect(getChildNodes(div)).toEqual([
+						document.createTextNode(''),
+						document.createTextNode('bar'),
+						document.createTextNode(''),
+					])
+				})
 			})
-			it('adds node content', () => {
-				const child = h.createElement('div', null)
-				const div = h.createElement('div', null, child)
-				expect(getChildNodes(div)).toEqual([child])
+			describe('node', () => {
+				it('renders node', () => {
+					const child = h.createElement('div', null)
+					const div = h.createElement('div', null, child)
+					expect(getChildNodes(div)).toEqual([child])
+				})
 			})
-			it('skips null content', () => {
-				const div = h.createElement('div', null, null)
-				expect(getChildNodes(div)).toEqual([])
+			describe('null', () => {
+				it('skips content', () => {
+					const div = h.createElement('div', null, null)
+					expect(getChildNodes(div)).toEqual([])
+				})
+				it('skips initial Property value', () => {
+					const div = h.createElement('div', null, newAtom(null))
+					expect(getChildNodes(div)).toEqual([document.createTextNode(''), document.createTextNode('')])
+				})
+				it('removes content for Property updates', () => {
+					const children = newAtom<string | null>('foo')
+					const element = h.createElement('div', null, children)
+					children.set(null)
+					expect(getChildNodes(element)).toEqual([document.createTextNode(''), document.createTextNode('')])
+				})
 			})
-			it('skips undefined content', () => {
-				const div = h.createElement('div', null, undefined)
-				expect(getChildNodes(div)).toEqual([])
+			describe('undefined', () => {
+				it('skips content', () => {
+					const div = h.createElement('div', null, undefined)
+					expect(getChildNodes(div)).toEqual([])
+				})
+				it('skips initial Property value', () => {
+					const div = h.createElement('div', null, newAtom(undefined))
+					expect(getChildNodes(div)).toEqual([document.createTextNode(''), document.createTextNode('')])
+				})
+				it('removes content for Property updates', () => {
+					const children = newAtom<string | undefined>('foo')
+					const element = h.createElement('div', null, children)
+					children.set(undefined)
+					expect(getChildNodes(element)).toEqual([document.createTextNode(''), document.createTextNode('')])
+				})
 			})
-			it('skips "false" content', () => {
-				const div = h.createElement('div', null, false)
-				expect(getChildNodes(div)).toEqual([])
+			describe('"false"', () => {
+				it('skips content', () => {
+					const div = h.createElement('div', null, false)
+					expect(getChildNodes(div)).toEqual([])
+				})
+				it('skips initial Property value', () => {
+					const div = h.createElement('div', null, newAtom(false))
+					expect(getChildNodes(div)).toEqual([document.createTextNode(''), document.createTextNode('')])
+				})
+				it('removes content for Property updates', () => {
+					const children = newAtom<string | false>('foo')
+					const element = h.createElement('div', null, children)
+					children.set(false)
+					expect(getChildNodes(element)).toEqual([document.createTextNode(''), document.createTextNode('')])
+				})
 			})
-			it('skips "true" content', () => {
-				const div = h.createElement('div', null, true)
-				expect(getChildNodes(div)).toEqual([])
+			describe('"true"', () => {
+				it('skips content', () => {
+					const div = h.createElement('div', null, true)
+					expect(getChildNodes(div)).toEqual([])
+				})
+				it('skips initial Property value', () => {
+					const div = h.createElement('div', null, newAtom(true))
+					expect(getChildNodes(div)).toEqual([document.createTextNode(''), document.createTextNode('')])
+				})
+				it('removes content for Property updates', () => {
+					const children = newAtom<string | true>('foo')
+					const element = h.createElement('div', null, children)
+					children.set(true)
+					expect(getChildNodes(element)).toEqual([document.createTextNode(''), document.createTextNode('')])
+				})
 			})
-			it('stringifies numeric content', () => {
-				const div = h.createElement('div', null, 123)
-				expect(getChildNodes(div)).toEqual([document.createTextNode('123')])
+			describe('number', () => {
+				it('renders text node', () => {
+					const div = h.createElement('div', null, 123)
+					expect(getChildNodes(div)).toEqual([document.createTextNode('123')])
+				})
+				it('renders text node for initial Property value', () => {
+					const div = h.createElement('div', null, newAtom(123))
+					expect(getChildNodes(div)).toEqual([
+						document.createTextNode(''),
+						document.createTextNode('123'),
+						document.createTextNode(''),
+					])
+				})
+				it('updates text node for Property updates', () => {
+					const children = newAtom(123)
+					const div = h.createElement('div', null, children)
+					children.set(456)
+					expect(getChildNodes(div)).toEqual([
+						document.createTextNode(''),
+						document.createTextNode('456'),
+						document.createTextNode(''),
+					])
+				})
+			})
+			describe('all at once', () => {
+				it('renders content', () => {
+					const child = h.createElement('div', null, undefined)
+					const element = h.createElement('div', null, ['string', 123, null, undefined, child])
+					expect(getChildNodes(element)).toEqual([
+						document.createTextNode('string'),
+						document.createTextNode('123'),
+						child,
+					])
+				})
+				it('renders content for Property initial value', () => {
+					const stringValue = newAtom('string')
+					const numberValue = newAtom(123)
+					const nullValue = newAtom(null)
+					const undefinedValue = newAtom(undefined)
+					const element = h.createElement('div', null, [stringValue, numberValue, nullValue, undefinedValue])
+					expect(getChildNodes(element)).toEqual([
+						document.createTextNode(''),
+						document.createTextNode('string'),
+						document.createTextNode(''),
+
+						document.createTextNode(''),
+						document.createTextNode('123'),
+						document.createTextNode(''),
+
+						document.createTextNode(''),
+						document.createTextNode(''),
+
+						document.createTextNode(''),
+						document.createTextNode(''),
+					])
+				})
+				it('updates content for Property updates', () => {
+					const stringValue = newAtom('string')
+					const numberValue = newAtom(123)
+					const nullValue = newAtom<string | null>(null)
+					const undefinedValue = newAtom<string | undefined>(undefined)
+					const element = h.createElement('div', null, [stringValue, numberValue, nullValue, undefinedValue])
+					stringValue.set('foo')
+					numberValue.set(456)
+					nullValue.set('null')
+					undefinedValue.set('undefined')
+					expect(getChildNodes(element)).toEqual([
+						document.createTextNode(''),
+						document.createTextNode('foo'),
+						document.createTextNode(''),
+
+						document.createTextNode(''),
+						document.createTextNode('456'),
+						document.createTextNode(''),
+
+						document.createTextNode(''),
+						document.createTextNode('null'),
+						document.createTextNode(''),
+
+						document.createTextNode(''),
+						document.createTextNode('undefined'),
+						document.createTextNode(''),
+					])
+				})
 			})
 		})
 		describe('props', () => {
