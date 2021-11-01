@@ -3,6 +3,6 @@
   "compilerOptions": {
     "jsx": "react",
     "jsxFactory": "h.createElement",
-    "jsxFragmentFactory": "h.createFragment"
+    "jsxFragmentFactory": "h.Fragment"
   }
 }

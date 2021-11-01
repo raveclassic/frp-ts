@@ -14,12 +14,12 @@ type PropertyValue = PrimitivePropertyValue | Property<PrimitivePropertyValue>
 type Props = null | Record<PropertyKey, PropertyValue>
 type NativeElement = HTMLElement | SVGElement
 
+export interface ComponentType<Props> {
+	(props: Props): JSXInternal.Element
+}
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace h {
-	export interface ComponentType<Props> {
-		(props: Props): JSX.Element | null
-	}
-
 	export import JSX = JSXInternal
 
 	export function createElement(
@@ -36,7 +36,7 @@ export namespace h {
 			// HTML Element
 			return createNativeElement(type, props, ...children)
 		}
-		if (type === createFragment) {
+		if (type === Fragment) {
 			// Fragment <></>
 			return createDocumentFragment(...children)
 		}
@@ -54,8 +54,13 @@ export namespace h {
 		}
 	}
 
-	export const createFragment = constVoid
+	export const Fragment: ComponentType<FragmentProps> = constVoid
 }
+
+export interface FragmentProps {
+	readonly children?: ElementChildren
+}
+export const Fragment = h.Fragment
 
 export const render = (element: PrimitiveElementChild, target?: Element | null): void => {
 	if (target && element !== null && element !== undefined) {
