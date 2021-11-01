@@ -11,6 +11,7 @@ import Primitive = JSXInternal.Primitive
 type PrimitivePropertyValue = Primitive | CSSProperties | EventListener
 type PropertyValue = PrimitivePropertyValue | Property<PrimitivePropertyValue>
 type Props = null | Record<PropertyKey, PropertyValue>
+type NativeElement = HTMLElement | SVGElement
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace h {
@@ -32,7 +33,7 @@ export namespace h {
 		// console.groupEnd()
 		if (typeof type === 'string') {
 			// HTML Element
-			return createHTMLElement(type, props, ...children)
+			return createNativeElement(type, props, ...children)
 		}
 		if (type === createFragment) {
 			// Fragment <></>
@@ -56,7 +57,7 @@ export const render = (element: PrimitiveElementChild, target?: Element | null):
 	}
 }
 
-const processStyle = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
+const processStyle = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
 	if (isNonNullable(value)) {
 		if (typeof value === 'string') {
 			// style: string
@@ -94,11 +95,11 @@ const getEventProxy = (target: object): EventProxy => {
 	}
 	return proxy
 }
-function handleEvent(this: HTMLElement, event: Event): void {
+function handleEvent(this: NativeElement, event: Event): void {
 	const handler = getEventProxy(this)[event.type]
 	handler?.(event)
 }
-const processEventHandler = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
+const processEventHandler = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
 	const trimmedName = name.slice(2).toLowerCase()
 	if (isNonNullable(value)) {
 		if (typeof value === 'function') {
@@ -111,11 +112,15 @@ const processEventHandler = (target: HTMLElement, name: string, value: Primitive
 	}
 }
 
-const processClassName = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
-	target.className = isNonNullable(value) ? value.toString() : ''
+const processClassName = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
+	if (target instanceof SVGElement) {
+		processArbitraryAttribute(target, 'class', value)
+	} else {
+		target.className = isNonNullable(value) ? value.toString() : ''
+	}
 }
 
-const processArbitraryAttribute = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
+const processArbitraryAttribute = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
 	if (isNonNullable(value)) {
 		target.setAttribute(name, value.toString())
 	} else {
@@ -123,7 +128,7 @@ const processArbitraryAttribute = (target: HTMLElement, name: string, value: Pri
 	}
 }
 
-const processAttribute = (target: HTMLElement, name: string, value: PrimitivePropertyValue): void => {
+const processAttribute = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
 	if (name === 'style') {
 		processStyle(target, name, value)
 	} else if (name.startsWith('on')) {
@@ -135,7 +140,7 @@ const processAttribute = (target: HTMLElement, name: string, value: PrimitivePro
 	}
 }
 
-const processProp = (target: HTMLElement, name: string, value: PropertyValue): void => {
+const processProp = (target: NativeElement, name: string, value: PropertyValue): void => {
 	if (isProperty(value)) {
 		const update = () => processAttribute(target, name, value.get())
 		cleanup(value.subscribe({ next: update }).unsubscribe)
@@ -151,8 +156,18 @@ const createDocumentFragment = (...children: readonly ElementChildren[]): Docume
 	return fragment
 }
 
-const createHTMLElement = (type: string, props: Props, ...children: readonly ElementChildren[]): HTMLElement => {
-	const element = document.createElement(type)
+export const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
+let isSvg = false
+export const svg = <Result>(factory: () => Result): Result => {
+	const current = isSvg
+	isSvg = true
+	const result = factory()
+	isSvg = current
+	return result
+}
+
+const createNativeElement = (type: string, props: Props, ...children: readonly ElementChildren[]): NativeElement => {
+	const element = isSvg ? document.createElementNS(SVG_NAMESPACE, type) : document.createElement(type)
 	for (const name in props) {
 		processProp(element, name, props[name])
 	}

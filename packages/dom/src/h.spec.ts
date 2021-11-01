@@ -1,4 +1,4 @@
-import { h } from './h'
+import { h, svg } from './h'
 import { constVoid } from '@frp-ts/utils'
 import { atom, clock } from '@frp-ts/core'
 import { CURRENT_CONTEXT, disposeContext } from './context'
@@ -17,9 +17,9 @@ describe('createElement', () => {
 				const div = h.createElement('div', null)
 				expect(div).toBeInstanceOf(HTMLDivElement)
 			})
-			it.skip('creates namespaced native element', () => {
-				const svg = h.createElement('svg', null, undefined)
-				expect(svg).toBeInstanceOf(SVGElement)
+			it('creates native svg element', () => {
+				const element = svg(() => h.createElement('svg', null, undefined))
+				expect(element).toBeInstanceOf(SVGSVGElement)
 			})
 		})
 		describe('children', () => {
@@ -214,38 +214,76 @@ describe('createElement', () => {
 				})
 			})
 			describe('className attribute', () => {
-				describe('string', () => {
-					it('sets string value', () => {
-						const div = h.createElement('div', { className: 'foo' })
-						expect(getClassName(div)).toBe('foo')
+				describe('html elements', () => {
+					describe('string', () => {
+						it('sets string value', () => {
+							const div = h.createElement('div', { className: 'foo' })
+							expect(getClassName(div)).toBe('foo')
+						})
+						it('sets initial Property value', () => {
+							const className = newAtom('foo')
+							const div = h.createElement('div', { className })
+							expect(getClassName(div)).toBe('foo')
+						})
+						it('updates value', () => {
+							const className = newAtom('foo')
+							const div = h.createElement('div', { className })
+							className.set('bar')
+							expect(getClassName(div)).toBe('bar')
+						})
 					})
-					it('sets initial Property value', () => {
-						const className = newAtom('foo')
-						const div = h.createElement('div', { className })
-						expect(getClassName(div)).toBe('foo')
-					})
-					it('updates value', () => {
-						const className = newAtom('foo')
-						const div = h.createElement('div', { className })
-						className.set('bar')
-						expect(getClassName(div)).toBe('bar')
+					describe('undefined', () => {
+						it('skips value', () => {
+							const div = h.createElement('div', { className: undefined })
+							expect(getClassName(div)).toBe('')
+						})
+						it('skips initial Property value', () => {
+							const className = newAtom(undefined)
+							const div = h.createElement('div', { className })
+							expect(getClassName(div)).toBe('')
+						})
+						it('updates value', () => {
+							const className = newAtom('foo')
+							const div = h.createElement('div', { className })
+							className.set('bar')
+							expect(getClassName(div)).toBe('bar')
+						})
 					})
 				})
-				describe('undefined', () => {
-					it('skips value', () => {
-						const div = h.createElement('div', { className: undefined })
-						expect(getClassName(div)).toBe('')
+				describe('svg elements', () => {
+					describe('string', () => {
+						it('sets string value', () => {
+							const element = svg(() => h.createElement('svg', { className: 'foo' }))
+							expect(getAttribute(element, 'class')).toBe('foo')
+						})
+						it('sets initial Property value', () => {
+							const className = newAtom('foo')
+							const element = svg(() => h.createElement('svg', { className }))
+							expect(getAttribute(element, 'class')).toBe('foo')
+						})
+						it('updates value', () => {
+							const className = newAtom('foo')
+							const element = svg(() => h.createElement('svg', { className }))
+							className.set('bar')
+							expect(getAttribute(element, 'class')).toBe('bar')
+						})
 					})
-					it('skips initial Property value', () => {
-						const className = newAtom(undefined)
-						const div = h.createElement('div', { className })
-						expect(getClassName(div)).toBe('')
-					})
-					it('updates value', () => {
-						const className = newAtom('foo')
-						const div = h.createElement('div', { className })
-						className.set('bar')
-						expect(getClassName(div)).toBe('bar')
+					describe('undefined', () => {
+						it('skips value', () => {
+							const element = svg(() => h.createElement('svg', { className: undefined }))
+							expect(getAttribute(element, 'class')).toBe(null)
+						})
+						it('skips initial Property value', () => {
+							const className = newAtom(undefined)
+							const element = svg(() => h.createElement('svg', { className }))
+							expect(getAttribute(element, 'class')).toBe(null)
+						})
+						it('removes attribute', () => {
+							const className = newAtom<undefined | string>('foo')
+							const delement = svg(() => h.createElement('svg', { className }))
+							className.set(undefined)
+							expect(getAttribute(delement, 'class')).toBe(null)
+						})
 					})
 				})
 			})
