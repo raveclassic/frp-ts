@@ -485,6 +485,50 @@ describe('createElement', () => {
 			})
 		})
 	})
+	describe('fragment', () => {})
+	describe('component', () => {
+		it('does not pass null props', () => {
+			const foo = jest.fn(constVoid)
+			h.createElement(foo, null, undefined)
+			expect(foo).toHaveBeenLastCalledWith()
+		})
+		it('passes props for null/undefined children', () => {
+			const foo = jest.fn(constVoid)
+			const props = { foo: 123 }
+			h.createElement(foo, props, null, undefined)
+			expect(foo).toHaveBeenLastCalledWith(props)
+		})
+		it('passes props with children', () => {
+			const foo = jest.fn(constVoid)
+			const props = { foo: 123 }
+			h.createElement(foo, props, 'foo')
+			expect(foo).toHaveBeenLastCalledWith({
+				...props,
+				children: 'foo',
+			})
+		})
+		it('does not pass null/undefined children', () => {
+			const foo = jest.fn(constVoid)
+			h.createElement(foo, null, null, undefined)
+			expect(foo).toHaveBeenLastCalledWith()
+		})
+		it('passes single child directly', () => {
+			const foo = jest.fn(constVoid)
+			h.createElement(foo, null, 'foo')
+			expect(foo).toHaveBeenLastCalledWith({ children: 'foo' })
+		})
+		it('passes multiple children as a list', () => {
+			const foo = jest.fn(constVoid)
+			h.createElement(foo, null, 'foo', 123)
+			expect(foo).toHaveBeenLastCalledWith({ children: ['foo', 123] })
+		})
+		it('returns component output', () => {
+			const child = h.createElement('div', null, 'child')
+			const foo = () => child
+			const result = h.createElement(foo, null)
+			expect(result).toBe(child)
+		})
+	})
 })
 
 const getChildNodes = (target: unknown): readonly Node[] => {

@@ -1,12 +1,13 @@
 import { JSXInternal } from './jsx'
 import { Property } from '@frp-ts/core'
-import { cleanup, CURRENT_CONTEXT } from './context'
+import { cleanup } from './context'
 export import PrimitiveElementChild = JSXInternal.PrimitiveElementChild
 export import ElementChild = JSXInternal.ElementChild
 export import ElementChildren = JSXInternal.ElementChildren
 import NativeElementChildren = JSXInternal.NativeElementChildren
 import CSSProperties = JSXInternal.CSSProperties
 import Primitive = JSXInternal.Primitive
+import { constVoid } from '@frp-ts/utils'
 
 type PrimitivePropertyValue = Primitive | CSSProperties | EventListener
 type PropertyValue = PrimitivePropertyValue | Property<PrimitivePropertyValue>
@@ -41,14 +42,19 @@ export namespace h {
 		}
 		if (typeof type === 'function') {
 			// ComponentType
-			return type({
-				...props,
-				children: children.length === 1 ? children[0] : children,
-			})
+			const filteredChildren = children.filter(isNonNullableOrVoid)
+			if (filteredChildren.length === 0) {
+				return props === null ? type() : type(props)
+			} else {
+				type({
+					...props,
+					children: filteredChildren.length === 1 ? filteredChildren[0] : filteredChildren,
+				})
+			}
 		}
 	}
 
-	export const createFragment = () => {}
+	export const createFragment = constVoid
 }
 
 export const render = (element: PrimitiveElementChild, target?: Element | null): void => {
@@ -58,7 +64,7 @@ export const render = (element: PrimitiveElementChild, target?: Element | null):
 }
 
 const processStyle = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
-	if (isNonNullable(value)) {
+	if (isNonNullableOrVoid(value)) {
 		if (typeof value === 'string') {
 			// style: string
 			target.style.cssText = value
@@ -70,7 +76,7 @@ const processStyle = (target: NativeElement, name: string, value: PrimitivePrope
 				if (typeof cssValue === 'string') {
 					target.style.setProperty(cssProperty, cssValue)
 				} else {
-					if (isNonNullable(cssValue)) {
+					if (isNonNullableOrVoid(cssValue)) {
 						throw new TypeError(
 							`Style property "${cssProperty}" should have string type or be undefined or null. Received ${JSON.stringify(
 								cssValue,
@@ -101,7 +107,7 @@ function handleEvent(this: NativeElement, event: Event): void {
 }
 const processEventHandler = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
 	const trimmedName = name.slice(2).toLowerCase()
-	if (isNonNullable(value)) {
+	if (isNonNullableOrVoid(value)) {
 		if (typeof value === 'function') {
 			getEventProxy(target)[trimmedName] = value
 			target.addEventListener(trimmedName, handleEvent)
@@ -116,12 +122,12 @@ const processClassName = (target: NativeElement, name: string, value: PrimitiveP
 	if (target instanceof SVGElement) {
 		processArbitraryAttribute(target, 'class', value)
 	} else {
-		target.className = isNonNullable(value) ? value.toString() : ''
+		target.className = isNonNullableOrVoid(value) ? value.toString() : ''
 	}
 }
 
 const processArbitraryAttribute = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
-	if (isNonNullable(value)) {
+	if (isNonNullableOrVoid(value)) {
 		target.setAttribute(name, value.toString())
 	} else {
 		target.removeAttribute(name)
@@ -228,7 +234,7 @@ const renderChild = (child: ElementChild): Node | undefined => {
 		return fragment
 	} else if (child instanceof Node) {
 		return child
-	} else if (isNonNullable(child) && typeof child !== 'boolean') {
+	} else if (isNonNullableOrVoid(child) && typeof child !== 'boolean') {
 		return document.createTextNode(child.toString())
 	}
 }
@@ -268,5 +274,6 @@ const append = (target: Element | DocumentFragment, children: NativeElementChild
 const isElementChild = (value: NativeElementChildren): value is ElementChild => !Array.isArray(value)
 const isRecord = (value: unknown): value is Record<PropertyKey, unknown> => typeof value === 'object' && value !== null
 const isProperty = (value: unknown): value is Property<unknown> => isRecord(value) && typeof value['get'] === 'function'
-const isNonNullable = <T>(value: NonNullable<T> | null | undefined): value is NonNullable<T> =>
+type NonNullableOrVoid<T> = T extends null | undefined | void ? never : T
+const isNonNullableOrVoid = <T>(value: NonNullableOrVoid<T> | null | undefined | void): value is NonNullableOrVoid<T> =>
 	value !== null && value !== undefined
