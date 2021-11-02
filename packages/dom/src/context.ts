@@ -1,5 +1,3 @@
-import { Subscription } from '@frp-ts/core'
-
 export interface Context {
 	readonly name: string
 	readonly cleanups: Set<() => void>
@@ -14,16 +12,13 @@ const newContext = (name: string): Context => ({
 const ROOT_CONTEXT: Context = newContext('ROOT')
 export let CURRENT_CONTEXT: Context = ROOT_CONTEXT
 
-export function withContext<Result>(name: string, f: () => Result): [Result, Context] {
-	console.group(name)
+export function withContext<Result>(name: string, factory: () => Result): [Result, Context] {
 	const currentContext = CURRENT_CONTEXT
 	const context = newContext(name)
 	CURRENT_CONTEXT.children.add(context)
 	CURRENT_CONTEXT = context
-	console.log(CURRENT_CONTEXT)
-	const result = f()
+	const result = factory()
 	CURRENT_CONTEXT = currentContext
-	console.groupEnd()
 	return [result, context]
 }
 
