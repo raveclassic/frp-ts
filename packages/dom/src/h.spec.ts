@@ -487,46 +487,44 @@ describe('createElement', () => {
 	})
 	describe('fragment', () => {})
 	describe('component', () => {
-		it('does not pass null props', () => {
+		it('passes empty object as props for null props value and single undefined child', () => {
 			const foo = jest.fn(constVoid)
 			h.createElement(foo, null, undefined)
-			expect(foo).toHaveBeenLastCalledWith()
+			expect(foo).toHaveBeenLastCalledWith({})
 		})
-		it('passes props for null/undefined children', () => {
+		it('passes props as is', () => {
 			const foo = jest.fn(constVoid)
-			const props = { foo: 123 }
-			h.createElement(foo, props, null, undefined)
-			expect(foo).toHaveBeenLastCalledWith(props)
+			h.createElement(foo, { prop: 123 }, undefined)
+			expect(foo).toHaveBeenLastCalledWith({ prop: 123 })
 		})
-		it('passes props with children', () => {
+		it('passes single child from a list of props as is', () => {
 			const foo = jest.fn(constVoid)
-			const props = { foo: 123 }
-			h.createElement(foo, props, 'foo')
-			expect(foo).toHaveBeenLastCalledWith({
-				...props,
-				children: 'foo',
-			})
+			h.createElement(foo, null, 123)
+			expect(foo).toHaveBeenLastCalledWith({ children: 123 })
 		})
-		it('does not pass null/undefined children', () => {
+		it('passes multiple children as a prop', () => {
+			const foo = jest.fn(constVoid)
+			h.createElement(foo, null, 123, 'bar')
+			expect(foo).toHaveBeenLastCalledWith({ children: [123, 'bar'] })
+		})
+		it('passes null/undefined children', () => {
 			const foo = jest.fn(constVoid)
 			h.createElement(foo, null, null, undefined)
-			expect(foo).toHaveBeenLastCalledWith()
-		})
-		it('passes single child directly', () => {
-			const foo = jest.fn(constVoid)
-			h.createElement(foo, null, 'foo')
-			expect(foo).toHaveBeenLastCalledWith({ children: 'foo' })
-		})
-		it('passes multiple children as a list', () => {
-			const foo = jest.fn(constVoid)
-			h.createElement(foo, null, 'foo', 123)
-			expect(foo).toHaveBeenLastCalledWith({ children: ['foo', 123] })
+			expect(foo).toHaveBeenLastCalledWith({
+				children: [null, undefined],
+			})
 		})
 		it('returns component output', () => {
 			const child = h.createElement('div', null, 'child')
 			const foo = () => child
 			const result = h.createElement(foo, null)
 			expect(result).toBe(child)
+		})
+		it('passes Property in props and children as is', () => {
+			const Component = jest.fn(constVoid)
+			const prop = newAtom('foo')
+			h.createElement(Component, { prop }, prop)
+			expect(Component).toHaveBeenLastCalledWith({ prop, children: prop })
 		})
 	})
 })

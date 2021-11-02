@@ -5,13 +5,10 @@ export import PrimitiveElementChild = JSXInternal.PrimitiveElementChild
 export import ElementChild = JSXInternal.ElementChild
 export import ElementChildren = JSXInternal.ElementChildren
 import NativeElementChildren = JSXInternal.NativeElementChildren
-import CSSProperties = JSXInternal.CSSProperties
-import Primitive = JSXInternal.Primitive
 import { constVoid } from '@frp-ts/utils'
 
-type PrimitivePropertyValue = Primitive | CSSProperties | EventListener
-type PropertyValue = PrimitivePropertyValue | Property<PrimitivePropertyValue>
-type Props = null | Record<PropertyKey, PropertyValue>
+type ComponentProps = Record<PropertyKey, unknown>
+type Props = ComponentProps | null
 type NativeElement = HTMLElement | SVGElement
 
 export interface ComponentType<Props> {
@@ -23,7 +20,7 @@ export namespace h {
 	export import JSX = JSXInternal
 
 	export function createElement(
-		type: string | ComponentType<Record<PropertyKey, unknown> | void>,
+		type: string | ComponentType<ComponentProps>,
 		props: Props,
 		...children: readonly ElementChildren[]
 	): JSX.Element {
@@ -42,15 +39,7 @@ export namespace h {
 		}
 		if (typeof type === 'function') {
 			// ComponentType
-			const filteredChildren = children.filter(isNonNullableOrVoid)
-			if (filteredChildren.length === 0) {
-				return props === null ? type() : type(props)
-			} else {
-				type({
-					...props,
-					children: filteredChildren.length === 1 ? filteredChildren[0] : filteredChildren,
-				})
-			}
+			return type(buildComponentProps(props, children))
 		}
 	}
 
@@ -68,7 +57,7 @@ export const render = (element: PrimitiveElementChild, target?: Element | null):
 	}
 }
 
-const processStyle = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
+const processStyle = (target: NativeElement, name: string, value: unknown): void => {
 	if (isNonNullableOrVoid(value)) {
 		if (typeof value === 'string') {
 			// style: string
@@ -96,7 +85,11 @@ const processStyle = (target: NativeElement, name: string, value: PrimitivePrope
 	}
 }
 
-interface EventProxy extends Record<string, EventListener> {}
+interface UnknownFunction {
+	(...args: readonly unknown[]): unknown
+}
+const isUnknownFunction = (value: unknown): value is UnknownFunction => typeof value === 'function'
+interface EventProxy extends Record<string, UnknownFunction> {}
 const EVENT_PROXY = new WeakMap<object, EventProxy>()
 const getEventProxy = (target: object): EventProxy => {
 	let proxy = EVENT_PROXY.get(target)
@@ -110,10 +103,10 @@ function handleEvent(this: NativeElement, event: Event): void {
 	const handler = getEventProxy(this)[event.type]
 	handler?.(event)
 }
-const processEventHandler = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
+const processEventHandler = (target: NativeElement, name: string, value: unknown): void => {
 	const trimmedName = name.slice(2).toLowerCase()
 	if (isNonNullableOrVoid(value)) {
-		if (typeof value === 'function') {
+		if (isUnknownFunction(value)) {
 			getEventProxy(target)[trimmedName] = value
 			target.addEventListener(trimmedName, handleEvent)
 		}
@@ -123,23 +116,27 @@ const processEventHandler = (target: NativeElement, name: string, value: Primiti
 	}
 }
 
-const processClassName = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
+const processClassName = (target: NativeElement, name: string, value: unknown): void => {
 	if (target instanceof SVGElement) {
 		processArbitraryAttribute(target, 'class', value)
 	} else {
-		target.className = isNonNullableOrVoid(value) ? value.toString() : ''
+		// we don't care about stringifying unsupported values
+		// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+		target.className = isNonNullableOrVoid(value) ? `${value}` : ''
 	}
 }
 
-const processArbitraryAttribute = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
+const processArbitraryAttribute = (target: NativeElement, name: string, value: unknown): void => {
 	if (isNonNullableOrVoid(value)) {
-		target.setAttribute(name, value.toString())
+		// we don't care about stringifying unsupported values
+		// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+		target.setAttribute(name, `${value}`)
 	} else {
 		target.removeAttribute(name)
 	}
 }
 
-const processAttribute = (target: NativeElement, name: string, value: PrimitivePropertyValue): void => {
+const processAttribute = (target: NativeElement, name: string, value: unknown): void => {
 	if (name === 'style') {
 		processStyle(target, name, value)
 	} else if (name.startsWith('on')) {
@@ -151,7 +148,7 @@ const processAttribute = (target: NativeElement, name: string, value: PrimitiveP
 	}
 }
 
-const processProp = (target: NativeElement, name: string, value: PropertyValue): void => {
+const processProp = (target: NativeElement, name: string, value: unknown): void => {
 	if (isProperty(value)) {
 		const update = () => processAttribute(target, name, value.get())
 		cleanup(value.subscribe({ next: update }).unsubscribe)
@@ -282,3 +279,19 @@ const isProperty = (value: unknown): value is Property<unknown> => isRecord(valu
 type NonNullableOrVoid<T> = T extends null | undefined | void ? never : T
 const isNonNullableOrVoid = <T>(value: NonNullableOrVoid<T> | null | undefined | void): value is NonNullableOrVoid<T> =>
 	value !== null && value !== undefined
+
+const coerceChildren = (
+	children: readonly ElementChildren[],
+): ElementChildren | readonly ElementChildren[] | undefined => {
+	if (children.length === 0) {
+		return undefined
+	} else if (children.length === 1) {
+		return children[0]
+	} else {
+		return children
+	}
+}
+const buildComponentProps = (props: Props, children: readonly ElementChildren[]): Record<PropertyKey, unknown> => {
+	const childrenProp = coerceChildren(children)
+	return childrenProp !== undefined ? { ...props, children: childrenProp } : { ...props }
+}
