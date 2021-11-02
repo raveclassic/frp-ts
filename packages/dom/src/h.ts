@@ -10,6 +10,7 @@ import { constVoid } from '@frp-ts/utils'
 type ComponentProps = Record<PropertyKey, unknown>
 type Props = ComponentProps | null
 type NativeElement = HTMLElement | SVGElement
+export type PropsWithChildren<P> = P & { readonly children: ElementChildren | readonly ElementChildren[] }
 
 export interface ComponentType<Props> {
 	(props: Props): JSXInternal.Element
@@ -19,9 +20,24 @@ export interface ComponentType<Props> {
 export namespace h {
 	export import JSX = JSXInternal
 
-	export function createElement(
-		type: string | ComponentType<ComponentProps>,
-		props: Props,
+	export function createElement<P extends ComponentProps | null>(
+		type: ComponentType<NonNullable<P>>,
+		props: P,
+		...children: readonly ElementChildren[]
+	): JSX.Element
+	export function createElement<Tag extends keyof JSX.IntrinsicElements>(
+		type: Tag,
+		props: JSX.IntrinsicElements[Tag] | null,
+		...children: readonly ElementChildren[]
+	): JSX.TagToElement[Tag]
+	export function createElement<P extends ComponentProps | null>(
+		type: string,
+		props: P,
+		...children: readonly ElementChildren[]
+	): JSX.Element
+	export function createElement<P extends ComponentProps | null>(
+		type: string | ComponentType<NonNullable<P>>,
+		props: P,
 		...children: readonly ElementChildren[]
 	): JSX.Element {
 		// console.group('createElement')
@@ -39,7 +55,8 @@ export namespace h {
 		}
 		if (typeof type === 'function') {
 			// ComponentType
-			return type(buildComponentProps(props, children))
+			const finalProps = buildComponentProps(props, children)
+			return type(finalProps)
 		}
 	}
 
@@ -291,7 +308,13 @@ const coerceChildren = (
 		return children
 	}
 }
-const buildComponentProps = (props: Props, children: readonly ElementChildren[]): Record<PropertyKey, unknown> => {
+
+function buildComponentProps<P>(props: P | null, children: readonly ElementChildren[]): NonNullable<P>
+function buildComponentProps(props: object | null, children: readonly ElementChildren[]): object {
 	const childrenProp = coerceChildren(children)
-	return childrenProp !== undefined ? { ...props, children: childrenProp } : { ...props }
+	if (props === null) {
+		return childrenProp === undefined ? {} : { children: childrenProp }
+	} else {
+		return childrenProp === undefined ? props : { ...props, children: childrenProp }
+	}
 }
