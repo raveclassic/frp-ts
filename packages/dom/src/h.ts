@@ -20,11 +20,11 @@ export interface ComponentType<Props> {
 export namespace h {
 	export import JSX = JSXInternal
 
-	export function createElement<P extends ComponentProps | null>(
-		type: ComponentType<NonNullable<P>>,
+	export function createElement<P extends ComponentProps | null, R>(
+		type: (props: NonNullable<P>) => R,
 		props: P,
 		...children: readonly ElementChildren[]
-	): JSX.Element
+	): R
 	export function createElement<Tag extends keyof JSX.IntrinsicElements>(
 		type: Tag,
 		props: JSX.IntrinsicElements[Tag] | null,
@@ -40,11 +40,6 @@ export namespace h {
 		props: P,
 		...children: readonly ElementChildren[]
 	): JSX.Element {
-		// console.group('createElement')
-		// console.log('type', type)
-		// console.log('props', props)
-		// console.log('children', children)
-		// console.groupEnd()
 		if (typeof type === 'string') {
 			// HTML Element
 			return createNativeElement(type, props, ...children)
@@ -216,7 +211,11 @@ const clearBetween = (startMarker: Node, endMarker: Node): void => {
 	}
 }
 
-const renderChild = (child: ElementChild): Node | undefined => {
+/**
+ * @internal - used by Bind component
+ * This function allows rendering `Property<Node>` in the current Context
+ */
+export const renderChild = (child: PrimitiveElementChild | Property<PrimitiveElementChild>): Node | undefined => {
 	if (isProperty(child)) {
 		const fragment = document.createDocumentFragment()
 		const startMarker = document.createTextNode('')

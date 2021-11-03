@@ -30,7 +30,7 @@ export const disposeContext = (context: Context): void => {
 	for (const cleanup of context.cleanups.values()) {
 		cleanup()
 	}
-	context.children.clear()
+	context.cleanups.clear()
 }
 export const cleanup = (f: () => void): void => {
 	CURRENT_CONTEXT.cleanups.add(f)
