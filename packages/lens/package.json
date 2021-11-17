@@ -22,7 +22,7 @@
     "build": "tsc --project ./tsconfig.build.json",
     "start": "yarn build --watch"
   },
-  "private": true,
+  "private": false,
   "publishConfig": {
     "access": "public"
   },
