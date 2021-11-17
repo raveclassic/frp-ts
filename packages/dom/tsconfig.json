@@ -4,5 +4,6 @@
     "jsx": "react",
     "jsxFactory": "h.createElement",
     "jsxFragmentFactory": "h.Fragment"
-  }
+  },
+  "include": [".", "./src/udomdiff.ts"]
 }

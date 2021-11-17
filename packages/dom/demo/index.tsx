@@ -1,4 +1,4 @@
-import { Bind, ElementChildren, h, If, render } from '../src'
+import { Bind, cleanup, ElementChildren, For, h, If, render } from '../src'
 import { clock, atom, property } from '@frp-ts/core'
 
 const newAtom = atom.newAtom({
@@ -74,12 +74,22 @@ const Foo2 = () => {
 	return undefined
 }
 
+const ForDemo = () => {
+	const list = newAtom([1, 2, 3])
+	setInterval(() => {
+		list.set([1, Math.random(), 3])
+	}, 1000)
+	return (
+		<For value={list} key={(item, index) => index}>
+			{(item) => <div>Item: {item}</div>}
+		</For>
+	)
+}
+
 // render
 render(
 	<>
-		<Foo2 />
-		<App foo={'foo'}>Child</App>
-		<PropertyAttribute />
+		<ForDemo />
 	</>,
 	document.getElementById('root'),
 )

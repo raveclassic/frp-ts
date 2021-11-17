@@ -9,5 +9,5 @@ export {
 	ElementChildren,
 	ComponentType,
 } from './h'
-export { Bind, BindProps, If, IfProps } from './control-flow'
+export { Bind, BindProps, If, IfProps, For, ForProps } from './control-flow'
 export { cleanup } from './context'

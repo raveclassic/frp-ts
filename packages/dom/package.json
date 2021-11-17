@@ -30,7 +30,8 @@
   "dependencies": {
     "@frp-ts/core": "^0.0.2",
     "@frp-ts/utils": "^0.0.2",
-    "csstype": "^3.0.9"
+    "csstype": "^3.0.9",
+    "udomdiff": "^1.1.0"
   },
   "devDependencies": {
     "@frp-ts/test-utils": "^0.0.2",
