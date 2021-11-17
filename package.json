@@ -33,7 +33,7 @@
     "prettier:fix": "prettier --write .",
     "coveralls": "cat coverage/lcov.info | coveralls",
     "typedoc": "typedoc && cp jekyll_config.yml docs/_config.yml",
-    "version": "yarn typedoc && git add docs && standard-version -a",
+    "version": "yarn typedoc && git add docs",
     "audit": "yarn-audit-fix --dry-run",
     "audit:fix": "yarn-audit-fix",
     "audit:fix:force": "yarn-audit-fix --force"
@@ -58,7 +58,6 @@
     "jest": "^27.3.1",
     "lerna": "^3.22.1",
     "prettier": "^2.0.4",
-    "standard-version": "^8.0.0",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.3.1",
     "typedoc": "^0.22.6",
