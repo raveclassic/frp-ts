@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/utils",
-  "version": "0.0.2",
+  "version": "1.0.0-alpha.1",
   "description": "Utilities for @frp-ts project",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -25,7 +25,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {},
   "devDependencies": {
     "rimraf": "^3.0.2",
     "typescript": "^4.4.4"
