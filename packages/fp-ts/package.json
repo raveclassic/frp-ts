@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/fp-ts",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Bindings to fp-ts library",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -26,8 +26,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@frp-ts/core": "^1.0.0-alpha.2",
-    "@frp-ts/utils": "^1.0.0-alpha.2",
+    "@frp-ts/core": "^1.0.0-alpha.3",
+    "@frp-ts/utils": "^1.0.0-alpha.3",
     "fp-ts": "^2.11.5"
   },
   "devDependencies": {

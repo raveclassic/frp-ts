@@ -7,7 +7,7 @@
     "./packages/test-utils",
     "./packages/utils"
   ],
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "command": {
