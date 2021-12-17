@@ -1,5 +1,4 @@
-import { atom, Property } from '@frp-ts/core'
-import { Env } from '@frp-ts/core/src'
+import { atom, Property, Env } from '@frp-ts/core'
 import { useState } from 'react'
 
 export const usePropertyFromProps = (env: Env) => {

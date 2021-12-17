@@ -1,6 +1,5 @@
-import { Property } from '@frp-ts/core'
+import { Property, observable } from '@frp-ts/core'
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { subscriptionNone } from '@frp-ts/core/src/observable'
 
 export const useProperty = <A>(property: Property<A>): A => {
 	const [, forceUpdate] = useState<Record<string, unknown>>()
@@ -9,7 +8,7 @@ export const useProperty = <A>(property: Property<A>): A => {
 	const valueRef = useRef(newValue)
 	valueRef.current = newValue
 
-	const subscriptionRef = useRef(subscriptionNone)
+	const subscriptionRef = useRef(observable.subscriptionNone)
 	useMemo(() => {
 		subscriptionRef.current.unsubscribe()
 		subscriptionRef.current = property.subscribe({
@@ -26,7 +25,7 @@ export const useProperty = <A>(property: Property<A>): A => {
 	useEffect(
 		() => () => {
 			subscriptionRef.current.unsubscribe()
-			subscriptionRef.current = subscriptionNone
+			subscriptionRef.current = observable.subscriptionNone
 		},
 		[],
 	)
