@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.2](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2021-12-17)
+
+
+### Bug Fixes
+
+* **react:** fix useProperty ([809a9b2](https://github.com/raveclassic/frp-ts/commit/809a9b2a5baf53debeabde6915dd0a9b67778ff3))
+
+
+### Features
+
+* **react:** add usePropertyFromProps hook ([5e026b1](https://github.com/raveclassic/frp-ts/commit/5e026b17c14601ffe15153da377dbc14cc92bd26))
+
+
+
+
+
 # [1.0.0-alpha.1](https://github.com/raveclassic/frp-ts/compare/v0.0.1...v1.0.0-alpha.1) (2021-11-17)
 
 
