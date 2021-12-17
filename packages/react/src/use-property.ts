@@ -1,13 +1,20 @@
 import { Property } from '@frp-ts/core'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+
+const useForceUpdate = () => {
+	const [, setTick] = useState(0)
+	return useRef(() => {
+		setTick((tick) => tick + 1)
+	}).current
+}
 
 export const useProperty = <A>(property: Property<A>): A => {
-	const [value, setValue] = useState(property.get())
+	const forceUpdate = useForceUpdate()
 	useEffect(() => {
 		const subscription = property.subscribe({
-			next: () => setValue(() => property.get()),
+			next: forceUpdate,
 		})
 		return subscription.unsubscribe
-	}, [])
-	return value
+	}, [property])
+	return property.get()
 }
