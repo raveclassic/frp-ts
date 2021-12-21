@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/test-utils",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "Testing utilities for @frp-ts project",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",

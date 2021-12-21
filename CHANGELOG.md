@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.5](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2021-12-21)
+
+
+### Bug Fixes
+
+* **react:** add `useProperties` re-export from index.ts ([95efde4](https://github.com/raveclassic/frp-ts/commit/95efde4dcc9f3537cf38a224a22db1f7bd147b6e))
+
+
+
+
+
 # [1.0.0-alpha.4](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2021-12-21)
 
 
