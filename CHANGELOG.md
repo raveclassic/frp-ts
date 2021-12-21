@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.4](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2021-12-21)
+
+
+### Features
+
+* **react:** add `useProperties` hook for multiple properties ([3f0e366](https://github.com/raveclassic/frp-ts/commit/3f0e366270a1e01115d2bb45077aafd82b88b6fa))
+
+
+
+
+
 # [1.0.0-alpha.3](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2021-12-17)
 
 
