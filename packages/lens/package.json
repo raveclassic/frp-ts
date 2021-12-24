@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/lens",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "description": "Lenses for frp-ts atoms",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -27,7 +27,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@frp-ts/core": "^1.0.0-alpha.6"
+    "@frp-ts/core": "^1.0.0-alpha.7"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
