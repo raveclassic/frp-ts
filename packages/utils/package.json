@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/utils",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "description": "Utilities for @frp-ts project",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",

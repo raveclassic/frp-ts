@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/core",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "description": "Functional reactive values-over-time",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -27,10 +27,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@frp-ts/utils": "^1.0.0-alpha.7"
+    "@frp-ts/utils": "^1.0.0-alpha.8"
   },
   "devDependencies": {
-    "@frp-ts/test-utils": "^1.0.0-alpha.7",
+    "@frp-ts/test-utils": "^1.0.0-alpha.8",
     "rimraf": "^3.0.2",
     "rxjs": "^7.4.0",
     "typescript": "^4.4.4"
