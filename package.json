@@ -25,7 +25,6 @@
     "build": "nx run-many --target=build --all --parallel",
     "lint": "nx run-many --target=lint --all --parallel",
     "test": "nx run-many --target=test --all --parallel",
-    "coveralls": "cat coverage/lcov.info | coveralls",
     "typedoc": "typedoc && cp jekyll_config.yml docs/_config.yml",
     "version": "yarn typedoc && git add docs"
   },
