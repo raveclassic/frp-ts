@@ -47,11 +47,11 @@ jobs:
 
       - run: pnpx nx-cloud start-ci-run
 
-      - run: pnpx nx affected --target=build --all --exclude=workspace --parallel --max-parallel=3
+      - run: pnpx nx affected --target=build --parallel --max-parallel=3
 
-      - run: pnpx nx affected --target=lint --all --exclude=workspace --parallel --max-parallel=3
+      - run: pnpx nx affected --target=lint --parallel --max-parallel=3
 
-      - run: pnpx nx affected --target=test --all --exclude=workspace --parallel --max-parallel=2
+      - run: pnpx nx affected --target=test --parallel --max-parallel=2
 
       - run: pnpx nx-cloud stop-all-agents
   pr:
@@ -92,11 +92,11 @@ jobs:
 
       - run: pnpx nx-cloud start-ci-run
 
-      - run: pnpx nx affected --target=build --all --exclude=workspace --parallel --max-parallel=3
+      - run: pnpx nx affected --target=build --parallel --max-parallel=3
 
-      - run: pnpx nx affected --target=lint --all --exclude=workspace --parallel --max-parallel=3
+      - run: pnpx nx affected --target=lint --parallel --max-parallel=3
 
-      - run: pnpx nx affected --target=test --all --exclude=workspace --parallel --max-parallel=2
+      - run: pnpx nx affected --target=test --parallel --max-parallel=2
 
       - run: pnpx nx-cloud stop-all-agents
   agents:

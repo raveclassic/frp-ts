@@ -6,19 +6,6 @@
     "lens": "packages/lens",
     "react": "packages/react",
     "test-utils": "packages/test-utils",
-    "utils": "packages/utils",
-    "workspace": {
-      "root": ".",
-      "targets": {
-        "version": {
-          "executor": "@jscutlery/semver:version",
-          "options": {
-            "syncVersions": true,
-            "commitMessageFormat": "${version}",
-            "push": false
-          }
-        }
-      }
-    }
+    "utils": "packages/utils"
   }
 }

@@ -358,3 +358,23 @@ Now everything is ready, and the functions can be used directly from this module
 ## Changelog
 
 Read more [here](./CHANGELOG.md)
+
+## Contributions & Development
+
+### Repository structure
+
+This repository is powered by [nx](https://nx.dev/).
+This means that subpackages are built into a single directory `/dist`.
+
+### Publishing
+
+```shell
+lerna version <version>
+lerna publish from-package
+```
+
+or simply (if you are absolutely sure)
+
+```shell
+lerna publish <version>
+```

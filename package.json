@@ -1,6 +1,6 @@
 {
   "name": "frp-ts",
-  "version": "0.0.2",
+  "version": "1.0.0-alpha.9",
   "description": "Monorepo for @frp-ts project",
   "author": "raveclassic",
   "license": "MIT",
@@ -22,18 +22,19 @@
   ],
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build": "nx run-many --target=build --all --exclude=workspace --parallel",
-    "lint": "nx run-many --target=lint --all --exclude=workspace --parallel",
-    "test": "nx run-many --target=test --all --exclude=workspace --parallel",
+    "build": "nx run-many --target=build --all --parallel",
+    "lint": "nx run-many --target=lint --all --parallel",
+    "test": "nx run-many --target=test --all --parallel",
     "typedoc": "typedoc && cp jekyll_config.yml docs/_config.yml",
-    "version": "yarn typedoc && git add docs"
+    "version": "yarn typedoc && git add docs",
+    "postversion": "pnpm build"
   },
   "private": true,
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-angular": "^15.0.0",
     "@commitlint/config-conventional": "^8.3.4",
     "@commitlint/travis-cli": "^8.3.5",
-    "@jscutlery/semver": "^2.16.1",
     "@nrwl/cli": "13.4.1",
     "@nrwl/eslint-plugin-nx": "13.4.1",
     "@nrwl/jest": "13.4.1",
@@ -57,6 +58,7 @@
     "eslint-plugin-unicorn": "^37.0.1",
     "husky": "^4.2.5",
     "jest": "^27.3.1",
+    "lerna": "^4.0.0",
     "prettier": "^2.0.4",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.3.1",

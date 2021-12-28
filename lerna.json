@@ -1,0 +1,22 @@
+{
+  "packages": [
+    "./packages/core",
+    "./packages/lens",
+    "./packages/fp-ts",
+    "./packages/react",
+    "./packages/test-utils",
+    "./packages/utils"
+  ],
+  "version": "1.0.0-alpha.8",
+  "npmClient": "pnpm",
+  "useWorkspaces": true,
+  "command": {
+    "publish": {
+      "conventionalCommits": true
+    },
+    "version": {
+      "push": false,
+      "conventionalCommits": true
+    }
+  }
+}
