@@ -1,0 +1,33 @@
+{
+  "root": "packages/lens",
+  "sourceRoot": "packages/lens/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/lens",
+        "main": "packages/lens/src/index.ts",
+        "tsConfig": "packages/lens/tsconfig.lib.json",
+        "assets": ["packages/lens/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/lens/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/lens"],
+      "options": {
+        "jestConfig": "packages/lens/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

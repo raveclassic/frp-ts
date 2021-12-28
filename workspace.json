@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "projects": {
+    "core": "packages/core",
+    "fp-ts": "packages/fp-ts",
+    "lens": "packages/lens",
+    "react": "packages/react",
+    "test-utils": "packages/test-utils",
+    "utils": "packages/utils"
+  }
+}

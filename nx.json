@@ -5,13 +5,7 @@
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "test",
-          "lint",
-          "package",
-          "prepare"
-        ]
+        "cacheableOperations": ["build", "test", "lint", "package", "prepare"]
       }
     }
   },
@@ -37,5 +31,8 @@
   },
   "affected": {
     "defaultBase": "master"
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/workspace"
   }
 }

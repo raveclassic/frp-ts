@@ -4,3 +4,6 @@ node_modules
 lib
 coverage
 .coveralls.yml
+/dist
+/tmp
+/out-tsc
