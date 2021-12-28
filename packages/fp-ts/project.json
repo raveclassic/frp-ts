@@ -25,7 +25,9 @@
       "outputs": ["coverage/packages/fp-ts"],
       "options": {
         "jestConfig": "packages/fp-ts/jest.config.js",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "codeCoverage": true,
+        "coverageReporters": ["lcov"]
       }
     }
   },
