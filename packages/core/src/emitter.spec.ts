@@ -1,8 +1,8 @@
 import { EventTarget, AddEventListenerOptions, newEmitter, fromEvent, mergeMany } from './emitter'
-import { constVoid } from 'fp-ts/lib/function'
 import { Time } from './clock'
 import { never } from './observable'
 import { clockUtils } from '@frp-ts/test-utils'
+import { constVoid } from '@frp-ts/utils'
 
 interface Event {
 	readonly type: string
