@@ -99,4 +99,30 @@ jobs:
       - run: pnpx nx affected --target=test --parallel --max-parallel=2
 
       - run: pnpx nx-cloud stop-all-agents
+  agents:
+    runs-on: ubuntu-latest
+    name: Agent 1
+    strategy:
+      matrix:
+        agent: [ 1, 2, 3 ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+      - name: Cache npm modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
 
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6.24.3
+          run_install: |
+            - recursive: true
+              args: [--frozen-lockfile]
+      - name: Start Nx Agent ${{ matrix.agent }}
+        run: npx nx-cloud start-agent
