@@ -2,48 +2,47 @@ name: Build
 
 on:
   push:
-    branches-ignore:
-      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      NODE_VERSION: 14
-
-    # Checkout code
     steps:
       - uses: actions/checkout@v2
+        name: Checkout [master]
         with:
-          # we actually need "github.event.pull_request.commits + 1" commit
           fetch-depth: 0
 
-      # Setup node
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v2
+        with:
+          main-branch-name: master
+
       - uses: actions/setup-node@v1
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '14'
 
-      # Cache node_modules
-      - uses: actions/cache@v2
+      - name: Cache npm modules
+        uses: actions/cache@v2
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-node-v${{ env.NODE_VERSION }}-${{ hashFiles('**/yarn.lock') }}
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
 
-      # Install dependencies
-      - run: yarn install --frozen-lockfile
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6.24.3
+          run_install: |
+            - recursive: true
+              args: [--frozen-lockfile, --strict-peer-dependencies]
 
-      # Lint
-      - run: npx commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
+      - run: pnpx commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
 
-      # Build
-      - run: yarn build
+      - run: pnpx nx affected --target=build --parallel --max-parallel=3
 
-      # Typecheck
-      - run: yarn typecheck
+      - run: pnpx nx affected --target=lint --parallel --max-parallel=3
 
-      # Test
-      - run: yarn test
+      - run: pnpx nx affected --target=test --parallel --max-parallel=2
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
