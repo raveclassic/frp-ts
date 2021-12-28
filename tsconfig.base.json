@@ -1,0 +1,28 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": false,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    //    "lib": ["es2017", "dom"],
+    "skipLibCheck": false,
+    "skipDefaultLibCheck": false,
+    "baseUrl": ".",
+    "paths": {
+      "@frp-ts/core": ["packages/core/src/index.ts"],
+      "@frp-ts/fp-ts": ["packages/fp-ts/src/index.ts"],
+      "@frp-ts/lens": ["packages/lens/src/index.ts"],
+      "@frp-ts/react": ["packages/react/src/index.ts"],
+      "@frp-ts/test-utils": ["packages/test-utils/src/index.ts"],
+      "@frp-ts/utils": ["packages/utils/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

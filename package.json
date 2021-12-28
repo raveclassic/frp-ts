@@ -24,7 +24,7 @@
     "preinstall": "npx only-allow pnpm",
     "prepublishOnly": "npm run test && npm run build",
     "typecheck": "lerna run typecheck",
-    "build": "pnpx nx run-many --target=build --all --parallel",
+    "build": "nx run-many --target=build --all --parallel",
     "test": "yarn prettier && yarn eslint && yarn jest",
     "eslint": "eslint . --ext .js,.ts,.json",
     "eslint:fix": "eslint --fix . --ext .js,.ts,.json,.md",
@@ -42,11 +42,21 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
+    "@nrwl/cli": "13.4.1",
+    "@nrwl/eslint-plugin-nx": "13.4.1",
+    "@nrwl/jest": "13.4.1",
+    "@nrwl/js": "13.4.1",
+    "@nrwl/linter": "13.4.1",
+    "@nrwl/tao": "13.4.1",
+    "@nrwl/workspace": "13.4.1",
+    "@swc/cli": "~0.1.52",
+    "@swc/core": "1.2.118",
+    "@swc/helpers": "~0.2.14",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
     "@commitlint/travis-cli": "^8.3.5",
     "@octokit/core": "^3.5.1",
-    "@types/jest": "^25.2.2",
+    "@types/jest": "^27.0.3",
     "@types/node": "^14.17.30",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
@@ -63,10 +73,7 @@
     "ts-node": "^10.3.1",
     "typedoc": "^0.22.6",
     "typescript": "^4.4.4",
-    "yarn-audit-fix": "^7.1.2",
-    "@nrwl/workspace": "latest",
-    "@nrwl/cli": "latest",
-    "@nrwl/tao": "latest"
+    "yarn-audit-fix": "^7.1.2"
   },
   "husky": {
     "hooks": {

@@ -4,3 +4,6 @@ lib
 CHANGELOG.md
 /docs
 pnpm-lock.yaml
+/dist
+/tmp
+/out-tsc

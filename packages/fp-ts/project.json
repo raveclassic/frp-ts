@@ -1,0 +1,33 @@
+{
+  "root": "packages/fp-ts",
+  "sourceRoot": "packages/fp-ts/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/fp-ts",
+        "main": "packages/fp-ts/src/index.ts",
+        "tsConfig": "packages/fp-ts/tsconfig.lib.json",
+        "assets": ["packages/fp-ts/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/fp-ts/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/fp-ts"],
+      "options": {
+        "jestConfig": "packages/fp-ts/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
