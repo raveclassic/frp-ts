@@ -85,7 +85,7 @@ jobs:
         with:
           version: 6.24.3
           run_install: |
-            - recursive: true
+            - recursive: false
               args: [--frozen-lockfile]
 
       - run: pnpx commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
@@ -122,7 +122,7 @@ jobs:
         with:
           version: 6.24.3
           run_install: |
-            - recursive: true
+            - recursive: false
               args: [--frozen-lockfile]
       - name: Start Nx Agent ${{ matrix.agent }}
         run: npx nx-cloud start-agent
