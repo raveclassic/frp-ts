@@ -17,9 +17,9 @@
   "homepage": "https://github.com/raveclassic/frp-ts#readme",
   "scripts": {
     "typecheck": "tsc",
-    "start": "yarn typecheck --watch",
+    "start": "pnpm typecheck -- --watch",
     "clean": "rimraf lib",
-    "prebuild": "yarn clean",
+    "prebuild": "pnpm clean",
     "build": "tsc --project ./tsconfig.build.json"
   },
   "publishConfig": {
