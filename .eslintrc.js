@@ -1,4 +1,7 @@
-const lernaJson = require('./lerna.json')
+const workspaces = require('./workspace.json')
+const path = require('path')
+
+const ROOT = path.resolve(__dirname)
 
 module.exports = {
 	root: true,
@@ -8,10 +11,10 @@ module.exports = {
 	},
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
-		project: 'tsconfig.eslint.json',
+		project: 'tsconfig.json',
 		extraFileExtensions: ['.json'],
 	},
-	plugins: ['jest', 'import', '@nrwl/nx', 'unicorn'],
+	plugins: ['@nrwl/nx', 'jest', 'import', 'unicorn'],
 	extends: [
 		'plugin:@nrwl/nx/typescript',
 		'eslint:recommended',
@@ -65,11 +68,12 @@ module.exports = {
 		'import/no-extraneous-dependencies': [
 			2,
 			{
-				packageDir: [...lernaJson.packages, '.'],
+				packageDir: [ROOT, ...Object.values(workspaces.projects).map((p) => path.resolve(ROOT, p))],
 				devDependencies: [
-					'./*.@(js|ts|tsx)',
-					'./scripts/**/*.@(js|ts|tsx)',
-					...lernaJson.packages.map((directory) => `${directory}/**/*.@(stories|mock|test|spec).@(ts|tsx)`),
+					path.resolve(ROOT, './*.@(js|ts|tsx)'),
+					...Object.values(workspaces.projects).map((p) =>
+						path.resolve(ROOT, `${p}/**/*.@(stories|mock|test|spec).@(ts|tsx|js|jsx)`),
+					),
 				],
 			},
 		],
@@ -144,9 +148,10 @@ module.exports = {
 	overrides: [
 		{
 			files: ['*.js', '*.jsx'],
-			extends: ['plugin:@nrwl/nx/javascript'],
+			// extends: ['plugin:@nrwl/nx/javascript'],
 			rules: {
 				'@typescript-eslint/no-var-requires': 0,
+				'@typescript-eslint/no-unsafe-assignment': 0,
 			},
 		},
 	],

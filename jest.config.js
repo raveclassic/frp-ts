@@ -1,6 +1,7 @@
+const { getJestProjects } = require('@nrwl/jest')
+
 module.exports = {
-	preset: 'ts-jest',
-	testEnvironment: 'jsdom',
+	projects: getJestProjects(),
 	testRunner: 'jasmine2',
 	collectCoverage: false,
 	coverageThreshold: {
@@ -11,8 +12,6 @@ module.exports = {
 			statements: 100,
 		},
 	},
-	collectCoverageFrom: ['./**/src/**/*.ts'],
+	collectCoverageFrom: ['<rootDir>/packages/*/src/**/*.ts'],
 	coveragePathIgnorePatterns: ['index.ts'],
-	testMatch: ['./**/*.spec.(ts|tsx)'],
-	testPathIgnorePatterns: ['/coverage/', '/node_modules/', '/lib/'],
 }
