@@ -28,12 +28,6 @@
         "passWithNoTests": true,
         "codeCoverage": true
       }
-    },
-    "deploy": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public"
-      }
     }
   },
   "tags": []
