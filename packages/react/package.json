@@ -18,9 +18,9 @@
   "scripts": {
     "typecheck": "tsc",
     "clean": "rimraf lib",
-    "prebuild": "yarn clean",
+    "prebuild": "pnpm clean",
     "build": "tsc --project ./tsconfig.build.json",
-    "start": "yarn build --watch"
+    "start": "pnpm build -- --watch"
   },
   "publishConfig": {
     "access": "public"

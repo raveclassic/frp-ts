@@ -3,3 +3,4 @@
 lib
 CHANGELOG.md
 /docs
+pnpm-lock.yaml

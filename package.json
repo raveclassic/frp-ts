@@ -21,6 +21,7 @@
     "./packages/utils"
   ],
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "prepublishOnly": "npm run test && npm run build",
     "typecheck": "lerna run typecheck",
     "build": "lerna run build",
