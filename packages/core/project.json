@@ -26,8 +26,7 @@
       "options": {
         "jestConfig": "packages/core/jest.config.js",
         "passWithNoTests": true,
-        "codeCoverage": true,
-        "coverageReporters": ["lcov"]
+        "codeCoverage": true
       }
     }
   },
