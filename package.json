@@ -24,7 +24,7 @@
     "preinstall": "npx only-allow pnpm",
     "prepublishOnly": "npm run test && npm run build",
     "typecheck": "lerna run typecheck",
-    "build": "lerna run build",
+    "build": "pnpx nx run-many --target=build --all --parallel",
     "test": "yarn prettier && yarn eslint && yarn jest",
     "eslint": "eslint . --ext .js,.ts,.json",
     "eslint:fix": "eslint --fix . --ext .js,.ts,.json,.md",
@@ -63,7 +63,10 @@
     "ts-node": "^10.3.1",
     "typedoc": "^0.22.6",
     "typescript": "^4.4.4",
-    "yarn-audit-fix": "^7.1.2"
+    "yarn-audit-fix": "^7.1.2",
+    "@nrwl/workspace": "latest",
+    "@nrwl/cli": "latest",
+    "@nrwl/tao": "latest"
   },
   "husky": {
     "hooks": {
