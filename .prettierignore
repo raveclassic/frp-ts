@@ -6,4 +6,5 @@ CHANGELOG.md
 pnpm-lock.yaml
 /dist
 /tmp
-/out-tsc
+§/out-tsc
+/.changeset
