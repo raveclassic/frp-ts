@@ -1,16 +1,3 @@
 {
-  "compilerOptions": {
-    "declaration": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "target": "ES2015",
-    "module": "commonjs",
-    "outDir": "lib",
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "jsx": "react"
-  },
-  "exclude": ["dist", "lib", "coverage", "node_modules"]
+  "extends": "./tsconfig.base.json"
 }

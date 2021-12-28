@@ -11,8 +11,9 @@ module.exports = {
 		project: 'tsconfig.eslint.json',
 		extraFileExtensions: ['.json'],
 	},
-	plugins: ['@typescript-eslint', 'jest', 'import', 'unicorn'],
+	plugins: ['jest', 'import', '@nrwl/nx', 'unicorn'],
 	extends: [
+		'plugin:@nrwl/nx/typescript',
 		'eslint:recommended',
 		'plugin:@typescript-eslint/eslint-recommended',
 		'plugin:@typescript-eslint/recommended',
@@ -73,6 +74,7 @@ module.exports = {
 			},
 		],
 		'import/namespace': 0,
+		'import/no-unresolved': 0,
 		'unicorn/consistent-function-scoping': 0,
 		'unicorn/custom-error-definition': 2,
 		'unicorn/filename-case': [
@@ -125,10 +127,24 @@ module.exports = {
 			},
 		],
 		eqeqeq: 2,
+		'@nrwl/nx/enforce-module-boundaries': [
+			'error',
+			{
+				enforceBuildableLibDependency: true,
+				allow: [],
+				depConstraints: [
+					{
+						sourceTag: '*',
+						onlyDependOnLibsWithTags: ['*'],
+					},
+				],
+			},
+		],
 	},
 	overrides: [
 		{
 			files: ['*.js', '*.jsx'],
+			extends: ['plugin:@nrwl/nx/javascript'],
 			rules: {
 				'@typescript-eslint/no-var-requires': 0,
 			},
