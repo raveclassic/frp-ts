@@ -368,13 +368,17 @@ This means that subpackages are built into a single directory `/dist`.
 
 ### Publishing
 
+This repository uses [lerna](https://github.com/lerna/lerna) **ONLY** for bumping versions
+until it's supported natively by [nx](https://nx.dev/).
+
+Make sure **NOT** to call `lerna bootstrap` and other commands.
+
 ```shell
 lerna version <version>
-lerna publish from-package
 ```
 
-or simply (if you are absolutely sure)
+Then
 
 ```shell
-lerna publish <version>
+pnpm deploy
 ```

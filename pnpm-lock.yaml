@@ -35,6 +35,7 @@ importers:
       husky: ^4.2.5
       jest: ^27.3.1
       lerna: ^4.0.0
+      ngx-deploy-npm: ^3.0.7
       prettier: ^2.0.4
       ts-jest: ^27.0.7
       ts-node: ^10.3.1
@@ -69,6 +70,7 @@ importers:
       husky: 4.3.8
       jest: 27.4.5_ts-node@10.4.0
       lerna: 4.0.0
+      ngx-deploy-npm: 3.0.7
       prettier: 2.5.1
       ts-jest: 27.1.2_b65cae1b46840061996b6cc0ea16ca56
       ts-node: 10.4.0_4be17cea6bf29b98aa46bad642b8df6c
@@ -1777,6 +1779,18 @@ packages:
       read-package-json-fast: 2.0.3
     dev: true
 
+  /@nrwl/cli/13.3.5:
+    resolution: {integrity: sha512-Cpa/DnsgcE7mLNOPXQbbN4wXBalvEi1TF+sPvTpGaRpy5FxEg6kTQ0C4oKiOGX97YkR1uy0OGVPpw2IKGzG2Ig==}
+    hasBin: true
+    dependencies:
+      '@nrwl/tao': 13.3.5
+      chalk: 4.1.0
+      enquirer: 2.3.6
+      v8-compile-cache: 2.3.0
+      yargs: 15.4.1
+      yargs-parser: 20.0.0
+    dev: true
+
   /@nrwl/cli/13.4.1:
     resolution: {integrity: sha512-U0ik9wrumTxg+l0f17xajOLgKPQH2hFFPiDlegOupef7mR3JBxrEzadkTXjRH7wXSOWBdzYyVYsfx+6UwS9Ilw==}
     hasBin: true
@@ -1787,6 +1801,17 @@ packages:
       v8-compile-cache: 2.3.0
       yargs: 15.4.1
       yargs-parser: 20.0.0
+    dev: true
+
+  /@nrwl/devkit/13.3.5:
+    resolution: {integrity: sha512-QqCP81T1PmAQdVyX5roQwNMMkyp+Pqe79WU4r/Uln0DAEzb9BcTQE61TDgNIcdvMq7Ng6uxGWRnhK8XbdLNVtw==}
+    dependencies:
+      '@nrwl/tao': 13.3.5
+      ejs: 3.1.6
+      ignore: 5.2.0
+      rxjs: 6.6.7
+      semver: 7.3.4
+      tslib: 2.3.1
     dev: true
 
   /@nrwl/devkit/13.4.1:
@@ -1949,6 +1974,25 @@ packages:
       tar: 6.1.11
     transitivePeerDependencies:
       - debug
+    dev: true
+
+  /@nrwl/tao/13.3.5:
+    resolution: {integrity: sha512-OOoNrH9ELt7GwNnu34L4gGTWpX8N2F7v0H23I6tSM5Qj6KhIJ/DPxaedF9a6frUhewX1+iuvZ0rOD5/TWRUd2w==}
+    hasBin: true
+    dependencies:
+      chalk: 4.1.0
+      enquirer: 2.3.6
+      fast-glob: 3.2.7
+      fs-extra: 9.1.0
+      ignore: 5.2.0
+      jsonc-parser: 3.0.0
+      nx: 13.3.5
+      rxjs: 6.6.7
+      rxjs-for-await: 0.0.2_rxjs@6.6.7
+      semver: 7.3.4
+      tmp: 0.2.1
+      tslib: 2.3.1
+      yargs-parser: 20.0.0
     dev: true
 
   /@nrwl/tao/13.4.1:
@@ -6690,6 +6734,12 @@ packages:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
     dev: true
 
+  /ngx-deploy-npm/3.0.7:
+    resolution: {integrity: sha512-dXjiYB/1cMyapFhWDS8MkSO9ld+mzMEbW2lGytkEx36tLg1mBT0724uOuRxgmQwp7H6gAhlqCJGmBI6bAyXw+A==}
+    dependencies:
+      '@nrwl/devkit': 13.3.5
+    dev: true
+
   /nice-try/1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
     dev: true
@@ -6937,6 +6987,13 @@ packages:
 
   /nwsapi/2.2.0:
     resolution: {integrity: sha512-h2AatdwYH+JHiZpv7pt/gSX1XoRGb7L/qSIeuqA6GwYoF9w1vP1cw42TO0aI2pNyshRK5893hNSl+1//vHK7hQ==}
+    dev: true
+
+  /nx/13.3.5:
+    resolution: {integrity: sha512-wxdvfOgza6KJ6hRDNBfFNatcp45VfCMQpDfbmL2Jdc3KiSN7K/bvtOVZvXaPrcKtbYghfL6SRsXtStIeITxlng==}
+    hasBin: true
+    dependencies:
+      '@nrwl/cli': 13.3.5
     dev: true
 
   /nx/13.4.1:
