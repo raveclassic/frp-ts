@@ -1,0 +1,34 @@
+{
+  "root": "apps/dom-demo",
+  "sourceRoot": "apps/dom-demo/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/dom-demo",
+        "main": "apps/dom-demo/src/index.ts",
+        "tsConfig": "apps/dom-demo/tsconfig.lib.json",
+        "assets": ["apps/dom-demo/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/dom-demo/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/dom-demo"],
+      "options": {
+        "jestConfig": "apps/dom-demo/jest.config.js",
+        "passWithNoTests": true,
+        "codeCoverage": true
+      }
+    }
+  },
+  "tags": []
+}

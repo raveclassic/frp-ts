@@ -1,5 +1,7 @@
 packages:
   - packages/core
+  - packages/dom
+  - apps/dom-demo
   - packages/lens
   - packages/fp-ts
   - packages/react

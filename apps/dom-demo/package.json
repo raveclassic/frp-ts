@@ -1,0 +1,25 @@
+{
+  "name": "@frp-ts/dom-demo",
+  "private": true,
+  "author": "raveclassic",
+  "scripts": {
+    "serve": "webpack server --config ./demo/webpack.config.ts"
+  },
+  "dependencies": {
+    "@frp-ts/core": "^1.0.0-alpha.10",
+    "@frp-ts/dom": "^1.0.0-alpha.10",
+    "@frp-ts/utils": "^1.0.0-alpha.10",
+    "csstype": "^3.0.9",
+    "udomdiff": "^1.1.0",
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.18.3",
+    "@frp-ts/test-utils": "^1.0.0-alpha.10",
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^7.0.5",
+    "webpack": "^5.60.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.3.1"
+  }
+}

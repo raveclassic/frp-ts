@@ -1,4 +1,4 @@
-import { Bind, cleanup, ElementChildren, For, h, If, render } from '../src'
+import { Bind, cleanup, ElementChildren, For, h, If, render } from '../../../packages/dom/src'
 import { clock, atom, property } from '@frp-ts/core'
 
 const newAtom = atom.newAtom({
