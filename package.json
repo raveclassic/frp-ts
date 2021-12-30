@@ -55,6 +55,7 @@
     "@nrwl/linter": "13.4.1",
     "@nrwl/nx-cloud": "^13.0.1",
     "@nrwl/tao": "13.4.1",
+    "@nrwl/web": "^13.4.1",
     "@nrwl/workspace": "13.4.1",
     "@octokit/core": "^3.5.1",
     "@swc/cli": "~0.1.52",

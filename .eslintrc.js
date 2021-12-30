@@ -152,6 +152,8 @@ module.exports = {
 			rules: {
 				'@typescript-eslint/no-var-requires': 0,
 				'@typescript-eslint/no-unsafe-assignment': 0,
+				'@typescript-eslint/no-unsafe-member-access': 0,
+				'@typescript-eslint/no-unsafe-return': 0,
 			},
 		},
 	],

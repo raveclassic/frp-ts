@@ -5,13 +5,7 @@
     "default": {
       "runner": "@nrwl/nx-cloud",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "test",
-          "lint",
-          "package",
-          "prepare"
-        ],
+        "cacheableOperations": ["build", "test", "lint", "package", "prepare"],
         "accessToken": "MWI3ZTFlMjUtNTNiYy00OGE4LWE0ODUtYmY0MWU4OTVlZmVhfHJlYWQtd3JpdGU="
       }
     }
@@ -40,6 +34,20 @@
     "defaultBase": "master"
   },
   "cli": {
-    "defaultCollection": "@nrwl/workspace"
+    "defaultCollection": "@nrwl/web"
+  },
+  "defaultProject": "dom-demo",
+  "generators": {
+    "@nrwl/web:application": {
+      "style": "css",
+      "linter": "eslint",
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "none"
+    },
+    "@nrwl/web:library": {
+      "style": "css",
+      "linter": "eslint",
+      "unitTestRunner": "jest"
+    }
   }
 }

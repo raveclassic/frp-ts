@@ -11,5 +11,5 @@ module.exports = {
 		'^.+\\.[tj]s$': 'ts-jest',
 	},
 	moduleFileExtensions: ['ts', 'js', 'html'],
-	coverageDirectory: '../../coverage/packages/dom',
+	coverageDirectory: '../../coverage/apps/dom-demo',
 }
