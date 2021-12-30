@@ -8,8 +8,8 @@ module.exports = {
 		},
 	},
 	transform: {
-		'^.+\\.[tj]s$': 'ts-jest',
+		'^.+\\.[tj]sx?$': 'ts-jest',
 	},
-	moduleFileExtensions: ['ts', 'js', 'html'],
+	moduleFileExtensions: ['ts', 'js', 'html', 'tsx'],
 	coverageDirectory: '../../coverage/packages/dom',
 }

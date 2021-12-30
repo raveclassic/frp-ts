@@ -1,7 +1,6 @@
-/** @jsx h.createElement */
 import { atom, clock, property } from '@frp-ts/core'
 import { h, PrimitiveElementChild } from './h'
-import { Bind, For } from './control-flow'
+import { Bind } from './control-flow'
 import { domUtils } from '@frp-ts/test-utils'
 import { cleanup, CURRENT_CONTEXT, disposeContext } from './context'
 
@@ -55,13 +54,6 @@ describe('control-flow', () => {
 			disposeContext(CURRENT_CONTEXT)
 			// cleanup should have been called because `Child` component is disposed
 			expect(cb).toHaveBeenCalledTimes(2)
-		})
-	})
-
-	describe('For', () => {
-		it('runs', () => {
-			const list = newAtom([1, 2, 3])
-			const result = <For value={list} key={(item, index) => index} item={(item) => <div>Hey!, {item}</div>} />
 		})
 	})
 })

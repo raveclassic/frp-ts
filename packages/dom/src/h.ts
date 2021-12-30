@@ -215,7 +215,7 @@ const clearBetween = (startMarker: Node, endMarker: Node): void => {
  * @internal - used by Bind component
  * This function allows rendering `Property<Node>` in the current Context
  */
-export const renderChild = (child: PrimitiveElementChild | Property<PrimitiveElementChild>): Node | undefined => {
+export const renderChild = (child: PrimitiveElementChild | Property<PrimitiveElementChild>): Node => {
 	if (isProperty(child)) {
 		const fragment = document.createDocumentFragment()
 		const startMarker = document.createTextNode('')
@@ -255,7 +255,7 @@ export const renderChild = (child: PrimitiveElementChild | Property<PrimitiveEle
 	} else if (isNonNullableOrVoid(child) && typeof child !== 'boolean') {
 		return document.createTextNode(child.toString())
 	}
-	throw new Error('Unsupported child')
+	return document.createTextNode('')
 }
 
 const renderChildren = (children: NativeElementChildren): Node | readonly Node[] | undefined => {

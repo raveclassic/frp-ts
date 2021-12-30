@@ -1,4 +1,4 @@
-import { h, render } from '@frp-ts/dom'
+import { For, h, If, indexKey, render } from '@frp-ts/dom'
 import { clock, atom } from '@frp-ts/core'
 
 const newAtom = atom.newAtom({
@@ -7,7 +7,7 @@ const newAtom = atom.newAtom({
 //
 const Counter = () => {
 	const counter = newAtom(0)
-	const increment = () => counter.set(counter.get() + 1)
+	const increment = () => counter.modify((v) => v + 1)
 	return (
 		<>
 			<div>{counter}</div>
@@ -93,9 +93,38 @@ const Counter = () => {
 // 	</>,
 // 	document.getElementById('root'),
 // )
-render(
-	<>
-		<Counter />
-	</>,
-	document.getElementById('root'),
-)
+
+const Test = () => {
+	const items = newAtom([1, 2, 3])
+	const handleChange = () => {
+		items.set([1, Math.random(), 3])
+	}
+	const isVisible = newAtom(true)
+	const handleToggle = () => {
+		isVisible.modify((value) => !value)
+	}
+	return (
+		<div id={'test'}>
+			<button onClick={handleChange}>Change</button>
+			<button onClick={handleToggle}>
+				Toggle
+				{/*Test: <If name={'If: Button'} value={isVisible} then={() => 'Hide'} else={() => 'Show'} />*/}
+			</button>
+			<If
+				name={'If: List'}
+				value={isVisible}
+				then={() => {
+					return (
+						<For items={items} getKey={indexKey}>
+							{(item) => {
+								return <div>Item: {item}</div>
+							}}
+						</For>
+					)
+				}}
+			/>
+		</div>
+	)
+}
+
+render(<Test />, document.getElementById('root'))

@@ -1,18 +1,51 @@
-/** @jsx h.createElement */
 import { PrimitiveElementChild, h, renderChild } from './h'
-import { cleanup, disposeContext, withContext } from './context'
+import { cleanup, Context, disposeContext, withContext } from './context'
 import { Emitter, property, Property } from '@frp-ts/core'
 import './udomdiff'
-import { newEmitter } from '@frp-ts/core/src/emitter'
+import { emitter } from '@frp-ts/core'
 
 export interface IfProps {
 	readonly value: Property<boolean>
 	readonly then: () => PrimitiveElementChild
 	readonly else?: () => PrimitiveElementChild
+	readonly name?: string
 }
 
 export function If(props: IfProps): PrimitiveElementChild {
-	return <Bind name={'If'}>{property.combine(props.value, (value) => (value ? props.then() : props.else?.()))}</Bind>
+	const ifContextName = props.name ?? 'If'
+	const ifBranchContextName = `${ifContextName}: Branch`
+	const [result] = withContext(ifContextName, () => {
+		let branchChild: PrimitiveElementChild
+		let branchContext: Context | undefined
+		const render = () => {
+			const [, context] = withContext(ifBranchContextName, () => {
+				branchChild = props.value.get() ? props.then() : props.else?.()
+			})
+			branchContext = context
+		}
+		render()
+
+		let conditionValue = props.value.get()
+		const proxy: Property<PrimitiveElementChild> = {
+			get: () => branchChild,
+			subscribe: (observer) =>
+				props.value.subscribe({
+					next: (time) => {
+						const newConditionValue = props.value.get()
+						if (newConditionValue !== conditionValue) {
+							conditionValue = newConditionValue
+							branchContext && disposeContext(branchContext)
+							// we need to call props.then/else again in `ifBranchContextName` context
+							render()
+							observer.next(time)
+						}
+					},
+				}),
+		}
+
+		return renderChild(proxy)
+	})
+	return result
 }
 
 export interface BindProps {
@@ -111,22 +144,24 @@ function createCacheEntry<Item>(
 	item: Item,
 	children: (item: Property<Item>) => PrimitiveElementChild,
 ): CacheEntry<Item> {
-	const emitter = newEmitter()
+	const e = emitter.newEmitter()
 	const valueRef = {
 		value: item,
 	}
 	const p: Property<Item> = {
 		get: () => valueRef.value,
-		subscribe: emitter.subscribe,
+		subscribe: e.subscribe,
 	}
 	const entry: CacheEntry<Item> = {
 		valueRef,
-		emitter,
+		emitter: e,
 		node: children(p),
 		property: p,
 	}
 	return entry
 }
+
+export const indexKey = (_: unknown, index: number) => index
 
 // const diff = (
 // 	parentNode: Node,
