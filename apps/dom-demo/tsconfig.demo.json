@@ -1,5 +1,16 @@
 {
-  "extends": "../tsconfig.json",
-  "compilerOptions": {},
-  "include": ["./index.tsx"]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "jsx": "react",
+    "jsxFactory": "h.createElement",
+    "jsxFragmentFactory": "h.Fragment"
+  },
+  "include": ["./src/index.tsx"]
 }

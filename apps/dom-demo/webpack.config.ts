@@ -4,11 +4,11 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 const SELF = path.resolve(__dirname)
 
 const config = {
-	entry: path.resolve(SELF, './index.tsx'),
+	entry: path.resolve(SELF, './src/index.tsx'),
 	mode: 'development',
 	plugins: [
 		new HtmlWebpackPlugin({
-			template: path.resolve(SELF, './index.html'),
+			template: path.resolve(SELF, './src/index.html'),
 		}),
 	],
 	optimization: {
