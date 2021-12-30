@@ -31,6 +31,8 @@
   },
   "devDependencies": {
     "@frp-ts/test-utils": "^1.0.0-alpha.10",
+    "eslint-plugin-react": "^7.26.1",
+    "eslint-plugin-react-app": "^6.2.2",
     "tslib": "^2.3.1"
   }
 }

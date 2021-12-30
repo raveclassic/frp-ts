@@ -68,8 +68,6 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-jest": "^25.2.2",
-    "eslint-plugin-react": "^7.26.1",
-    "eslint-plugin-react-app": "^6.2.2",
     "eslint-plugin-unicorn": "^37.0.1",
     "husky": "^4.2.5",
     "jest": "^27.3.1",

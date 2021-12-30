@@ -1,5 +1,6 @@
 {
-  "extends": ["../../.eslintrc.js"],
+  "plugins": ["react", "react-app"],
+  "extends": ["react-app", "../../.eslintrc.js"],
   "ignorePatterns": ["!**/*"],
   "overrides": [
     {
@@ -14,5 +15,10 @@
       "files": ["*.js", "*.jsx"],
       "rules": {}
     }
-  ]
+  ],
+  "settings": {
+    "react": {
+      "pragma": "h"
+    }
+  }
 }

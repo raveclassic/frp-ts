@@ -1,9 +1,8 @@
 /** @jsx h.createElement */
-import { PrimitiveElementChild, h, renderChild, ElementChild, ElementChildren } from './h'
+import { PrimitiveElementChild, h, renderChild } from './h'
 import { cleanup, disposeContext, withContext } from './context'
 import { Emitter, property, Property } from '@frp-ts/core'
 import './udomdiff'
-import udomdiff from 'udomdiff'
 import { newEmitter } from '@frp-ts/core/src/emitter'
 
 export interface IfProps {
@@ -93,7 +92,8 @@ export function For<Item>(props: ForProps<Item>): PrimitiveElementChild {
 			subscription.unsubscribe()
 		})
 
-		return <h.Fragment>{nodes}</h.Fragment>
+		throw new Error('')
+		// return <h.Fragment>{nodes}</h.Fragment>
 	})
 
 	return result

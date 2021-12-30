@@ -12,7 +12,6 @@ module.exports = {
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
 		project: 'tsconfig.json',
-		extraFileExtensions: ['.json'],
 	},
 	plugins: ['@nrwl/nx', 'jest', 'import', 'unicorn'],
 	extends: [
@@ -74,6 +73,7 @@ module.exports = {
 					...Object.values(workspaces.projects).map((p) =>
 						path.resolve(ROOT, `${p}/**/*.@(stories|mock|test|spec).@(ts|tsx|js|jsx)`),
 					),
+					'webpack.config.ts',
 				],
 			},
 		],

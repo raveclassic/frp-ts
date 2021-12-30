@@ -255,6 +255,7 @@ export const renderChild = (child: PrimitiveElementChild | Property<PrimitiveEle
 	} else if (isNonNullableOrVoid(child) && typeof child !== 'boolean') {
 		return document.createTextNode(child.toString())
 	}
+	throw new Error('Unsupported child')
 }
 
 const renderChildren = (children: NativeElementChildren): Node | readonly Node[] | undefined => {

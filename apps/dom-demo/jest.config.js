@@ -1,6 +1,6 @@
 module.exports = {
 	testRunner: 'jasmine2',
-	displayName: 'dom',
+	displayName: 'dom-demo',
 	preset: '../../jest.preset.js',
 	globals: {
 		'ts-jest': {
