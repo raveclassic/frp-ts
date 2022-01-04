@@ -1,25 +1,16 @@
-export const APPEND_OPERATION = 1
-export const GET_BEFORE_OPERATION = 0
-
-export type DiffOperation = typeof APPEND_OPERATION | typeof GET_BEFORE_OPERATION
-
 const MOVED = Symbol('Moved')
 type Moved = typeof MOVED
 
 /**
  * Adapted from https://github.com/luwes/sinuous/blob/master/packages/sinuous/map/src/diff.js
- * All credits to https://github.com/luwes
- * License: no license
  */
 export function diff<T>(
-	parent: Node,
 	a: (T | Moved)[],
 	b: readonly T[],
-	get: (item: T, key: PropertyKey, operation: DiffOperation) => Node,
-	before: Node,
 	getKey: (item: T, index: number) => PropertyKey,
 	onNewValue: (key: PropertyKey, previousValue: T, newValue: T) => void,
 	onDelete: (key: PropertyKey) => void,
+	onInsertBefore: (item: T, key: PropertyKey, beforeKey: PropertyKey) => void,
 ): void {
 	const aIdx = new Map<PropertyKey, number>()
 	const bIdx = new Map<PropertyKey, number>()
@@ -51,10 +42,7 @@ export function diff<T>(
 			i++
 		} else if (a.length <= i) {
 			// No more elements in old, this is an addition
-			parent.insertBefore(
-				get(bElm, getKey(bElm, j), APPEND_OPERATION),
-				get(aElm, getKey(aElm, i), GET_BEFORE_OPERATION) ?? before,
-			)
+			onInsertBefore(bElm, getKey(bElm, j), getKey(aElm, i))
 			j++
 		} else if (aElm === bElm) {
 			// No difference, we move on
@@ -75,7 +63,7 @@ export function diff<T>(
 				i++
 			} else if (wantedElmInOldIndex === undefined) {
 				// New element is not in old list, it has been added
-				parent.insertBefore(get(bElm, bKey, APPEND_OPERATION), get(aElm, aKey, GET_BEFORE_OPERATION) ?? before)
+				onInsertBefore(bElm, bKey, aKey)
 				j++
 			} else if (curElmInNewIndex === wantedElmInOldIndex && aKey === bKey) {
 				// Different elements with the same key
@@ -88,10 +76,7 @@ export function diff<T>(
 				// Element is in both lists, it has been moved
 				const wantedElmInOld = a[wantedElmInOldIndex]
 				if (wantedElmInOld !== MOVED) {
-					parent.insertBefore(
-						get(wantedElmInOld, getKey(wantedElmInOld, wantedElmInOldIndex), APPEND_OPERATION),
-						get(aElm, aKey, GET_BEFORE_OPERATION) ?? before,
-					)
+					onInsertBefore(wantedElmInOld, getKey(wantedElmInOld, wantedElmInOldIndex), aKey)
 				}
 				a[wantedElmInOldIndex] = MOVED
 				if (wantedElmInOldIndex > i + 1) i++
