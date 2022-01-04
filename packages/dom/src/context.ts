@@ -1,21 +1,23 @@
 export interface Context {
-	readonly name: string
+	readonly name: PropertyKey
 	readonly cleanups: Set<() => void>
 	readonly children: Set<Context>
+	readonly parent?: Context
 }
 
-const newContext = (name: string): Context => ({
+const newContext = (name: PropertyKey, parent?: Context): Context => ({
 	name,
 	cleanups: new Set(),
 	children: new Set(),
+	parent,
 })
 const ROOT_CONTEXT: Context = newContext('ROOT')
 export let CURRENT_CONTEXT: Context = ROOT_CONTEXT
 
-export function withContext<Result>(name: string, factory: () => Result): [Result, Context] {
+export function withContext<Result>(name: PropertyKey, factory: () => Result): [Result, Context] {
 	const currentContext = CURRENT_CONTEXT
-	const context = newContext(name)
-	CURRENT_CONTEXT.children.add(context)
+	const context = newContext(name, CURRENT_CONTEXT)
+	currentContext.children.add(context)
 	CURRENT_CONTEXT = context
 	const result = factory()
 	CURRENT_CONTEXT = currentContext
@@ -31,7 +33,9 @@ export const disposeContext = (context: Context): void => {
 		cleanup()
 	}
 	context.cleanups.clear()
+	context.parent?.children.delete(context)
 }
+
 export const cleanup = (f: () => void): void => {
 	CURRENT_CONTEXT.cleanups.add(f)
 }

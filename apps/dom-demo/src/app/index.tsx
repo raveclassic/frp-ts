@@ -1,4 +1,4 @@
-import { For, h, If, indexKey, render } from '@frp-ts/dom'
+import { cleanup, For, h, If, indexKey, render } from '@frp-ts/dom'
 import { clock, atom } from '@frp-ts/core'
 
 const newAtom = atom.newAtom({
@@ -117,7 +117,14 @@ const Test = () => {
 					return (
 						<For items={items} getKey={(item) => `key: ${item}`}>
 							{(item) => {
-								return <div>Item: {item}</div>
+								const timer = newAtom(0)
+								const interval = setInterval(() => timer.modify((value) => value + 1), 1000)
+								cleanup(() => clearInterval(interval))
+								return (
+									<div>
+										Item: {item}, interval: {timer}
+									</div>
+								)
 							}}
 						</For>
 					)

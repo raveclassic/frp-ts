@@ -34,7 +34,7 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 		for (let i = 0; i < previousItems.length; i++) {
 			const item = previousItems[i]
 			const key = props.getKey(item, i)
-			const entry = newCacheEntry(item, props)
+			const entry = newCacheEntry(item, key, props)
 			cache.set(key, entry)
 			renderedItems.push(entry.element)
 		}
@@ -72,7 +72,7 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 		const onInsertBefore = (item: Item, key: PropertyKey, beforeKey: PropertyKey): void => {
 			let element = cache.get(key)?.element
 			if (!element) {
-				const entry = newCacheEntry(item, props)
+				const entry = newCacheEntry(item, key, props)
 				cache.set(key, entry)
 				element = entry.element
 			}
@@ -96,9 +96,9 @@ export function indexKey<Item>(item: Item, index: number): number {
 	return index
 }
 
-function newCacheEntry<Item>(item: Item, props: ForProps<Item>): CacheEntry<Item> {
+function newCacheEntry<Item>(item: Item, key: PropertyKey, props: ForProps<Item>): CacheEntry<Item> {
 	const itemAtom = newAtom(item)
-	const [itemElement, itemContext] = withContext('item', () => renderChild(props.children(itemAtom)))
+	const [itemElement, itemContext] = withContext(key, () => renderChild(props.children(itemAtom)))
 	return {
 		atom: itemAtom,
 		element: itemElement,
