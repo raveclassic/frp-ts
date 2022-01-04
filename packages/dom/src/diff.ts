@@ -1,8 +1,7 @@
-export const DELETE_OPERATION = -1
 export const APPEND_OPERATION = 1
 export const GET_BEFORE_OPERATION = 0
 
-export type DiffOperation = typeof DELETE_OPERATION | typeof APPEND_OPERATION | typeof GET_BEFORE_OPERATION
+export type DiffOperation = typeof APPEND_OPERATION | typeof GET_BEFORE_OPERATION
 
 const MOVED = Symbol('Moved')
 type Moved = typeof MOVED
@@ -20,6 +19,7 @@ export function diff<T>(
 	before: Node,
 	getKey: (item: T, index: number) => PropertyKey,
 	onNewValue: (key: PropertyKey, previousValue: T, newValue: T) => void,
+	onDelete: (key: PropertyKey) => void,
 ): void {
 	const aIdx = new Map<PropertyKey, number>()
 	const bIdx = new Map<PropertyKey, number>()
@@ -47,7 +47,7 @@ export function diff<T>(
 			i++
 		} else if (b.length <= j) {
 			// No more elements in new, this is a delete
-			parent.removeChild(get(aElm, getKey(aElm, i), DELETE_OPERATION))
+			onDelete(getKey(aElm, i))
 			i++
 		} else if (a.length <= i) {
 			// No more elements in old, this is an addition
@@ -71,7 +71,7 @@ export function diff<T>(
 			const wantedElmInOldIndex = aIdx.get(bKey)
 			if (curElmInNewIndex === undefined) {
 				// Current element is not in new list, it has been removed
-				parent.removeChild(get(aElm, aKey, DELETE_OPERATION))
+				onDelete(aKey)
 				i++
 			} else if (wantedElmInOldIndex === undefined) {
 				// New element is not in old list, it has been added

@@ -1,7 +1,7 @@
 import { atom, Atom, clock, Property } from '@frp-ts/core'
 import { PrimitiveElementChild, renderChild } from './h'
 import { cleanup, Context, disposeContext, withContext } from './context'
-import { APPEND_OPERATION, DELETE_OPERATION, diff, DiffOperation, GET_BEFORE_OPERATION } from './diff'
+import { APPEND_OPERATION, diff, DiffOperation, GET_BEFORE_OPERATION } from './diff'
 
 export interface ForProps<Item> {
 	readonly items: Property<readonly Item[]>
@@ -29,7 +29,6 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 		const endMarker = document.createTextNode('')
 
 		// initial run
-		const toDelete: PropertyKey[] = []
 		let previousItems = props.items.get().slice() // make a copy, udomdiff mutates this list
 		const renderedItems: Node[] = []
 		for (let i = 0; i < previousItems.length; i++) {
@@ -40,35 +39,25 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 			renderedItems.push(entry.element)
 		}
 
+		let currentParent: Node | null = null
+
 		// updates
 		const subscription = props.items.subscribe({
 			next: () => {
-				const parent = startMarker.parentNode
+				currentParent = startMarker.parentNode
 				// parent is either a DocumentFragment or an Element
 				// where the DocumentFragment has been attached to
-				if (!parent) return
+				if (!currentParent) return
 
 				const nextItems = props.items.get()
 
-				diff(parent, previousItems, nextItems, process, endMarker, props.getKey, onNewValue)
+				diff(currentParent, previousItems, nextItems, process, endMarker, props.getKey, onNewValue, onDelete)
 				previousItems = nextItems.slice()
-				for (const key of toDelete) {
-					deleteItem(key, cache)
-				}
-				toDelete.length = 0
 			},
 		})
 
 		const process = (item: Item, key: PropertyKey, operation: DiffOperation): Node => {
 			switch (operation) {
-				case DELETE_OPERATION: {
-					const cached = cache.get(key)
-					if (!cached) {
-						throw new Error(`Cannot find cached node for key "${key.toString()}"`)
-					}
-					toDelete.push(key)
-					return cached.element
-				}
 				case APPEND_OPERATION: {
 					const entry = newCacheEntry(item, props)
 					cache.set(key, entry)
@@ -88,6 +77,15 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 			const cached = cache.get(key)
 			if (cached) {
 				cached.atom.set(newValue)
+			}
+		}
+
+		const onDelete = (key: PropertyKey): void => {
+			const cached = cache.get(key)
+			if (cached) {
+				currentParent?.removeChild(cached.element)
+				disposeContext(cached.context)
+				cache.delete(key)
 			}
 		}
 
@@ -117,13 +115,5 @@ function newCacheEntry<Item>(item: Item, props: ForProps<Item>): CacheEntry<Item
 		atom: itemAtom,
 		element: itemElement,
 		context: itemContext,
-	}
-}
-
-function deleteItem<Item>(key: PropertyKey, cache: Cache<Item>): void {
-	const cached = cache.get(key)
-	if (cached) {
-		disposeContext(cached.context)
-		cache.delete(key)
 	}
 }
