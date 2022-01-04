@@ -1,3 +1,5 @@
+import { Time } from '@frp-ts/core'
+
 const MOVED = Symbol('Moved')
 type Moved = typeof MOVED
 
@@ -8,9 +10,10 @@ export function diff<T>(
 	a: (T | Moved)[],
 	b: readonly T[],
 	getKey: (item: T, index: number) => PropertyKey,
-	onNewValue: (key: PropertyKey, previousValue: T, newValue: T) => void,
+	onNewValue: (key: PropertyKey, previousValue: T, newValue: T, time: Time) => void,
 	onDelete: (key: PropertyKey) => void,
 	onInsertBefore: (item: T, key: PropertyKey, beforeKey: PropertyKey) => void,
+	time: Time,
 ): void {
 	const aIdx = new Map<PropertyKey, number>()
 	const bIdx = new Map<PropertyKey, number>()
@@ -69,7 +72,7 @@ export function diff<T>(
 				// Different elements with the same key
 				// Element has been updated with a new value
 				// Try to updated cached
-				onNewValue(aKey, aElm, bElm)
+				onNewValue(aKey, aElm, bElm, time)
 				i++
 				j++
 			} else {

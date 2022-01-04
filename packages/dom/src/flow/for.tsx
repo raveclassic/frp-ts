@@ -1,4 +1,4 @@
-import { atom, Atom, clock, Property } from '@frp-ts/core'
+import { atom, clock, emitter, Property, Time } from '@frp-ts/core'
 import { PrimitiveElementChild, renderChild } from '../h/h'
 import { cleanup, Context, disposeContext, withContext } from '../context/context'
 import { diff } from '../utils/diff'
@@ -9,9 +9,13 @@ export interface ForProps<Item> {
 	readonly children: (item: Property<Item>) => PrimitiveElementChild
 }
 
+interface Notifier<Value> extends Property<Value> {
+	readonly notify: (time: Time, newValue: Value) => void
+}
+
 interface CacheEntry<Item> {
 	readonly element: Node
-	readonly atom: Atom<Item>
+	readonly notifier: Notifier<Item>
 	readonly context: Context
 }
 interface Cache<Item> extends Map<PropertyKey, CacheEntry<Item>> {}
@@ -42,18 +46,22 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 
 		// updates
 		const subscription = props.items.subscribe({
-			next: () => {
+			next: (time) => {
 				// parent might be different from the previous call
 				currentParent = startMarker.parentNode
 				const nextItems = props.items.get()
 
-				diff(previousItems, nextItems, props.getKey, onNewValue, onDelete, onInsertBefore)
+				diff(previousItems, nextItems, props.getKey, onNewValue, onDelete, onInsertBefore, time)
 				previousItems = nextItems.slice()
 			},
 		})
 
-		const onNewValue = (key: PropertyKey, previousValue: Item, newValue: Item): void =>
-			cache.get(key)?.atom.set(newValue)
+		const onNewValue = (key: PropertyKey, previousValue: Item, newValue: Item, time: Time): void => {
+			const cached = cache.get(key)
+			if (cached) {
+				cached.notifier.notify(time, newValue)
+			}
+		}
 
 		const onDelete = (key: PropertyKey): void => {
 			const cached = cache.get(key)
@@ -94,8 +102,19 @@ export function indexKey<Item>(item: Item, index: number): number {
 function newCacheEntry<Item>(item: Item, key: PropertyKey, props: ForProps<Item>): CacheEntry<Item> {
 	const itemAtom = newAtom(item)
 	const [itemElement, itemContext] = withContext(key, () => renderChild(props.children(itemAtom)))
+	const e = emitter.newEmitter()
+	let value = item
 	return {
-		atom: itemAtom,
+		notifier: {
+			get: () => value,
+			subscribe: e.subscribe,
+			notify: (time, newValue) => {
+				if (value !== newValue) {
+					value = newValue
+					e.next(time)
+				}
+			},
+		},
 		element: itemElement,
 		context: itemContext,
 	}
