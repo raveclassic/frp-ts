@@ -1,7 +1,7 @@
 import { atom, Atom, clock, Property } from '@frp-ts/core'
-import { PrimitiveElementChild, renderChild } from './h'
-import { cleanup, Context, disposeContext, withContext } from './context'
-import { diff } from './diff'
+import { PrimitiveElementChild, renderChild } from '../h/h'
+import { cleanup, Context, disposeContext, withContext } from '../context/context'
+import { diff } from '../utils/diff'
 
 export interface ForProps<Item> {
 	readonly items: Property<readonly Item[]>

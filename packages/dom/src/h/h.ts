@@ -1,6 +1,6 @@
 import { JSXInternal } from './jsx'
 import { Property } from '@frp-ts/core'
-import { cleanup } from './context'
+import { cleanup } from '../context/context'
 export import PrimitiveElementChild = JSXInternal.PrimitiveElementChild
 export import ElementChild = JSXInternal.ElementChild
 export import ElementChildren = JSXInternal.ElementChildren

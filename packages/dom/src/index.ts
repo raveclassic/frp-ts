@@ -8,7 +8,8 @@ export {
 	ElementChild,
 	ElementChildren,
 	ComponentType,
-} from './h'
-export { Bind, BindProps, If, IfProps } from './control-flow'
-export { cleanup } from './context'
-export { ForProps, For, indexKey } from './for'
+} from './h/h'
+export { cleanup } from './context/context'
+export { ForProps, For, indexKey } from './flow/for'
+export { If, IfProps } from './flow/if'
+export { Bind, BindProps } from './flow/bind'

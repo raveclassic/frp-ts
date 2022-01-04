@@ -1,7 +1,7 @@
 import { h, svg } from './h'
 import { constVoid } from '@frp-ts/utils'
 import { atom, clock } from '@frp-ts/core'
-import { CURRENT_CONTEXT, disposeContext } from './context'
+import { CURRENT_CONTEXT, disposeContext } from '../context/context'
 import { domUtils } from '@frp-ts/test-utils'
 
 const newAtom = atom.newAtom({

@@ -1,14 +1,14 @@
 import { atom, clock, property } from '@frp-ts/core'
-import { h, PrimitiveElementChild } from './h'
-import { Bind } from './control-flow'
+import { h, PrimitiveElementChild } from '../h/h'
 import { domUtils } from '@frp-ts/test-utils'
-import { cleanup, CURRENT_CONTEXT, disposeContext } from './context'
+import { cleanup, CURRENT_CONTEXT, disposeContext } from '../context/context'
+import { Bind } from './bind'
 
 const newAtom = atom.newAtom({
 	clock: clock.newCounterClock(),
 })
 
-describe('control-flow', () => {
+describe('bind', () => {
 	describe('Bind', () => {
 		beforeEach(() => disposeContext(CURRENT_CONTEXT))
 		it('renders primitive children', () => {

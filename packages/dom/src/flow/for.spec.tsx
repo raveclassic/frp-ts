@@ -1,6 +1,6 @@
 import { atom, clock } from '@frp-ts/core'
 import { domUtils } from '@frp-ts/test-utils'
-import { h } from '.'
+import { h } from '@frp-ts/dom'
 import { constVoid } from '@frp-ts/utils'
 import { For, indexKey } from './for'
 
