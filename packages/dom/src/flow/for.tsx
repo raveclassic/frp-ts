@@ -1,4 +1,4 @@
-import { atom, clock, emitter, Property, Time } from '@frp-ts/core'
+import { emitter, Property, Time } from '@frp-ts/core'
 import { PrimitiveElementChild, renderChild } from '../h/h'
 import { cleanup, Context, disposeContext, withContext } from '../context/context'
 import { diff } from '../utils/diff'
@@ -9,20 +9,13 @@ export interface ForProps<Item> {
 	readonly children: (item: Property<Item>) => PrimitiveElementChild
 }
 
-interface Notifier<Value> extends Property<Value> {
-	readonly notify: (time: Time, newValue: Value) => void
-}
-
 interface CacheEntry<Item> {
 	readonly element: Node
-	readonly notifier: Notifier<Item>
+	readonly property: Property<Item>
 	readonly context: Context
+	readonly notify: (time: Time, value: Item) => void
 }
 interface Cache<Item> extends Map<PropertyKey, CacheEntry<Item>> {}
-
-const newAtom = atom.newAtom({
-	clock: clock.newCounterClock(),
-})
 
 export function For<Item>(props: ForProps<Item>): DocumentFragment {
 	const [result] = withContext('For', () => {
@@ -56,12 +49,8 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 			},
 		})
 
-		const onNewValue = (key: PropertyKey, previousValue: Item, newValue: Item, time: Time): void => {
-			const cached = cache.get(key)
-			if (cached) {
-				cached.notifier.notify(time, newValue)
-			}
-		}
+		const onNewValue = (key: PropertyKey, previousValue: Item, newValue: Item, time: Time): void =>
+			cache.get(key)?.notify(time, newValue)
 
 		const onDelete = (key: PropertyKey): void => {
 			const cached = cache.get(key)
@@ -100,20 +89,20 @@ export function indexKey<Item>(item: Item, index: number): number {
 }
 
 function newCacheEntry<Item>(item: Item, key: PropertyKey, props: ForProps<Item>): CacheEntry<Item> {
-	const itemAtom = newAtom(item)
-	const [itemElement, itemContext] = withContext(key, () => renderChild(props.children(itemAtom)))
 	const e = emitter.newEmitter()
 	let value = item
+	const property: Property<Item> = {
+		get: () => value,
+		subscribe: e.subscribe,
+	}
+	const [itemElement, itemContext] = withContext(key, () => renderChild(props.children(property)))
 	return {
-		notifier: {
-			get: () => value,
-			subscribe: e.subscribe,
-			notify: (time, newValue) => {
-				if (value !== newValue) {
-					value = newValue
-					e.next(time)
-				}
-			},
+		property,
+		notify: (time, newValue) => {
+			if (value !== newValue) {
+				value = newValue
+				e.next(time)
+			}
 		},
 		element: itemElement,
 		context: itemContext,
