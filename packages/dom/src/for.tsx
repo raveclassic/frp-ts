@@ -22,7 +22,6 @@ const newAtom = atom.newAtom({
 
 export function For<Item>(props: ForProps<Item>): DocumentFragment {
 	const [result] = withContext('For', () => {
-		console.log('rendering For')
 		const cache: Cache<Item> = new Map()
 
 		const startMarker = document.createTextNode('')
@@ -53,12 +52,8 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 			},
 		})
 
-		const onNewValue = (key: PropertyKey, previousValue: Item, newValue: Item): void => {
-			const cached = cache.get(key)
-			if (cached) {
-				cached.atom.set(newValue)
-			}
-		}
+		const onNewValue = (key: PropertyKey, previousValue: Item, newValue: Item): void =>
+			cache.get(key)?.atom.set(newValue)
 
 		const onDelete = (key: PropertyKey): void => {
 			const cached = cache.get(key)
@@ -80,7 +75,7 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 		}
 
 		cleanup(() => {
-			console.log('unmounting For')
+			cache.clear()
 			currentParent = null
 			subscription.unsubscribe()
 		})
