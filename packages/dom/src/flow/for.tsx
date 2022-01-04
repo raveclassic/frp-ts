@@ -1,7 +1,8 @@
-import { emitter, Property, Time } from '@frp-ts/core'
+import { Property, Time } from '@frp-ts/core'
 import { PrimitiveElementChild, renderChild } from '../h/h'
 import { cleanup, Context, disposeContext, withContext } from '../context/context'
 import { diff } from '../utils/diff'
+import { MutableProperty, newMutableProperty } from '../utils/mutable-property'
 
 export interface ForProps<Item> {
 	readonly items: Property<readonly Item[]>
@@ -11,9 +12,8 @@ export interface ForProps<Item> {
 
 interface CacheEntry<Item> {
 	readonly element: Node
-	readonly property: Property<Item>
+	readonly property: MutableProperty<Item>
 	readonly context: Context
-	readonly notify: (time: Time, value: Item) => void
 }
 interface Cache<Item> extends Map<PropertyKey, CacheEntry<Item>> {}
 
@@ -50,7 +50,7 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 		})
 
 		const onNewValue = (key: PropertyKey, previousValue: Item, newValue: Item, time: Time): void =>
-			cache.get(key)?.notify(time, newValue)
+			cache.get(key)?.property.next(time, newValue)
 
 		const onDelete = (key: PropertyKey): void => {
 			const cached = cache.get(key)
@@ -89,22 +89,11 @@ export function indexKey<Item>(item: Item, index: number): number {
 }
 
 function newCacheEntry<Item>(item: Item, key: PropertyKey, props: ForProps<Item>): CacheEntry<Item> {
-	const e = emitter.newEmitter()
-	let value = item
-	const property: Property<Item> = {
-		get: () => value,
-		subscribe: e.subscribe,
-	}
-	const [itemElement, itemContext] = withContext(key, () => renderChild(props.children(property)))
+	const property = newMutableProperty(item)
+	const [element, context] = withContext(key, () => renderChild(props.children(property)))
 	return {
 		property,
-		notify: (time, newValue) => {
-			if (value !== newValue) {
-				value = newValue
-				e.next(time)
-			}
-		},
-		element: itemElement,
-		context: itemContext,
+		element,
+		context,
 	}
 }
