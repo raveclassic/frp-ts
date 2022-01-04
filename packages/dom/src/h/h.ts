@@ -218,8 +218,8 @@ const clearBetween = (startMarker: Node, endMarker: Node): void => {
 export const renderChild = (child: PrimitiveElementChild | Property<PrimitiveElementChild>): Node => {
 	if (isProperty(child)) {
 		const fragment = document.createDocumentFragment()
-		const startMarker = document.createTextNode('')
-		const endMarker = document.createTextNode('')
+		const startMarker = newMarker()
+		const endMarker = newMarker()
 		fragment.append(startMarker)
 		const rendered = renderChildren(child.get())
 		if (rendered) {
@@ -252,10 +252,17 @@ export const renderChild = (child: PrimitiveElementChild | Property<PrimitiveEle
 		return fragment
 	} else if (child instanceof Node) {
 		return child
-	} else if (isNonNullableOrVoid(child) && typeof child !== 'boolean') {
-		return document.createTextNode(child.toString())
+	} else {
+		/**
+		 * child is a {@link PrimitiveElementChild}
+		 * TODO find out if it's better to return Node | undefined here
+		 */
+		if (child === null || child === undefined) {
+			return document.createTextNode('')
+		} else {
+			return document.createTextNode(child.toString())
+		}
 	}
-	return document.createTextNode('')
 }
 
 const renderChildren = (children: NativeElementChildren): Node | readonly Node[] | undefined => {
@@ -318,3 +325,5 @@ function buildComponentProps(props: object | null, children: readonly ElementChi
 		return childrenProp === undefined ? props : { ...props, children: childrenProp }
 	}
 }
+
+export const newMarker = () => document.createTextNode('')
