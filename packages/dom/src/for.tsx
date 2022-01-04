@@ -1,6 +1,7 @@
 import { atom, Atom, clock, Property } from '@frp-ts/core'
 import { PrimitiveElementChild, renderChild } from './h'
-import { cleanup, withContext } from './context'
+import { cleanup, Context, disposeContext, withContext } from './context'
+import { APPEND_OPERATION, DELETE_OPERATION, diff, DiffOperation, GET_BEFORE_OPERATION } from './diff'
 
 export interface ForProps<Item> {
 	readonly items: Property<readonly Item[]>
@@ -9,8 +10,9 @@ export interface ForProps<Item> {
 }
 
 interface CacheEntry<Item> {
-	element: Node
-	atom: Atom<Item>
+	readonly element: Node
+	readonly atom: Atom<Item>
+	readonly context: Context
 }
 interface Cache<Item> extends Map<PropertyKey, CacheEntry<Item>> {}
 
@@ -22,45 +24,72 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 	const [result] = withContext('For', () => {
 		console.log('rendering For')
 		const cache: Cache<Item> = new Map()
-		const keys: PropertyKey[] = []
 
-		const start = document.createTextNode('')
-		const end = document.createTextNode('')
+		const startMarker = document.createTextNode('')
+		const endMarker = document.createTextNode('')
 
 		// initial run
-		const initialItems = props.items.get()
+		const toDelete: PropertyKey[] = []
+		let previousItems = props.items.get().slice() // make a copy, udomdiff mutates this list
 		const renderedItems: Node[] = []
-		for (let i = 0; i < initialItems.length; i++) {
-			const item = initialItems[i]
+		for (let i = 0; i < previousItems.length; i++) {
+			const item = previousItems[i]
 			const key = props.getKey(item, i)
-			const itemAtom = newAtom(item)
-			const itemElement = renderChild(props.children(itemAtom))
-			const entry: CacheEntry<Item> = {
-				atom: itemAtom,
-				element: itemElement,
-			}
-			keys.push(key)
+			const entry = newCacheEntry(item, props)
 			cache.set(key, entry)
-			renderedItems.push(itemElement)
+			renderedItems.push(entry.element)
 		}
 
 		// updates
 		const subscription = props.items.subscribe({
 			next: () => {
-				const newItems = props.items.get()
-				const newKeys: PropertyKey[] = []
-				for (let i = 0; i < newItems.length; i++) {
-					const newItem = newItems[i]
-					const key = props.getKey(newItem, i)
-					newKeys.push(key)
-					const cached = cache.get(key)
-					if (cached) {
-						// update
-						cached.atom.set(newItem)
-					}
+				const parent = startMarker.parentNode
+				// parent is either a DocumentFragment or an Element
+				// where the DocumentFragment has been attached to
+				if (!parent) return
+
+				const nextItems = props.items.get()
+
+				diff(parent, previousItems, nextItems, process, endMarker, props.getKey, onNewValue)
+				previousItems = nextItems.slice()
+				for (const key of toDelete) {
+					deleteItem(key, cache)
 				}
+				toDelete.length = 0
 			},
 		})
+
+		const process = (item: Item, key: PropertyKey, operation: DiffOperation): Node => {
+			switch (operation) {
+				case DELETE_OPERATION: {
+					const cached = cache.get(key)
+					if (!cached) {
+						throw new Error(`Cannot find cached node for key "${key.toString()}"`)
+					}
+					toDelete.push(key)
+					return cached.element
+				}
+				case APPEND_OPERATION: {
+					const entry = newCacheEntry(item, props)
+					cache.set(key, entry)
+					return entry.element
+				}
+				case GET_BEFORE_OPERATION: {
+					const cached = cache.get(key)
+					if (cached) {
+						return cached.element
+					}
+					throw new Error(`Cannot find cached node for key "${key.toString()}"`)
+				}
+			}
+		}
+
+		const onNewValue = (key: PropertyKey, previousValue: Item, newValue: Item): void => {
+			const cached = cache.get(key)
+			if (cached) {
+				cached.atom.set(newValue)
+			}
+		}
 
 		cleanup(() => {
 			console.log('unmounting For')
@@ -68,7 +97,7 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 		})
 
 		const result = document.createDocumentFragment()
-		result.append(start, ...renderedItems, end)
+		result.append(startMarker, ...renderedItems, endMarker)
 		return result
 	})
 	return result
@@ -76,4 +105,25 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 
 export function indexKey<Item>(item: Item, index: number): number {
 	return index
+}
+
+const MOVED = Symbol('Moved')
+type Moved = typeof MOVED
+
+function newCacheEntry<Item>(item: Item, props: ForProps<Item>): CacheEntry<Item> {
+	const itemAtom = newAtom(item)
+	const [itemElement, itemContext] = withContext('item', () => renderChild(props.children(itemAtom)))
+	return {
+		atom: itemAtom,
+		element: itemElement,
+		context: itemContext,
+	}
+}
+
+function deleteItem<Item>(key: PropertyKey, cache: Cache<Item>): void {
+	const cached = cache.get(key)
+	if (cached) {
+		disposeContext(cached.context)
+		cache.delete(key)
+	}
 }

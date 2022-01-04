@@ -95,9 +95,9 @@ const Counter = () => {
 // )
 
 const Test = () => {
-	const items = newAtom([1, 2, 3])
+	const items = newAtom(['first', 'second', 'third'])
 	const handleChange = () => {
-		items.set([1, Math.random(), 3])
+		items.set(['first', 'second ' + Math.random(), 'third'])
 	}
 	const isVisible = newAtom(true)
 	const handleToggle = () => {
@@ -115,7 +115,7 @@ const Test = () => {
 				value={isVisible}
 				then={() => {
 					return (
-						<For items={items} getKey={indexKey}>
+						<For items={items} getKey={(item) => `key: ${item}`}>
 							{(item) => {
 								return <div>Item: {item}</div>
 							}}
@@ -128,3 +128,37 @@ const Test = () => {
 }
 
 render(<Test />, document.getElementById('root'))
+
+// const fragment = document.createDocumentFragment()
+// const first = document.createTextNode('first')
+// console.log('first parent', first.parentNode)
+// fragment.append(first, document.createTextNode('second'))
+// console.log('first parent', first.parentNode)
+// const root = document.getElementById('root')
+// root?.append(fragment)
+// console.log('first parent', first.parentNode)
+// console.log('fragment children', Array.from(fragment.children))
+// // fragment.append(document.createTextNode('third'))
+// // console.log('fragment children', Array.from(fragment.children))
+// console.log('first child', fragment.firstChild)
+// // root?.removeChild(fragment)
+// // root?.removeChild(fragment)
+
+// console.log('ATTRIBUTE_NODE', Node.ATTRIBUTE_NODE)
+// console.log('CDATA_SECTION_NODE', Node.CDATA_SECTION_NODE)
+// console.log('COMMENT_NODE', Node.COMMENT_NODE)
+// console.log('DOCUMENT_FRAGMENT_NODE', Node.DOCUMENT_FRAGMENT_NODE)
+// console.log('DOCUMENT_NODE', Node.DOCUMENT_NODE)
+// console.log('DOCUMENT_POSITION_CONTAINED_BY', Node.DOCUMENT_POSITION_CONTAINED_BY)
+// console.log('DOCUMENT_POSITION_CONTAINS', Node.DOCUMENT_POSITION_CONTAINS)
+// console.log('DOCUMENT_POSITION_DISCONNECTED', Node.DOCUMENT_POSITION_DISCONNECTED)
+// console.log('DOCUMENT_POSITION_FOLLOWING', Node.DOCUMENT_POSITION_FOLLOWING)
+// console.log('DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC', Node.DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC)
+// console.log('DOCUMENT_POSITION_PRECEDING', Node.DOCUMENT_POSITION_PRECEDING)
+// console.log('DOCUMENT_TYPE_NODE', Node.DOCUMENT_TYPE_NODE)
+// console.log('ELEMENT_NODE', Node.ELEMENT_NODE)
+// console.log('ENTITY_NODE', Node.ENTITY_NODE)
+// console.log('ENTITY_REFERENCE_NODE', Node.ENTITY_REFERENCE_NODE)
+// console.log('NOTATION_NODE', Node.NOTATION_NODE)
+// console.log('PROCESSING_INSTRUCTION_NODE', Node.PROCESSING_INSTRUCTION_NODE)
+// console.log('TEXT_NODE', Node.TEXT_NODE)
