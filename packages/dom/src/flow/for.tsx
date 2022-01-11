@@ -39,7 +39,9 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 			const key = props.getKey(item, i)
 			const entry = newCacheEntry(item, key, props)
 			cache.set(key, entry)
-			renderedItems.push(entry.element)
+			if (entry.element) {
+				renderedItems.push(entry.element)
+			}
 		}
 
 		let currentParent: Node | null = null
@@ -103,7 +105,10 @@ export function indexKey<Item>(item: Item, index: number): number {
 
 function newCacheEntry<Item>(item: Item, key: PropertyKey, props: ForProps<Item>): CacheEntry<Item> {
 	const property = newMutableProperty(item)
-	const [element, context] = withContext(key, () => renderChild(props.children(property)))
+	const [element, context] = withContext(
+		key,
+		() => renderChild(props.children(property)) ?? document.createTextNode(''),
+	)
 	if (element.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
 		// item rendered a DocumentFragment
 		// wrap it with start/end markers so that it's possible to clear its content (clearBeetween)
