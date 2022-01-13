@@ -4,7 +4,7 @@ import { pipeable } from 'fp-ts/lib/pipeable'
 import { sequenceS as sequenceSApply, sequenceT as sequenceTApply } from 'fp-ts/lib/Apply'
 import { Functor2C, Functor2, Functor3, Functor3C, Functor4, Functor1, Functor } from 'fp-ts/lib/Functor'
 import { HKT, Kind, Kind2, Kind3, Kind4, URIS, URIS2, URIS3, URIS4 } from 'fp-ts/lib/HKT'
-import { Property, observable, emitter } from '@frp-ts/core'
+import { Property, observable, emitter, interopObservable } from '@frp-ts/core'
 import { IO } from 'fp-ts/lib/IO'
 
 const URI = '@frp-ts/fp-ts/Property'
@@ -24,16 +24,32 @@ export const instance: Applicative1<URI> = {
 	URI: URI,
 	map: (fa, f) => {
 		const memoF = memo1(f)
+		const get = () => memoF(fa.get())
 		return {
-			get: () => memoF(fa.get()),
+			get,
 			subscribe: fa.subscribe,
+			[interopObservable.observableSymbol]: () => interopObservable.newInteropObservable(fa.subscribe, get),
 		}
 	},
-	of: (a) => ({ get: () => a, subscribe: observable.never.subscribe }),
-	ap: (fab, fa) => ({
-		get: () => memoApply(fab.get(), fa.get()),
-		subscribe: emitter.mergeMany([fab, fa]).subscribe,
-	}),
+	of: (a) => {
+		const get = () => a
+		return {
+			get,
+			subscribe: observable.never.subscribe,
+			[interopObservable.observableSymbol]: () =>
+				interopObservable.newInteropObservable(observable.never.subscribe, get),
+		}
+	},
+	ap: (fab, fa) => {
+		const observable = emitter.mergeMany([fab, fa])
+		const get = () => memoApply(fab.get(), fa.get())
+		return {
+			get,
+			subscribe: observable.subscribe,
+			[interopObservable.observableSymbol]: () =>
+				interopObservable.newInteropObservable(observable.subscribe, get),
+		}
+	},
 }
 
 const { map, ap, apFirst, apSecond } = pipeable(instance)

@@ -134,8 +134,8 @@ describe('ap', () => {
 		const fa = newAtom(0)
 		const spyFab = jest.fn(fab.subscribe)
 		const spyFa = jest.fn(fa.subscribe)
-		const fabSource: Property<typeof f> = { get: fab.get, subscribe: spyFab }
-		const faSource: Property<number> = { get: fa.get, subscribe: spyFa }
+		const fabSource: Property<typeof f> = { ...fab, subscribe: spyFab }
+		const faSource: Property<number> = { ...fa, subscribe: spyFa }
 		const b = ap(faSource)(fabSource)
 		const s1 = b.subscribe({
 			next: constVoid,
