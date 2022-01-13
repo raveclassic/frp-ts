@@ -3,9 +3,11 @@ import { mergeMany, newEmitter } from './emitter'
 import { newAtom } from './atom'
 import { Env, Time } from './clock'
 import { memoMany } from '@frp-ts/utils'
+import { InteropObservable, newInteropObservable, observableSymbol } from './interop-observable'
 
 export interface Property<A> extends Observable<Time> {
 	readonly get: () => A
+	[Symbol.observable]: () => InteropObservable<A>
 }
 
 export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscription] => {
@@ -31,13 +33,17 @@ export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscri
 
 	resubscribeToInner()
 
+	const get = () => {
+		// use extra thunk because reference to inner source changes
+		return inner.get()
+	}
+	const interop = () => newInteropObservable(emitter.subscribe, get)
+
 	return [
 		{
-			get: () => {
-				// use extra thunk because reference to inner source changes
-				return inner.get()
-			},
+			get,
 			subscribe: emitter.subscribe,
+			[Symbol.observable]: interop,
 		},
 		outerDisposable,
 	]
@@ -46,7 +52,7 @@ export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscri
 export const tap =
 	<A>(f: (a: A) => unknown) =>
 	(fa: Property<A>): Property<A> => ({
-		get: fa.get,
+		...fa,
 		subscribe: (observer) =>
 			fa.subscribe({
 				next: (t) => {
@@ -91,8 +97,10 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	const get = () => memoProject(...properties.map((property) => property.get()))
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
 	const subscribe = doesNotEmit ? never.subscribe : mergeMany(properties).subscribe
+	const interop = () => newInteropObservable(subscribe, get)
 	return {
 		get,
 		subscribe,
+		[observableSymbol]: interop,
 	}
 }
