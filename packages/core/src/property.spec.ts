@@ -3,7 +3,7 @@ import { Atom } from './atom'
 import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
 import { combine, flatten, Property, tap } from './property'
-import { Observable, Subject } from 'rxjs'
+import { from, Observable, Subject } from 'rxjs'
 import { Env, newCounterClock } from './clock'
 import { atom, property } from '.'
 import { clockUtils, emitterUtils } from '@frp-ts/test-utils'
@@ -76,7 +76,10 @@ describe('combine', () => {
 		s.unsubscribe()
 	})
 	it('never emits if all arguments never emit', () => {
-		const a: Property<boolean> = { get: () => true, subscribe: never.subscribe }
+		const a: Property<boolean> = {
+			...newAtom(true),
+			subscribe: never.subscribe,
+		}
 		const b = combine(a, () => false)
 		expect(b.subscribe).toBe(never.subscribe)
 	})
@@ -163,7 +166,7 @@ describe('flatten', () => {
 	it('unsubscribes from source by outer dispose', () => {
 		const disposeA = jest.fn()
 		const sourceA: Property<boolean> = {
-			get: () => true,
+			...newAtom(true),
 			subscribe: () => ({
 				unsubscribe: disposeA,
 			}),
@@ -251,6 +254,58 @@ describe('diamond flow', () => {
 		expect(cb).toHaveBeenCalledTimes(2)
 
 		sub.unsubscribe()
+	})
+})
+describe('interop observable', () => {
+	it('single property', () => {
+		const a = newAtom(1)
+
+		const cb = jest.fn()
+		const subs = from(a).subscribe(cb)
+
+		// should replay current value
+		expect(cb).toHaveBeenCalledTimes(1)
+		expect(cb).toBeCalledWith(1)
+
+		a.set(2)
+		// should notify change
+		expect(cb).toHaveBeenCalledTimes(2)
+		expect(cb).toBeCalledWith(2)
+
+		subs.unsubscribe()
+		a.set(3)
+		// should not notify after unsubscribe
+		expect(cb).toHaveBeenCalledTimes(2)
+	})
+	it('combined properties', () => {
+		const a = newAtom(10)
+		const b = newAtom(20)
+		const p = combine(a, b, (a, b) => a + b)
+
+		const cb = jest.fn()
+		const subs = from(p).subscribe(cb)
+
+		// should replay current value
+		expect(cb).toHaveBeenCalledTimes(1)
+		expect(cb).toBeCalledWith(30)
+
+		a.set(0)
+		// should notify if single change
+		expect(cb).toHaveBeenCalledTimes(2)
+		expect(cb).toBeCalledWith(20)
+
+		// should notify changes
+		a.set(11)
+		expect(cb).toHaveBeenCalledTimes(3)
+		b.set(22)
+		expect(cb).toHaveBeenCalledTimes(4)
+		expect(cb).toBeCalledWith(33)
+
+		subs.unsubscribe()
+		b.set(0)
+
+		// should not notify after unsubscribe
+		expect(cb).toHaveBeenCalledTimes(4)
 	})
 })
 describe('fromObservable', () => {
