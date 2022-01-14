@@ -40,7 +40,7 @@ jobs:
         with:
           version: 6.26.1
           run_install: |
-            - recursive: true
+            - recursive: false
               args: [--frozen-lockfile]
 
       - run: pnpx commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
