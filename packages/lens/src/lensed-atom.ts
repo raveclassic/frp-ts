@@ -1,4 +1,4 @@
-import { Atom, Env, atom, property } from '@frp-ts/core'
+import { Atom, clock, atom, property } from '@frp-ts/core'
 
 export interface Lens<S, A> {
 	readonly get: (s: S) => A
@@ -9,10 +9,8 @@ export interface LensedAtom<A> extends Atom<A> {
 	readonly view: <B>(lens: Lens<A, B>) => LensedAtom<B>
 }
 
-export const newLensedAtom = (env: Env): (<A>(initial: A) => LensedAtom<A>) => {
-	const newAtom = atom.newAtom(env)
-	return (initial) => toLensedAtom(newAtom(initial))
-}
+export const newLensedAtom = <A>(initial: A, env = clock.DEFAULT_ENV): LensedAtom<A> =>
+	toLensedAtom(atom.newAtom(initial, env))
 
 export const toLensedAtom = <A>(atom: Atom<A>): LensedAtom<A> => {
 	const { set, get, subscribe } = atom

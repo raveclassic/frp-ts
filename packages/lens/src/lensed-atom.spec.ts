@@ -1,17 +1,10 @@
-import { Lens } from './lensed-atom'
-import { Env, clock } from '@frp-ts/core'
-import { lensedAtom } from '.'
+import { Lens, newLensedAtom } from './lensed-atom'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 const prop = <O extends object, K extends keyof O>(key: K): Lens<O, O[K]> => ({
 	get: (s) => s[key],
 	set: (a) => (s) => ({ ...s, [key]: a }),
 })
-
-const env: Env = {
-	clock: clock.newCounterClock(),
-}
-const newLensedAtom = lensedAtom.newLensedAtom(env)
 
 describe('view', () => {
 	it('views', () => {

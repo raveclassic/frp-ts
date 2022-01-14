@@ -1,7 +1,7 @@
 import { never, Observable, Subscription, subscriptionNone } from './observable'
 import { mergeMany, newEmitter } from './emitter'
 import { newAtom } from './atom'
-import { Env, Time } from './clock'
+import { DEFAULT_ENV, Time } from './clock'
 import { memoMany } from '@frp-ts/utils'
 import { InteropObservable, newInteropObservable, observableSymbol } from './interop-observable'
 
@@ -60,23 +60,19 @@ export const tap =
 			}),
 	})
 
-export const fromObservable = (env: Env): (<A>(initial: A, ma: Observable<A>) => [Property<A>, Subscription]) => {
-	const s = scan(env)
-	return <A>(initial: A, ma: Observable<A>) => s<A, A>((_, a) => a, initial)(ma)
+export const fromObservable = <A>(initial: A, ma: Observable<A>, env = DEFAULT_ENV): [Property<A>, Subscription] => {
+	return scan<A, A>((_, a) => a, initial, env)(ma)
 }
 
-export function scan(
-	env: Env,
-): <A, B>(f: (acc: B, a: A) => B, initial: B) => (ma: Observable<A>) => [Property<B>, Subscription] {
-	const producer = newAtom(env)
-	return (f, initial) => (ma) => {
-		const p = producer(initial)
+export const scan =
+	<A, B>(f: (acc: B, a: A) => B, initial: B, env = DEFAULT_ENV) =>
+	(ma: Observable<A>): [Property<B>, Subscription] => {
+		const p = newAtom(initial, env)
 		const s = ma.subscribe({
 			next: (a) => p.set(f(p.get(), a)),
 		})
 		return [p, s]
 	}
-}
 
 export type PropertyValue<Target> = Target extends Property<infer A> ? A : never
 export type MapPropertiesToValues<Target extends readonly Property<unknown>[]> = {

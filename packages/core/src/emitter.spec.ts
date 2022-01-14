@@ -111,13 +111,14 @@ describe('Emitter', () => {
 			const target = newEventTarget()
 			const addEventListener = jest.spyOn(target, 'addEventListener')
 			const removeEventListener = jest.spyOn(target, 'removeEventListener')
+			const clock = clockUtils.newVirtualClock(0)
 			const options: AddEventListenerOptions = {
 				capture: true,
 				once: true,
 				passive: true,
+				clock,
 			}
-			const clock = clockUtils.newVirtualClock(0)
-			const n = fromEvent({ clock })(target, 'click', options)
+			const n = fromEvent(target, 'click', options)
 			// should subscribe
 			expect(addEventListener).toHaveBeenCalledTimes(0)
 			const cb = jest.fn()

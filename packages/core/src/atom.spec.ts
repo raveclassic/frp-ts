@@ -1,10 +1,4 @@
-import { Env, newCounterClock } from './clock'
-import { atom } from '.'
-
-const env: Env = {
-	clock: newCounterClock(),
-}
-const newAtom = atom.newAtom(env)
+import { newAtom } from './atom'
 
 describe('atom', () => {
 	it('stores initial value', () => {

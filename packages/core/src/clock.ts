@@ -14,3 +14,7 @@ export const newCounterClock = (): Clock => {
 export interface Env {
 	readonly clock: Clock
 }
+
+export const DEFAULT_ENV: Env = {
+	clock: newCounterClock(),
+}

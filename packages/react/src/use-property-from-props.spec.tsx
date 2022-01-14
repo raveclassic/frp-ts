@@ -1,19 +1,15 @@
-import { Env, clock, Property } from '@frp-ts/core'
+import { Property } from '@frp-ts/core'
 import { usePropertyFromProps } from './use-property-from-props'
 import React, { useMemo } from 'react'
 import { render } from '@testing-library/react'
 import { constVoid } from '@frp-ts/utils'
-
-const env: Env = {
-	clock: clock.newCounterClock(),
-}
 
 interface TestProps<T> {
 	readonly value: T
 	readonly onProperty: (property: Property<T>) => void
 }
 function Test<T>(props: TestProps<T>) {
-	const property = usePropertyFromProps(env)(props.value)
+	const property = usePropertyFromProps(props.value)
 	useMemo(() => props.onProperty(property), [property, props.onProperty])
 	return <></>
 }

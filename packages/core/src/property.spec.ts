@@ -1,20 +1,10 @@
-import { Atom } from './atom'
+import { Atom, newAtom } from './atom'
 
 import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
-import { combine, flatten, Property, tap } from './property'
+import { combine, flatten, fromObservable, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
-import { Env, newCounterClock } from './clock'
-import { atom, property } from '.'
 import { clockUtils, emitterUtils } from '@frp-ts/test-utils'
-
-const env: Env = {
-	clock: newCounterClock(),
-}
-
-const newAtom = atom.newAtom(env)
-const scan = property.scan(env)
-const fromObservable = property.fromObservable(env)
 
 describe('combine', () => {
 	it('combines', () => {
@@ -229,11 +219,8 @@ describe('diamond flow', () => {
 	})
 	it('notifies combined on each different source emit in different ticks', () => {
 		const clock = clockUtils.newVirtualClock(0)
-		const newProducer = atom.newAtom({
-			clock,
-		})
-		const a = newProducer(0)
-		const b = newProducer(0)
+		const a = newAtom(0, { clock })
+		const b = newAtom(0, { clock })
 		const c = combine(a, b, (...args) => args)
 		const cb = jest.fn()
 		const sub = c.subscribe({ next: cb })

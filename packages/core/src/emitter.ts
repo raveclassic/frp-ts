@@ -1,4 +1,4 @@
-import { Env, Time } from './clock'
+import { DEFAULT_ENV, Env, Time } from './clock'
 import { never, Observable, Observer, subscriptionNone } from './observable'
 
 /**
@@ -101,7 +101,7 @@ export const mergeMany = (observables: readonly Observable<Time>[]): Observable<
 export interface EventListenerOptions {
 	capture?: boolean
 }
-export interface AddEventListenerOptions extends EventListenerOptions {
+export interface AddEventListenerOptions extends EventListenerOptions, Partial<Env> {
 	once?: boolean
 	passive?: boolean
 }
@@ -109,15 +109,15 @@ export interface EventTarget {
 	readonly addEventListener: (event: string, handler: () => void, options?: AddEventListenerOptions | boolean) => void
 	readonly removeEventListener: (event: string, handler: () => void, options?: EventListenerOptions | boolean) => void
 }
-export const fromEvent =
-	(e: Env) =>
-	(target: EventTarget, event: string, options?: AddEventListenerOptions): Observable<Time> =>
-		multicast({
-			subscribe: (listener) => {
-				const handler = () => listener.next(e.clock.now())
-				target.addEventListener(event, handler, options)
-				return {
-					unsubscribe: () => target.removeEventListener(event, handler, options),
-				}
-			},
-		})
+export const fromEvent = (target: EventTarget, event: string, options?: AddEventListenerOptions): Observable<Time> => {
+	const clock = options?.clock ?? DEFAULT_ENV.clock
+	return multicast({
+		subscribe: (listener) => {
+			const handler = () => listener.next(clock.now())
+			target.addEventListener(event, handler, options)
+			return {
+				unsubscribe: () => target.removeEventListener(event, handler, options),
+			}
+		},
+	})
+}
