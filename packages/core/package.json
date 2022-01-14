@@ -18,6 +18,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "peerDependencies": {
+    "tslib": "^2.3.1"
+  },
   "dependencies": {
     "@frp-ts/utils": "^1.0.0-alpha.11"
   },
@@ -25,6 +28,7 @@
     "@frp-ts/test-utils": "^1.0.0-alpha.11",
     "rimraf": "^3.0.2",
     "rxjs": "^7.4.0",
+    "tslib": "^2.3.1",
     "typescript": "^4.4.4"
   }
 }
