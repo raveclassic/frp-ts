@@ -7,7 +7,7 @@ import { InteropObservable, newInteropObservable, observableSymbol } from './int
 
 export interface Property<A> extends Observable<Time> {
 	readonly get: () => A
-	[Symbol.observable]: () => InteropObservable<A>
+	readonly [Symbol.observable]: () => InteropObservable<A>
 }
 
 export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscription] => {
