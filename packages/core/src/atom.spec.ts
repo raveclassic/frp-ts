@@ -1,10 +1,6 @@
-import { Env, newCounterClock } from './clock'
-import { atom } from '.'
-
-const env: Env = {
-	clock: newCounterClock(),
-}
-const newAtom = atom.newAtom(env)
+import { newAtom } from './atom'
+import { constVoid } from '@frp-ts/utils'
+import { action } from './emitter'
 
 describe('atom', () => {
 	it('stores initial value', () => {
@@ -25,6 +21,18 @@ describe('atom', () => {
 		set(1)
 		expect(f).toHaveBeenCalledTimes(1)
 		s.unsubscribe()
+	})
+	it('does not notify inside action and notifies only on action completion', () => {
+		const a = newAtom(0)
+		const cb: (value: number) => void = jest.fn(constVoid)
+		a.subscribe({ next: () => cb(a.get()) })
+		action(() => {
+			a.set(3)
+			a.set(4)
+			expect(cb).toHaveBeenCalledTimes(0)
+		})
+		expect(cb).toHaveBeenCalledTimes(1)
+		expect(cb).toHaveBeenLastCalledWith(4)
 	})
 	it('skips duplicates', () => {
 		const { set, subscribe } = newAtom(0)

@@ -12,6 +12,6 @@ module.exports = {
 			statements: 100,
 		},
 	},
-	collectCoverageFrom: ['<rootDir>/packages/*/src/**/*.ts'],
+	collectCoverageFrom: ['<rootDir>/packages/*/src/**/*.tsx?'],
 	coveragePathIgnorePatterns: ['index.ts'],
 }

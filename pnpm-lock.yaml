@@ -83,6 +83,7 @@ importers:
       '@frp-ts/utils': ^1.0.0-alpha.11
       rimraf: ^3.0.2
       rxjs: ^7.4.0
+      tslib: ^2.1.0
       typescript: ^4.4.4
     dependencies:
       '@frp-ts/utils': link:../utils
@@ -90,6 +91,7 @@ importers:
       '@frp-ts/test-utils': link:../test-utils
       rimraf: 3.0.2
       rxjs: 7.5.1
+      tslib: 2.3.1
       typescript: 4.5.4
 
   packages/fp-ts:
@@ -99,6 +101,7 @@ importers:
       fp-ts: ^2.11.5
       rimraf: ^3.0.2
       rxjs: ^7.4.0
+      tslib: ^2.1.0
       typescript: ^4.4.4
     dependencies:
       '@frp-ts/core': link:../core
@@ -107,18 +110,17 @@ importers:
       fp-ts: 2.11.5
       rimraf: 3.0.2
       rxjs: 7.5.1
+      tslib: 2.3.1
       typescript: 4.5.4
 
   packages/lens:
     specifiers:
       '@frp-ts/core': ^1.0.0-alpha.11
-      rimraf: ^3.0.2
-      typescript: ^4.4.4
+      tslib: ^2.1.0
     dependencies:
       '@frp-ts/core': link:../core
     devDependencies:
-      rimraf: 3.0.2
-      typescript: 4.5.4
+      tslib: 2.3.1
 
   packages/react:
     specifiers:
@@ -129,8 +131,7 @@ importers:
       '@types/react-dom': '>=16.0.0'
       react: '>=16.0.0'
       react-dom: '>=16.0.0'
-      rimraf: ^3.0.2
-      typescript: ^4.4.4
+      tslib: ^2.1.0
     dependencies:
       '@frp-ts/core': link:../core
       '@frp-ts/utils': link:../utils
@@ -140,24 +141,19 @@ importers:
       '@types/react-dom': 17.0.11
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-      rimraf: 3.0.2
-      typescript: 4.5.4
+      tslib: 2.3.1
 
   packages/test-utils:
     specifiers:
-      rimraf: ^3.0.2
-      typescript: ^4.4.4
+      tslib: ^2.1.0
     devDependencies:
-      rimraf: 3.0.2
-      typescript: 4.5.4
+      tslib: 2.3.1
 
   packages/utils:
     specifiers:
-      rimraf: ^3.0.2
-      typescript: ^4.4.4
+      tslib: ^2.1.0
     devDependencies:
-      rimraf: 3.0.2
-      typescript: 4.5.4
+      tslib: 2.3.1
 
 packages:
 

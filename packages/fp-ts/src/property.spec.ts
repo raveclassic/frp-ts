@@ -1,6 +1,6 @@
 import { Observable, map } from 'rxjs'
 
-import { Observer, observable, Property, atom, clock, Env } from '@frp-ts/core'
+import { Observer, observable, Property, atom } from '@frp-ts/core'
 import { constVoid } from '@frp-ts/utils'
 import { ap, instance, sample, sampleIO } from './property'
 import { emitterUtils } from '@frp-ts/test-utils'
@@ -20,12 +20,6 @@ export const testObservable: Functor1<TEST_OBSERVABLE_URI> = {
 	map: (fa, f) => fa.pipe(map(f)),
 }
 
-const defaultEnv: Env = {
-	clock: clock.newCounterClock(),
-}
-
-export const newAtom = atom.newAtom(defaultEnv)
-
 describe('sample', () => {
 	it('sample testObservable', () => {
 		let observer: Observer<number>
@@ -36,7 +30,7 @@ describe('sample', () => {
 		})
 		const nextObserver = (n: number) => observer.next(n)
 		const unsubscribe = jest.fn(constVoid)
-		const source = emitterUtils.attachSubscription(newAtom(0), { unsubscribe })
+		const source = emitterUtils.attachSubscription(atom.newAtom(0), { unsubscribe })
 		const sampleObservable = sample(testObservable)
 		const sampled = sampleObservable(source, sampler)
 		const next = jest.fn()
@@ -73,8 +67,8 @@ describe('sample', () => {
 
 	it('sample Property', () => {
 		const sampleSource = sample(instance)
-		const sampler = newAtom(0)
-		const source = newAtom(1)
+		const sampler = atom.newAtom(0)
+		const source = atom.newAtom(1)
 		const { get: getSampled, subscribe: sampled } = sampleSource(source, sampler)
 		expect(getSampled()).toBe(1)
 		const cb = jest.fn()
@@ -91,8 +85,8 @@ describe('sample', () => {
 	it('sampleIO Property', () => {
 		const sampleSource = sampleIO(instance)
 
-		const sampler = newAtom(0)
-		const source = newAtom(1)
+		const sampler = atom.newAtom(0)
+		const source = atom.newAtom(1)
 		const sampled = sampleSource(source, sampler)
 		expect(sampled.get()()).toBe(1)
 		const cb = jest.fn()
@@ -117,8 +111,8 @@ describe('ap', () => {
 	it('aps', () => {
 		const f = (n: number) => n + 1
 		const g = (n: number) => n / 2
-		const fab = newAtom(f)
-		const fa = newAtom(0)
+		const fab = atom.newAtom(f)
+		const fa = atom.newAtom(0)
 		const b = ap(fa)(fab)
 		expect(b.get()).toBe(f(0))
 		fab.set(g)
@@ -130,8 +124,8 @@ describe('ap', () => {
 	})
 	it('multicasts', () => {
 		const f = (n: number) => n + 1
-		const fab = newAtom(f)
-		const fa = newAtom(0)
+		const fab = atom.newAtom(f)
+		const fa = atom.newAtom(0)
 		const spyFab = jest.fn(fab.subscribe)
 		const spyFa = jest.fn(fa.subscribe)
 		const fabSource: Property<typeof f> = { ...fab, subscribe: spyFab }
@@ -173,7 +167,7 @@ describe('sample', () => {
 		})
 		const nextObserver = (n: number) => observer.next(n)
 		const unsubscribe = jest.fn()
-		const source = emitterUtils.attachSubscription(newAtom(0), { unsubscribe })
+		const source = emitterUtils.attachSubscription(atom.newAtom(0), { unsubscribe })
 		const sampleObservable = sample(testObservable)
 		const sampled = sampleObservable(source, sampler)
 		const next = jest.fn()

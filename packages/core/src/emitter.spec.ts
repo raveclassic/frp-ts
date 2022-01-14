@@ -1,40 +1,7 @@
-import { EventTarget, AddEventListenerOptions, newEmitter, fromEvent, mergeMany } from './emitter'
+import { newEmitter, mergeMany } from './emitter'
 import { Time } from './clock'
 import { never } from './observable'
-import { clockUtils } from '@frp-ts/test-utils'
 import { constVoid } from '@frp-ts/utils'
-
-interface Event {
-	readonly type: string
-}
-interface TestEventTarget extends EventTarget {
-	readonly dispatchEvent: (event: Event) => void
-}
-const newEventTarget = (): TestEventTarget => {
-	const storage = new Map<string, Set<() => void>>()
-	return {
-		addEventListener: (event: string, listener: () => void) => {
-			let stored = storage.get(event)
-			if (!stored) {
-				stored = new Set()
-				storage.set(event, stored)
-			}
-			stored.add(listener)
-		},
-		removeEventListener: (event: string, listener: () => void) => {
-			const stored = storage.get(event)
-			if (stored) {
-				stored.delete(listener)
-			}
-		},
-		dispatchEvent(event: Event) {
-			const stored = storage.get(event.type)
-			if (stored) {
-				for (const listener of stored) listener()
-			}
-		},
-	}
-}
 
 describe('Emitter', () => {
 	describe('newEmitter', () => {
@@ -105,53 +72,22 @@ describe('Emitter', () => {
 			expect(f2).toHaveBeenCalledTimes(0)
 			expect(s2).toHaveBeenCalledTimes(0)
 		})
-	})
-	describe('fromEvent', () => {
-		it('subscribes', () => {
-			const target = newEventTarget()
-			const addEventListener = jest.spyOn(target, 'addEventListener')
-			const removeEventListener = jest.spyOn(target, 'removeEventListener')
-			const options: AddEventListenerOptions = {
-				capture: true,
-				once: true,
-				passive: true,
+		it('does not notify the same listener twice when subscribed during previous notification', () => {
+			const e = newEmitter()
+			const o = {
+				next: jest.fn(),
 			}
-			const clock = clockUtils.newVirtualClock(0)
-			const n = fromEvent({ clock })(target, 'click', options)
-			// should subscribe
-			expect(addEventListener).toHaveBeenCalledTimes(0)
-			const cb = jest.fn()
-			const observer = {
-				next: cb,
-			}
-			const d = n.subscribe(observer)
-			expect(addEventListener).toHaveBeenCalledTimes(1)
-			expect(addEventListener).toHaveBeenCalledWith('click', jasmine.any(Function), options)
-			// should also multicast
-			const d2 = n.subscribe(observer)
-			expect(addEventListener).toHaveBeenCalledTimes(1)
-			// should notify
-			target.dispatchEvent({
-				type: 'click',
+			e.subscribe({
+				next: () => {
+					e.subscribe(o)
+					e.subscribe(o)
+				},
 			})
-			expect(cb).toHaveBeenCalledWith(0)
-			// should also multicast
-			expect(cb).toHaveBeenCalledTimes(1)
-			// set tick
-			clock.next()
-			target.dispatchEvent({
-				type: 'click',
-			})
-			expect(cb).toHaveBeenCalledWith(1)
-			// should also multicast
-			expect(cb).toHaveBeenCalledTimes(2)
-			// should unsubscribe
-			expect(removeEventListener).toHaveBeenCalledTimes(0)
-			d2.unsubscribe()
-			// should also multicast
-			expect(removeEventListener).toHaveBeenCalledTimes(0)
-			d.unsubscribe()
-			expect(removeEventListener).toHaveBeenCalledTimes(1)
+			e.next(1)
+			o.next.mockClear()
+			// now o.next is added to the set of listeners
+			e.next(2)
+			expect(o.next).toHaveBeenCalledTimes(1)
 		})
 	})
 })

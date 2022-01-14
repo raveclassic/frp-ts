@@ -7,9 +7,10 @@ module.exports = {
 			tsconfig: '<rootDir>/tsconfig.spec.json',
 		},
 	},
+	testMatch: ['./**/*.spec.(ts|tsx)'],
 	transform: {
-		'^.+\\.[tj]s$': 'ts-jest',
+		'^.+\\.[tj]sx?$': 'ts-jest',
 	},
-	moduleFileExtensions: ['ts', 'js', 'html'],
+	moduleFileExtensions: ['ts', 'js', 'html', 'tsx'],
 	coverageDirectory: '../../coverage/packages/react',
 }

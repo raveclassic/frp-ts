@@ -1,20 +1,11 @@
-import { Atom } from './atom'
+import { Atom, newAtom } from './atom'
 
 import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
-import { combine, flatten, Property, tap } from './property'
+import { combine, flatten, fromObservable, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
-import { Env, newCounterClock } from './clock'
-import { atom, property } from '.'
-import { clockUtils, emitterUtils } from '@frp-ts/test-utils'
-
-const env: Env = {
-	clock: newCounterClock(),
-}
-
-const newAtom = atom.newAtom(env)
-const scan = property.scan(env)
-const fromObservable = property.fromObservable(env)
+import { emitterUtils } from '@frp-ts/test-utils'
+import { action } from './emitter'
 
 describe('combine', () => {
 	it('combines', () => {
@@ -82,6 +73,22 @@ describe('combine', () => {
 		}
 		const b = combine(a, () => false)
 		expect(b.subscribe).toBe(never.subscribe)
+	})
+	it('emits exactly the last value from several updates inside action', () => {
+		const a = newAtom(0)
+		const b = newAtom(0)
+		const c = combine(a, b, (a, b) => a + b)
+		const cb: (value: number) => void = jest.fn()
+		c.subscribe({
+			next: () => cb(c.get()),
+		})
+
+		action(() => {
+			a.set(1)
+			b.set(1)
+		})
+		expect(cb).toHaveBeenCalledTimes(1)
+		expect(cb).toHaveBeenLastCalledWith(2)
 	})
 })
 
@@ -213,9 +220,9 @@ describe('diamond flow', () => {
 		const b = combine(a, (n) => n + 1)
 		const c = combine(a, (n) => n / 1)
 
-		const { subscribe: d } = combine(b, c, (...args) => args)
+		const d = combine(b, c, (...args) => args)
 		const cb = jest.fn()
-		const sub = d({ next: cb })
+		d.subscribe({ next: cb })
 
 		expect(cb).toHaveBeenCalledTimes(0)
 
@@ -224,36 +231,6 @@ describe('diamond flow', () => {
 
 		a.set(2)
 		expect(cb).toHaveBeenCalledTimes(2)
-
-		sub.unsubscribe()
-	})
-	it('notifies combined on each different source emit in different ticks', () => {
-		const clock = clockUtils.newVirtualClock(0)
-		const newProducer = atom.newAtom({
-			clock,
-		})
-		const a = newProducer(0)
-		const b = newProducer(0)
-		const c = combine(a, b, (...args) => args)
-		const cb = jest.fn()
-		const sub = c.subscribe({ next: cb })
-
-		expect(cb).toHaveBeenCalledTimes(0)
-		// first a notification
-		a.set(1)
-		// next a notification in the same tick
-		b.set(2)
-		expect(cb).toHaveBeenCalledTimes(1)
-		// next tick
-		clock.next()
-		// first b notification
-		b.set(1)
-		expect(cb).toHaveBeenCalledTimes(2)
-		// next b notification in the same tick
-		a.set(2)
-		expect(cb).toHaveBeenCalledTimes(2)
-
-		sub.unsubscribe()
 	})
 })
 describe('interop observable', () => {
@@ -306,6 +283,19 @@ describe('interop observable', () => {
 
 		// should not notify after unsubscribe
 		expect(cb).toHaveBeenCalledTimes(4)
+	})
+	it('emits exactly the last value from several updates inside action', () => {
+		const a = newAtom(0)
+		const cb = jest.fn()
+		from(a).subscribe(cb)
+		cb.mockClear()
+
+		action(() => {
+			a.set(1)
+			a.set(2)
+		})
+		expect(cb).toHaveBeenCalledTimes(1)
+		expect(cb).toHaveBeenLastCalledWith(2)
 	})
 })
 describe('fromObservable', () => {

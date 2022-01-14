@@ -1,5 +1,21 @@
-import { Env, Time } from './clock'
+import { Time } from './clock'
 import { never, Observable, Observer, subscriptionNone } from './observable'
+
+let isLocked = false
+let lastTime: Time | undefined = undefined
+const lockedListeners = new Set<(time: Time) => void>()
+export const action = (f: () => void): void => {
+	isLocked = true
+	f()
+	isLocked = false
+	if (lastTime !== undefined) {
+		for (const listener of Array.from(lockedListeners)) {
+			listener(lastTime)
+		}
+		lastTime = undefined
+		lockedListeners.clear()
+	}
+}
 
 /**
  * Synchronous time-based emitter
@@ -11,15 +27,23 @@ export const newEmitter = (): Emitter => {
 	const listeners = new Set<Observer<Time>>()
 	let isNotifying = false
 	// tracks new listeners added while notifying
-	let pendingAdditions: Observer<Time>[] = []
+	const pendingAdditions: Observer<Time>[] = []
 
 	return {
 		next: (time) => {
 			if (lastNotifiedTime !== time) {
 				lastNotifiedTime = time
+				if (isLocked) {
+					lastTime = time
+				}
+
 				isNotifying = true
 				for (const listener of Array.from(listeners)) {
-					listener.next(time)
+					if (isLocked) {
+						lockedListeners.add(listener.next)
+					} else {
+						listener.next(time)
+					}
 				}
 				isNotifying = false
 
@@ -28,7 +52,7 @@ export const newEmitter = (): Emitter => {
 					for (let i = 0, l = pendingAdditions.length; i < l; i++) {
 						listeners.add(pendingAdditions[i])
 					}
-					pendingAdditions = []
+					pendingAdditions.length = 0
 				}
 			}
 		},
@@ -97,27 +121,3 @@ export const mergeMany = (observables: readonly Observable<Time>[]): Observable<
 		},
 	})
 }
-
-export interface EventListenerOptions {
-	capture?: boolean
-}
-export interface AddEventListenerOptions extends EventListenerOptions {
-	once?: boolean
-	passive?: boolean
-}
-export interface EventTarget {
-	readonly addEventListener: (event: string, handler: () => void, options?: AddEventListenerOptions | boolean) => void
-	readonly removeEventListener: (event: string, handler: () => void, options?: EventListenerOptions | boolean) => void
-}
-export const fromEvent =
-	(e: Env) =>
-	(target: EventTarget, event: string, options?: AddEventListenerOptions): Observable<Time> =>
-		multicast({
-			subscribe: (listener) => {
-				const handler = () => listener.next(e.clock.now())
-				target.addEventListener(event, handler, options)
-				return {
-					unsubscribe: () => target.removeEventListener(event, handler, options),
-				}
-			},
-		})
