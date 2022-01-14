@@ -73,50 +73,10 @@ The library core consists of the following pieces which are borrowed from [calmm
     `Atom` extends `Property` in the way that is allows mutating current value
     still being capable of everything `Property` is capable of - holding the value and notifying about its changes.
 
--   `Clock` - internal driver that makes things happen and allows notifications to actually work and updates to be delivered to listeners
-
 ## Deep Dive
 
 This section of the doc aims to give a better understanding of how the things work.
 So to achieve that we'll build up a simple counter, reviewing all pieces of the design one-by-one.
-
-### `Clock`
-
-Let's start from the `Clock` because it's required for everything else to work.
-A `Clock` is conceptually a way to get the current time of the execution.
-It may be the unix epoch time, the time from start of the program or just an incrementing counter.
-`frp-ts` ships a default simple counter clock:
-
-```typescript
-import { clock } from '@frp-ts/core'
-
-// we create a new counter clock
-const counterClock = clock.newCounterClock()
-console.log(counterClock.now()) // logs 0
-console.log(counterClock.now()) // logs 1
-console.log(counterClock.now()) // logs 2
-
-// or we can create our own clock base on Date
-const dateClock = {
-	now: () => Date.now(),
-}
-
-// or even a "virtual" clock which is "frozen" and requires manual time operation
-// such clock may be useful in tests when testing events occurring in the same tick
-const virtualClock = {
-	time: -1,
-	now() {
-		return this.time
-	},
-	next() {
-		this.time++
-	},
-}
-```
-
-A `Clock#now` is similar to `rxjs` [Scheduler#now](https://rxjs.dev/api/index/class/Scheduler#now).
-
-Now we can work with `Atom` and `Property`.
 
 ### `Atom`
 
@@ -125,13 +85,10 @@ just a readonly `Atom` and mutability is required for the next example.
 So, `Atom` adds mutability to `Property`. Let's create one:
 
 ```typescript
-import { atom, clock } from '@frp-ts/core'
+import { atom } from '@frp-ts/core'
 
 // We create an atom that will allow us to get values, update its value manually and listen to updates.
-// As mentioned earlier a `Atom` depends on a `Clock`
-// so wee need to pass it directly as part of environment
-// Yeah, that's a lot of boilerplate you may say, but more on that later. For now let's just pass the clock and initial value.
-const counter = atom.newAtom({ clock: clock.newCounterClock() })(0)
+const counter = atom.newAtom(0)
 
 // get the last value
 console.log(counter.get()) // logs '0'
@@ -162,11 +119,9 @@ counter.set(3) // logs 'value: 3'
 
 We're done but there are two important things about the callback:
 
--   it is in the form of `Observer`. This is because `frp-ts` implements [es-observables](https://github.com/tc39/proposal-observable) so that it is seemlessly compatible with other implementations. Also there's no support for plain functions as callbacks for the sake of API simplicity.
+-   it is in the form of `Observer`. This is because `frp-ts` implements [es-observables](https://github.com/tc39/proposal-observable) so that it is seemlessly compatible with other implementations. Also, there's no support for plain functions as callbacks for the sake of API simplicity.
 -   it is _not_ fired on subscription. This is because, although `Atom` (and `Property`) is _similar_ to rxjs [BehaviorSubject](https://rxjs.dev/api/index/class/BehaviorSubject), it is fundamentally different in the way it works - it only notifies subscribers if the value _is changed_.
 -   it is _not_ supplied the changed value. This is how `frp-ts` solves glitches (diamond shape problem). There should always be a single source of truth for the value - either it is the callback's argument (like it's done in almost all reactive libraries) or the value of property/atom.
-
-More on this later.
 
 ### `Property`
 
@@ -176,8 +131,6 @@ Sometimes we don't want to expose mutable access to our state and `Property` is 
 Now let's update our counter to restrict arbitrary mutations of its state:
 
 ```typescript
-import { clock } from '@frp-ts/core'
-
 // we'll need an interface to describe our counter more precisely
 interface Counter extends Property<number> {
 	readonly inc: () => void
@@ -186,8 +139,7 @@ interface Counter extends Property<number> {
 // we'll also need a constructor that takes initial value
 const newCounter = (initial: number): Counter => {
 	// here we define local mutable state
-	// again, we won't need to set up newAtom each time this way, more on this later
-	const state = newAtom({ clock: clock.newCounterClock() })(initial)
+	const state = newAtom(initial)
 	// expose readonly API
 	const inc = () => state.modify((n) => n + 1)
 	return {
@@ -229,7 +181,6 @@ Let's try to build some example with lenses.
 
 ```typescript
 // let's define a nested structure
-import { clock } from '@frp-ts/core'
 import { newLensedAtom, Lens } from '@frp-ts/lens'
 
 interface Person {
@@ -237,7 +188,7 @@ interface Person {
 	readonly age: number
 }
 // and create a person
-const mike = newLensedAtom({ clock: clock.newCounterClock() })({ name: 'Mike', age: 20 })
+const mike = newLensedAtom({ name: 'Mike', age: 20 })
 
 // now what if we have a user interface that allows changing person's name and age,
 // for example a form with two inputs?
@@ -321,39 +272,6 @@ The lens package (`@frp-ts/core`) contains APIs for working with lenses.
 The fp-ts integration package (`@frp-ts/fp-ts`) contains an integration layer with `fp-ts` including `HKT` registration and helpers for working with higher-kinded types.
 
 ---
-
-After installation of the core, the library needs to be sort of set up.
-We've already seen that akward creation of `Clock` before we're able to use `newAtom`.
-That's indeed awkward and generally not should be done.
-Instead, it's recommended to prepare the library before using it and have a single global clock for an application.
-It may be created as a part of the setup required for some parts of this library including producers -
-some helpers also require `Clock`.
-
-So We need to create an environment for some parts of the library to work.
-This environment should contain a single global instance of `Clock`.
-So in general there should be created a module exporting parametrized functions:
-
-```typescript
-// /src/utils.ts
-import { clock, atom, observable, emitter } from '@frp-ts/core'
-import {
-	scan as getScan,
-	fromObservable as getFromObservable,
-	sample as getSample,
-	sampleIO as getSampleIO,
-} from 'frp-ts/lib/property'
-import { Env } from 'frp-ts/lib/clock'
-
-const e: Env = {
-	clock: clock.newCounterClock(),
-}
-export const newAtom = atom.newAtome(e)
-export const fromEvent = emitter.fromEvent(e)
-export const fromObservable = observable.fromObservable(e)
-export const scan = observable.scan(e)
-```
-
-Now everything is ready, and the functions can be used directly from this module.
 
 ## Changelog
 
