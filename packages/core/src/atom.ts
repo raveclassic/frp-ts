@@ -1,8 +1,7 @@
 import { newEmitter } from './emitter'
-import { Property } from './property'
+import { newProperty, Property } from './property'
 import { Env, Time } from './clock'
 import { Observer, Subscription } from './observable'
-import { newInteropObservable, observableSymbol } from './interop-observable'
 
 export interface Update<A> {
 	(a: A): A
@@ -33,13 +32,10 @@ export const newAtom =
 			}
 			set(value)
 		}
-		const interop = () => newInteropObservable(subscribe, get)
 
 		return {
+			...newProperty(get, subscribe),
 			set,
-			get,
-			subscribe,
 			modify,
-			[observableSymbol]: interop,
 		}
 	}

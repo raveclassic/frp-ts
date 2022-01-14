@@ -1,4 +1,4 @@
-import { Atom, Env, atom, interopObservable } from '@frp-ts/core'
+import { Atom, Env, atom, property } from '@frp-ts/core'
 
 export interface Lens<S, A> {
 	readonly get: (s: S) => A
@@ -20,12 +20,10 @@ export const toLensedAtom = <A>(atom: Atom<A>): LensedAtom<A> => {
 	const view = <B>(lens: Lens<A, B>): LensedAtom<B> => {
 		const lensedGet = () => lens.get(get())
 		const lensedSet = (b: B) => set(lens.set(b)(get()))
-		const interop = () => interopObservable.newInteropObservable(subscribe, lensedGet)
 
 		return {
-			get: lensedGet,
+			...property.newProperty(lensedGet, subscribe),
 			set: lensedSet,
-			subscribe,
 			view: (bc) => view(composeLens(lens, bc)),
 			modify: (...updates) => {
 				let value = lensedGet()
@@ -34,7 +32,6 @@ export const toLensedAtom = <A>(atom: Atom<A>): LensedAtom<A> => {
 				}
 				lensedSet(value)
 			},
-			[interopObservable.observableSymbol]: interop,
 		}
 	}
 

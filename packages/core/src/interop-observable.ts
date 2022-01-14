@@ -16,7 +16,10 @@ export interface InteropObservable<A> {
 	subscribe: (observer: Partial<Observer<A>>) => Subscription
 }
 
-export const newInteropObservable = <A>(subscribe: Observable<Time>['subscribe'], get: () => A): InteropObservable<A> => ({
+export const newInteropObservable = <A>(
+	get: () => A,
+	subscribe: Observable<Time>['subscribe'],
+): InteropObservable<A> => ({
 	subscribe: (observer) => {
 		const emitNext = () => observer.next?.(get())
 		emitNext()
