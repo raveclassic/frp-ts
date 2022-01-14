@@ -5,6 +5,8 @@ import { constVoid } from '@frp-ts/utils'
 import { combine, flatten, fromObservable, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
 import { clockUtils, emitterUtils } from '@frp-ts/test-utils'
+import { action } from './emitter'
+import { newCounterClock } from './clock'
 
 describe('combine', () => {
 	it('combines', () => {
@@ -72,6 +74,25 @@ describe('combine', () => {
 		}
 		const b = combine(a, () => false)
 		expect(b.subscribe).toBe(never.subscribe)
+	})
+	it('emits exactly the last value from several updates inside action', () => {
+		const clock = clockUtils.newVirtualClock(0)
+		const a = newAtom(0, { clock })
+		const b = newAtom(0, { clock })
+		const c = combine(a, b, (a, b) => a + b)
+		const o = {
+			next: jest.fn(),
+		}
+		c.subscribe(o)
+
+		action(() => {
+			a.set(1)
+			clock.next()
+			b.set(1)
+		})
+		const lastTime = clock.now()
+		expect(o.next).toHaveBeenCalledTimes(1)
+		expect(o.next).toHaveBeenLastCalledWith(lastTime)
 	})
 })
 
@@ -293,6 +314,19 @@ describe('interop observable', () => {
 
 		// should not notify after unsubscribe
 		expect(cb).toHaveBeenCalledTimes(4)
+	})
+	it('emits exactly the last value from several updates inside action', () => {
+		const a = newAtom(0)
+		const cb = jest.fn()
+		from(a).subscribe(cb)
+		cb.mockClear()
+
+		action(() => {
+			a.set(1)
+			a.set(2)
+		})
+		expect(cb).toHaveBeenCalledTimes(1)
+		expect(cb).toHaveBeenLastCalledWith(2)
 	})
 })
 describe('fromObservable', () => {

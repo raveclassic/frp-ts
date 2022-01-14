@@ -1,6 +1,22 @@
 import { DEFAULT_ENV, Env, Time } from './clock'
 import { never, Observable, Observer, subscriptionNone } from './observable'
 
+let isLocked = false
+let lastTime: Time | undefined = undefined
+let lockedListeners = new Set<(time: Time) => void>()
+export const action = (f: () => void): void => {
+	isLocked = true
+	f()
+	isLocked = false
+	if (lastTime !== undefined && lockedListeners) {
+		for (const listener of Array.from(lockedListeners)) {
+			listener(lastTime)
+		}
+		lastTime = undefined
+		lockedListeners.clear()
+	}
+}
+
 /**
  * Synchronous time-based emitter
  */
@@ -17,9 +33,17 @@ export const newEmitter = (): Emitter => {
 		next: (time) => {
 			if (lastNotifiedTime !== time) {
 				lastNotifiedTime = time
+				if (isLocked) {
+					lastTime = time
+				}
+
 				isNotifying = true
 				for (const listener of Array.from(listeners)) {
-					listener.next(time)
+					if (isLocked) {
+						lockedListeners.add(listener.next)
+					} else {
+						listener.next(time)
+					}
 				}
 				isNotifying = false
 
@@ -28,7 +52,7 @@ export const newEmitter = (): Emitter => {
 					for (let i = 0, l = pendingAdditions.length; i < l; i++) {
 						listeners.add(pendingAdditions[i])
 					}
-					pendingAdditions = []
+					pendingAdditions.length = 0
 				}
 			}
 		},

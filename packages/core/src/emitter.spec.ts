@@ -1,5 +1,5 @@
 import { EventTarget, AddEventListenerOptions, newEmitter, fromEvent, mergeMany } from './emitter'
-import { Time } from './clock'
+import { DEFAULT_ENV, newCounterClock, Time } from './clock'
 import { never } from './observable'
 import { clockUtils } from '@frp-ts/test-utils'
 import { constVoid } from '@frp-ts/utils'
@@ -104,6 +104,23 @@ describe('Emitter', () => {
 			// new subscriptions added in the same tick should **NOT** be notified to avoid loops and races
 			expect(f2).toHaveBeenCalledTimes(0)
 			expect(s2).toHaveBeenCalledTimes(0)
+		})
+		it('does not notify the same listener twice when subscribed during previous notification', () => {
+			const e = newEmitter()
+			const o = {
+				next: jest.fn(),
+			}
+			e.subscribe({
+				next: () => {
+					e.subscribe(o)
+					e.subscribe(o)
+				},
+			})
+			e.next(1)
+			o.next.mockClear()
+			// now o.next is added to the set of listeners
+			e.next(2)
+			expect(o.next).toHaveBeenCalledTimes(1)
 		})
 	})
 	describe('fromEvent', () => {

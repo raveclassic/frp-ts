@@ -1,4 +1,7 @@
 import { newAtom } from './atom'
+import { constVoid } from '@frp-ts/utils'
+import { clockUtils } from '@frp-ts/test-utils'
+import { action } from './emitter'
 
 describe('atom', () => {
 	it('stores initial value', () => {
@@ -19,6 +22,21 @@ describe('atom', () => {
 		set(1)
 		expect(f).toHaveBeenCalledTimes(1)
 		s.unsubscribe()
+	})
+	it('does not notify inside action and notifies only on action completion', () => {
+		const clock = clockUtils.newVirtualClock(0)
+		const a = newAtom(0, { clock })
+		const cb = jest.fn(constVoid)
+		a.subscribe({ next: cb })
+		action(() => {
+			a.set(3)
+			clock.next()
+			a.set(4)
+			expect(cb).toHaveBeenCalledTimes(0)
+		})
+		const lastTime = clock.now()
+		expect(cb).toHaveBeenCalledTimes(1)
+		expect(cb).toHaveBeenLastCalledWith(lastTime)
 	})
 	it('skips duplicates', () => {
 		const { set, subscribe } = newAtom(0)
