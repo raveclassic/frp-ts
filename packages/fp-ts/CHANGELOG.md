@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.11](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2022-01-14)
+
+
+### Features
+
+* **core:** add constructor for `property` & remove interop export ([282abef](https://github.com/raveclassic/frp-ts/commit/282abefa4e38d9cd6b10be2f48ac1c85144345c4))
+* **fp-ts:** migrate to new signature ([1005889](https://github.com/raveclassic/frp-ts/commit/100588929eafb592c2ba382242f3bf83ec23d497))
+
+
+
+
+
 # [1.0.0-alpha.10](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2021-12-28)
 
 **Note:** Version bump only for package @frp-ts/fp-ts

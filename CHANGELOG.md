@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.11](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2022-01-14)
+
+
+### Bug Fixes
+
+* **core:** add readonly for `Symbol.observable` to `property` ([abcf21e](https://github.com/raveclassic/frp-ts/commit/abcf21e69d0fcaecfde289c85d216238010d850b))
+* fix lockfile ([af803aa](https://github.com/raveclassic/frp-ts/commit/af803aac26064cb54f86bba20ec4bafdacee6cb6))
+
+
+### Features
+
+* **core:** add compatibility with `RxJs` and `Most` ([6df5739](https://github.com/raveclassic/frp-ts/commit/6df573965657eef311b43559e840bf94fe23f188))
+* **core:** add constructor for `property` & remove interop export ([282abef](https://github.com/raveclassic/frp-ts/commit/282abefa4e38d9cd6b10be2f48ac1c85144345c4))
+* **fp-ts:** migrate to new signature ([1005889](https://github.com/raveclassic/frp-ts/commit/100588929eafb592c2ba382242f3bf83ec23d497))
+* **lens:** migrate to new signature ([fa6e5d1](https://github.com/raveclassic/frp-ts/commit/fa6e5d159b47fbe40c303b48ab01a8a08fd4caeb))
+
+
+
+
+
 # [1.0.0-alpha.10](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2021-12-28)
 
 **Note:** Version bump only for package frp-ts
