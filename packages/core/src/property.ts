@@ -10,6 +10,12 @@ export interface Property<A> extends Observable<Time> {
 	readonly [Symbol.observable]: () => InteropObservable<A>
 }
 
+export const newProperty = <A>(get: () => A, subscribe: Observable<Time>['subscribe']): Property<A> => ({
+	get,
+	subscribe,
+	[observableSymbol]: () => newInteropObservable(get, subscribe),
+})
+
 export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscription] => {
 	// store initial inner source in a mutable reference
 	let inner: Property<A> = source.get()
@@ -37,16 +43,8 @@ export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscri
 		// use extra thunk because reference to inner source changes
 		return inner.get()
 	}
-	const interop = () => newInteropObservable(emitter.subscribe, get)
 
-	return [
-		{
-			get,
-			subscribe: emitter.subscribe,
-			[Symbol.observable]: interop,
-		},
-		outerDisposable,
-	]
+	return [newProperty(get, emitter.subscribe), outerDisposable]
 }
 
 export const tap =
@@ -97,10 +95,5 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	const get = () => memoProject(...properties.map((property) => property.get()))
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
 	const subscribe = doesNotEmit ? never.subscribe : mergeMany(properties).subscribe
-	const interop = () => newInteropObservable(subscribe, get)
-	return {
-		get,
-		subscribe,
-		[observableSymbol]: interop,
-	}
+	return newProperty(get, subscribe)
 }
