@@ -1,7 +1,7 @@
 export * as clock from './clock'
 export { Time, Env, Clock } from './clock'
 export * as emitter from './emitter'
-export { AddEventListenerOptions, EventListenerOptions, EventTarget, Emitter } from './emitter'
+export { Emitter } from './emitter'
 export * as observable from './observable'
 export { Observer, Subscription, Observable } from './observable'
 export * as atom from './atom'

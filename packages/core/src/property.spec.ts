@@ -4,9 +4,8 @@ import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
 import { combine, flatten, fromObservable, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
-import { clockUtils, emitterUtils } from '@frp-ts/test-utils'
+import { emitterUtils } from '@frp-ts/test-utils'
 import { action } from './emitter'
-import { newCounterClock } from './clock'
 
 describe('combine', () => {
 	it('combines', () => {
@@ -76,23 +75,20 @@ describe('combine', () => {
 		expect(b.subscribe).toBe(never.subscribe)
 	})
 	it('emits exactly the last value from several updates inside action', () => {
-		const clock = clockUtils.newVirtualClock(0)
-		const a = newAtom(0, { clock })
-		const b = newAtom(0, { clock })
+		const a = newAtom(0)
+		const b = newAtom(0)
 		const c = combine(a, b, (a, b) => a + b)
-		const o = {
-			next: jest.fn(),
-		}
-		c.subscribe(o)
+		const cb: (value: number) => void = jest.fn()
+		c.subscribe({
+			next: () => cb(c.get()),
+		})
 
 		action(() => {
 			a.set(1)
-			clock.next()
 			b.set(1)
 		})
-		const lastTime = clock.now()
-		expect(o.next).toHaveBeenCalledTimes(1)
-		expect(o.next).toHaveBeenLastCalledWith(lastTime)
+		expect(cb).toHaveBeenCalledTimes(1)
+		expect(cb).toHaveBeenLastCalledWith(2)
 	})
 })
 
@@ -224,9 +220,9 @@ describe('diamond flow', () => {
 		const b = combine(a, (n) => n + 1)
 		const c = combine(a, (n) => n / 1)
 
-		const { subscribe: d } = combine(b, c, (...args) => args)
+		const d = combine(b, c, (...args) => args)
 		const cb = jest.fn()
-		const sub = d({ next: cb })
+		d.subscribe({ next: cb })
 
 		expect(cb).toHaveBeenCalledTimes(0)
 
@@ -235,33 +231,6 @@ describe('diamond flow', () => {
 
 		a.set(2)
 		expect(cb).toHaveBeenCalledTimes(2)
-
-		sub.unsubscribe()
-	})
-	it('notifies combined on each different source emit in different ticks', () => {
-		const clock = clockUtils.newVirtualClock(0)
-		const a = newAtom(0, { clock })
-		const b = newAtom(0, { clock })
-		const c = combine(a, b, (...args) => args)
-		const cb = jest.fn()
-		const sub = c.subscribe({ next: cb })
-
-		expect(cb).toHaveBeenCalledTimes(0)
-		// first a notification
-		a.set(1)
-		// next a notification in the same tick
-		b.set(2)
-		expect(cb).toHaveBeenCalledTimes(1)
-		// next tick
-		clock.next()
-		// first b notification
-		b.set(1)
-		expect(cb).toHaveBeenCalledTimes(2)
-		// next b notification in the same tick
-		a.set(2)
-		expect(cb).toHaveBeenCalledTimes(2)
-
-		sub.unsubscribe()
 	})
 })
 describe('interop observable', () => {
