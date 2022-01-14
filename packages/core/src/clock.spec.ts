@@ -1,10 +1,10 @@
-import { newCounterClock } from './clock'
+import { now } from './clock'
 
-describe('newCounterClock', () => {
+describe('now', () => {
 	it('increments time on each count', () => {
-		const clock = newCounterClock()
-		expect(clock.now()).toBe(0)
-		expect(clock.now()).toBe(1)
-		expect(clock.now()).toBe(2)
+		const time = now()
+		expect(now()).toBe(time + 1)
+		expect(now()).toBe(time + 2)
+		expect(now()).toBe(time + 3)
 	})
 })

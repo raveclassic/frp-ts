@@ -1,7 +1,7 @@
 import { never, Observable, Subscription, subscriptionNone } from './observable'
 import { mergeMany, newEmitter } from './emitter'
 import { newAtom } from './atom'
-import { DEFAULT_ENV, Time } from './clock'
+import { Time } from './clock'
 import { memoMany } from '@frp-ts/utils'
 import { InteropObservable, newInteropObservable, observableSymbol } from './interop-observable'
 
@@ -60,14 +60,13 @@ export const tap =
 			}),
 	})
 
-export const fromObservable = <A>(initial: A, ma: Observable<A>, env = DEFAULT_ENV): [Property<A>, Subscription] => {
-	return scan<A, A>((_, a) => a, initial, env)(ma)
-}
+export const fromObservable = <A>(initial: A, ma: Observable<A>): [Property<A>, Subscription] =>
+	scan<A, A>((_, a) => a, initial)(ma)
 
 export const scan =
-	<A, B>(f: (acc: B, a: A) => B, initial: B, env = DEFAULT_ENV) =>
+	<A, B>(f: (acc: B, a: A) => B, initial: B) =>
 	(ma: Observable<A>): [Property<B>, Subscription] => {
-		const p = newAtom(initial, env)
+		const p = newAtom(initial)
 		const s = ma.subscribe({
 			next: (a) => p.set(f(p.get(), a)),
 		})

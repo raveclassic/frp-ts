@@ -3,12 +3,12 @@ import { never, Observable, Observer, subscriptionNone } from './observable'
 
 let isLocked = false
 let lastTime: Time | undefined = undefined
-let lockedListeners = new Set<(time: Time) => void>()
+const lockedListeners = new Set<(time: Time) => void>()
 export const action = (f: () => void): void => {
 	isLocked = true
 	f()
 	isLocked = false
-	if (lastTime !== undefined && lockedListeners) {
+	if (lastTime !== undefined) {
 		for (const listener of Array.from(lockedListeners)) {
 			listener(lastTime)
 		}
@@ -27,7 +27,7 @@ export const newEmitter = (): Emitter => {
 	const listeners = new Set<Observer<Time>>()
 	let isNotifying = false
 	// tracks new listeners added while notifying
-	let pendingAdditions: Observer<Time>[] = []
+	const pendingAdditions: Observer<Time>[] = []
 
 	return {
 		next: (time) => {

@@ -1,5 +1,4 @@
-export * as clock from './clock'
-export { Time, Env, Clock } from './clock'
+export { Time } from './clock'
 export * as emitter from './emitter'
 export { Emitter } from './emitter'
 export * as observable from './observable'

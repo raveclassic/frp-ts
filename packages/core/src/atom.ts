@@ -1,6 +1,6 @@
 import { newEmitter } from './emitter'
 import { newProperty, Property } from './property'
-import { DEFAULT_ENV, Time } from './clock'
+import { now, Time } from './clock'
 import { Observer, Subscription } from './observable'
 
 export interface Update<A> {
@@ -12,13 +12,13 @@ export interface Atom<A> extends Property<A> {
 	readonly modify: (...updates: readonly Update<A>[]) => void
 }
 
-export const newAtom = <A>(initial: A, env = DEFAULT_ENV): Atom<A> => {
+export const newAtom = <A>(initial: A): Atom<A> => {
 	let last = initial
 	const e = newEmitter()
 	const set = (a: A): void => {
 		if (last !== a) {
 			last = a
-			e.next(env.clock.now())
+			e.next(now())
 		}
 	}
 	const get = (): A => last
