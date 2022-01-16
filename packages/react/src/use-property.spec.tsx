@@ -1,8 +1,8 @@
 import { Property, atom, emitter, property } from '@frp-ts/core'
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 import { useProperty } from './use-property'
 import { constVoid } from '@frp-ts/utils'
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { act } from 'react-dom/test-utils'
 
 interface TestProps<A> {
@@ -19,6 +19,7 @@ describe('useProperty', () => {
 		const a = atom.newAtom(123)
 		const cb = jest.fn(constVoid)
 		render(<Test property={a} onValue={cb} />)
+		expect(cb).toHaveBeenCalledTimes(1)
 		expect(cb).toHaveBeenLastCalledWith(123)
 	})
 	it('returns new value from new property', () => {
@@ -35,9 +36,10 @@ describe('useProperty', () => {
 		const Component = () => {
 			const value = useProperty(a)
 			cb(value)
-			useState(() => a.set(2))
+			useEffect(() => a.set(2), [])
 			return <></>
 		}
+
 		render(<Component />)
 		expect(cb.mock.calls).toEqual([[1], [2]])
 	})
@@ -83,5 +85,35 @@ describe('useProperty', () => {
 		tree.unmount()
 		a.set(a.get() + 1)
 		expect(cb).not.toHaveBeenCalled()
+	})
+	it('subscribe in strict mode with nested components', () => {
+		const a = atom.newAtom(1)
+		const cb = jest.fn()
+
+		const InnerComponent = (props: { value: number }) => {
+			cb(props.value)
+			return <>Value {props.value}</>
+		}
+		const Component = () => {
+			const value = useProperty(a)
+			return <InnerComponent value={value} />
+		}
+		render(
+			<React.StrictMode>
+				<Component />
+			</React.StrictMode>,
+		)
+
+		expect(screen.getByText('Value 1')).toBeDefined()
+		expect(cb).toBeCalledTimes(2)
+		expect(cb).toHaveBeenLastCalledWith(1)
+
+		act(() => {
+			a.set(2)
+		})
+
+		expect(screen.getByText('Value 2')).toBeDefined()
+		expect(cb).toBeCalledTimes(4)
+		expect(cb).toHaveBeenLastCalledWith(2)
 	})
 })
