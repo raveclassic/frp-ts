@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.12](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.11...v1.0.0-alpha.12) (2022-01-17)
+
+
+### Features
+
+* Remove env and add actions ([#33](https://github.com/raveclassic/frp-ts/issues/33)) ([a6bcec7](https://github.com/raveclassic/frp-ts/commit/a6bcec79884d8a36e05511fbae817a963fa21a5f))
+
+
+### BREAKING CHANGES
+
+* all functions requiring Env now don't need it, some functions were removed
+
+
+
+
+
 # [1.0.0-alpha.11](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2022-01-14)
 
 **Note:** Version bump only for package @frp-ts/test-utils

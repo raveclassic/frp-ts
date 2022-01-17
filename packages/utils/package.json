@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/utils",
-  "version": "1.0.0-alpha.11",
+  "version": "1.0.0-alpha.12",
   "description": "Utilities for @frp-ts project",
   "typedocMain": "./src/index.ts",
   "author": "raveclassic",
