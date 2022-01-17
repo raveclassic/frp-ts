@@ -27,7 +27,8 @@
     "test": "nx run-many --target=test --all --parallel",
     "typedoc": "typedoc && cp jekyll_config.yml docs/_config.yml",
     "preversion": "pnpm i --frozen-lockfile",
-    "version": "yarn typedoc && git add docs && pnpm i && git add pnpm-lock.yaml && git push",
+    "version": "yarn typedoc && git add docs && pnpm i && git add pnpm-lock.yaml",
+    "postversion": "git push",
     "predeploy": "pnpm build",
     "deploy": "nx run-many --target=deploy --all"
   },
