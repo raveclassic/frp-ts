@@ -100,19 +100,19 @@ export const mergeMany = (observables: readonly Observable<Time>[]): Observable<
 	if (observables.length === 1) {
 		return multicast(observables[0])
 	}
-	let lastNotifiedTime = Infinity
+	let lastNotifiedTime = -Infinity
 	return multicast({
 		subscribe: (listener) => {
-			const subscriptions = observables.map((observable) =>
-				observable.subscribe({
-					next: (t) => {
-						if (t !== lastNotifiedTime) {
-							lastNotifiedTime = t
-							listener.next(t)
-						}
-					},
-				}),
-			)
+			const observer: Observer<Time> = {
+				next: (t) => {
+					if (t !== lastNotifiedTime) {
+						lastNotifiedTime = t
+						listener.next(t)
+					}
+				},
+			}
+
+			const subscriptions = observables.map((observable) => observable.subscribe(observer))
 			return {
 				unsubscribe: () => {
 					for (const subscription of subscriptions) subscription.unsubscribe()
