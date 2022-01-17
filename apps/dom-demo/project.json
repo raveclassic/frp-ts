@@ -1,0 +1,67 @@
+{
+  "projectType": "application",
+  "root": "apps/dom-demo",
+  "sourceRoot": "apps/dom-demo/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/dom-demo",
+        "index": "apps/dom-demo/src/index.html",
+        "baseHref": "/",
+        "main": "apps/dom-demo/src/main.tsx",
+        "polyfills": "",
+        "tsConfig": "apps/dom-demo/tsconfig.app.json",
+        "assets": ["apps/dom-demo/src/assets"],
+        "styles": [],
+        "scripts": [],
+        "webpackConfig": "apps/dom-demo/webpack.config.js"
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/dom-demo/src/environments/environment.ts",
+              "with": "apps/dom-demo/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "options": {
+        "buildTarget": "dom-demo:build"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "dom-demo:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/dom-demo/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/dom-demo"],
+      "options": {
+        "jestConfig": "apps/dom-demo/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

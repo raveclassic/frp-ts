@@ -12,14 +12,24 @@
     "url": "https://github.com/raveclassic/frp-ts/issues"
   },
   "homepage": "https://github.com/raveclassic/frp-ts#readme",
-  "workspaces": [
-    "./packages/core",
-    "./packages/lens",
-    "./packages/fp-ts",
-    "./packages/react",
-    "./packages/test-utils",
-    "./packages/utils"
-  ],
+  "workspaces": {
+    "packages": [
+      "./packages/core",
+      "./packages/dom",
+      "./apps/dom-demo",
+      "./packages/lens",
+      "./packages/fp-ts",
+      "./packages/react",
+      "./packages/test-utils",
+      "./packages/utils"
+    ],
+    "nohoist": [
+      "@frp-ts/react/react",
+      "@frp-ts/react/react-dom",
+      "@frp-ts/react/@types/react",
+      "@frp-ts/react/@types/react-dom"
+    ]
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "nx run-many --target=build --all --parallel",
@@ -45,6 +55,7 @@
     "@nrwl/linter": "13.4.1",
     "@nrwl/nx-cloud": "^13.0.1",
     "@nrwl/tao": "13.4.1",
+    "@nrwl/web": "^13.4.1",
     "@nrwl/workspace": "13.4.1",
     "@octokit/core": "^3.5.1",
     "@swc/cli": "~0.1.52",

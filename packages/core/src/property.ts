@@ -87,6 +87,9 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	// eslint-disable-next-line no-restricted-syntax
 	const properties: Properties = args.slice(0, args.length - 1) as never
 	const memoProject = memoMany(project)
+	if (properties.length === 1) {
+		return newProperty(() => memoProject(properties[0].get()), properties[0].subscribe)
+	}
 	const get = () => memoProject(...properties.map((property) => property.get()))
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
 	const subscribe = doesNotEmit ? never.subscribe : mergeMany(properties).subscribe

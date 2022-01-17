@@ -1,0 +1,41 @@
+{
+  "root": "packages/dom",
+  "sourceRoot": "packages/dom/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/dom",
+        "main": "packages/dom/src/index.ts",
+        "tsConfig": "packages/dom/tsconfig.lib.json",
+        "assets": ["packages/dom/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/dom/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/dom"],
+      "options": {
+        "jestConfig": "packages/dom/jest.config.js",
+        "passWithNoTests": true,
+        "codeCoverage": true
+      }
+    },
+    "deploy": {
+      "executor": "ngx-deploy-npm:deploy",
+      "options": {
+        "access": "public",
+        "noBuild": true
+      }
+    }
+  },
+  "tags": []
+}

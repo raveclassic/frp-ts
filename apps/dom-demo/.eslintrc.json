@@ -1,0 +1,24 @@
+{
+  "plugins": ["react", "react-app"],
+  "extends": ["react-app", "../../.eslintrc.js"],
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "rules": {}
+    }
+  ],
+  "settings": {
+    "react": {
+      "pragma": "h"
+    }
+  }
+}

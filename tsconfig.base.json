@@ -14,8 +14,11 @@
     "skipLibCheck": false,
     "skipDefaultLibCheck": false,
     "baseUrl": ".",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@frp-ts/core": ["packages/core/src/index.ts"],
+      "@frp-ts/dom": ["packages/dom/src/index.ts"],
       "@frp-ts/fp-ts": ["packages/fp-ts/src/index.ts"],
       "@frp-ts/lens": ["packages/lens/src/index.ts"],
       "@frp-ts/react": ["packages/react/src/index.ts"],

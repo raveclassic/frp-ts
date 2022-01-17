@@ -1,7 +1,9 @@
 {
-  "name": "@frp-ts/fp-ts",
-  "version": "1.0.0-alpha.12",
-  "description": "Bindings to fp-ts library",
+  "name": "@frp-ts/dom",
+  "version": "1.0.0-alpha.10",
+  "description": "DOM renderer for @frp-ts project",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "typedocMain": "./src/index.ts",
   "author": "raveclassic",
   "license": "MIT",
@@ -14,20 +16,23 @@
   },
   "homepage": "https://github.com/raveclassic/frp-ts#readme",
   "scripts": {},
+  "private": true,
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
-    "fp-ts": "^2.11.5",
     "tslib": "^2.3.1"
   },
   "dependencies": {
-    "@frp-ts/core": "^1.0.0-alpha.12",
-    "@frp-ts/utils": "^1.0.0-alpha.12"
+    "@frp-ts/core": "^1.0.0-alpha.10",
+    "@frp-ts/utils": "^1.0.0-alpha.10",
+    "csstype": "^3.0.9",
+    "udomdiff": "^1.1.0"
   },
   "devDependencies": {
-    "fp-ts": "^2.11.5",
-    "rxjs": "^7.4.0",
+    "@frp-ts/test-utils": "^1.0.0-alpha.10",
+    "eslint-plugin-react": "^7.26.1",
+    "eslint-plugin-react-app": "^6.2.2",
     "tslib": "^2.3.1"
   }
 }

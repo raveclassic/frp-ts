@@ -2,6 +2,8 @@
   "version": 2,
   "projects": {
     "core": "packages/core",
+    "dom": "packages/dom",
+    "dom-demo": "apps/dom-demo",
     "fp-ts": "packages/fp-ts",
     "lens": "packages/lens",
     "react": "packages/react",
