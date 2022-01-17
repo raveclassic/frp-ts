@@ -88,10 +88,7 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	const properties: Properties = args.slice(0, args.length - 1) as never
 	const memoProject = memoMany(project)
 	if (properties.length === 1) {
-		return {
-			get: () => memoProject(properties[0].get()),
-			subscribe: properties[0].subscribe,
-		}
+		return newProperty(() => memoProject(properties[0].get()), properties[0].subscribe)
 	}
 	const get = () => memoProject(...properties.map((property) => property.get()))
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)

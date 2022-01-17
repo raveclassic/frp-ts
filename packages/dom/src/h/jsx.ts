@@ -1,5 +1,4 @@
 import { Property } from '@frp-ts/core'
-import { EventTarget } from '@frp-ts/core'
 // no idea why eslint doesn't see this package
 // eslint-disable-next-line import/no-unresolved
 import * as CSS from 'csstype'

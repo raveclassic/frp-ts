@@ -1,12 +1,8 @@
+import { atom } from '@frp-ts/core'
 import { cleanup, For, h, If, indexKey, render } from '@frp-ts/dom'
-import { clock, atom } from '@frp-ts/core'
 
-const newAtom = atom.newAtom({
-	clock: clock.newCounterClock(),
-})
-//
 const Counter = () => {
-	const counter = newAtom(0)
+	const counter = atom.newAtom(0)
 	const increment = () => counter.modify((v) => v + 1)
 	return (
 		<>
@@ -95,11 +91,11 @@ const Counter = () => {
 // )
 
 const Test = () => {
-	const items = newAtom(['first', 'second', 'third'])
+	const items = atom.newAtom(['first', 'second', 'third'])
 	const handleChange = () => {
-		items.set(['first', 'second ' + Math.random(), 'third'])
+		items.set(['first', 'second ' + Math.random().toString(), 'third'])
 	}
-	const isVisible = newAtom(true)
+	const isVisible = atom.newAtom(true)
 	const handleToggle = () => {
 		isVisible.modify((value) => !value)
 	}
@@ -117,7 +113,7 @@ const Test = () => {
 					return (
 						<For items={items} getKey={(item) => `key: ${item}`}>
 							{(item) => {
-								const timer = newAtom(0)
+								const timer = atom.newAtom(0)
 								const interval = setInterval(() => timer.modify((value) => value + 1), 1000)
 								cleanup(() => clearInterval(interval))
 								return (
