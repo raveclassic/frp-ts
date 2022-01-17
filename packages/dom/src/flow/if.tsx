@@ -1,4 +1,4 @@
-import { Property } from '@frp-ts/core'
+import { property, Property } from '@frp-ts/core'
 import { PrimitiveElementChild, renderChild } from '../h/h'
 import { Context, disposeContext, withContext } from '../context/context'
 
@@ -24,9 +24,9 @@ export function If(props: IfProps): PrimitiveElementChild {
 		render()
 
 		let conditionValue = props.value.get()
-		const proxy: Property<PrimitiveElementChild> = {
-			get: () => branchChild,
-			subscribe: (observer) =>
+		const proxy: Property<PrimitiveElementChild> = property.newProperty(
+			() => branchChild,
+			(observer) =>
 				props.value.subscribe({
 					next: (time) => {
 						const newConditionValue = props.value.get()
@@ -39,7 +39,7 @@ export function If(props: IfProps): PrimitiveElementChild {
 						}
 					},
 				}),
-		}
+		)
 
 		return renderChild(proxy)
 	})

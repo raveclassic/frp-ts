@@ -39,9 +39,7 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 			const key = props.getKey(item, i)
 			const entry = newCacheEntry(item, key, props)
 			cache.set(key, entry)
-			if (entry.element) {
-				renderedItems.push(entry.element)
-			}
+			renderedItems.push(entry.element)
 		}
 
 		let currentParent: Node | null = null
@@ -68,6 +66,7 @@ export function For<Item>(props: ForProps<Item>): DocumentFragment {
 					if (cached.element.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
 						clearFragmentEntry(currentParent, cached)
 					} else {
+						// eslint-disable-next-line unicorn/prefer-dom-node-remove
 						currentParent.removeChild(cached.element)
 					}
 				}
@@ -115,6 +114,7 @@ function newCacheEntry<Item>(item: Item, key: PropertyKey, props: ForProps<Item>
 		const start = newMarker()
 		const end = newMarker()
 		element.insertBefore(start, element.firstChild)
+		// eslint-disable-next-line unicorn/prefer-dom-node-append
 		element.appendChild(end)
 		return {
 			property,
@@ -137,11 +137,13 @@ function clearFragmentEntry<Item>(parent: Node, entry: CacheEntry<Item>): void {
 	while (cursor && cursor !== end) {
 		const next = cursor.nextSibling
 		if (parent === cursor.parentNode) {
+			// eslint-disable-next-line unicorn/prefer-dom-node-remove
 			parent.removeChild(cursor)
 		}
 		cursor = next ?? undefined
 	}
 	if (end && parent === end.parentNode) {
+		// eslint-disable-next-line unicorn/prefer-dom-node-remove
 		parent.removeChild(end)
 	}
 }
