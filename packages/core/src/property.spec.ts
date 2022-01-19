@@ -2,10 +2,11 @@ import { Atom, newAtom } from './atom'
 
 import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
-import { combine, flatten, fromObservable, Property, scan, tap } from './property'
+import { combine, flatten, fromObservable, newProperty, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
 import { emitterUtils } from '@frp-ts/test-utils'
-import { action } from './emitter'
+import { action, newEmitter } from './emitter'
+import { now } from './clock'
 
 describe('combine', () => {
 	it('combines', () => {
@@ -211,6 +212,32 @@ describe('tap', () => {
 		a.set(1)
 		expect(cb).toHaveBeenCalledWith(1)
 		s.unsubscribe()
+	})
+	it('always skips duplicates', () => {
+		const emitter = newEmitter()
+		const property = newProperty(() => 0, emitter.subscribe)
+		const tapCB = jest.fn()
+		const resultCB = jest.fn()
+		const result = tap(tapCB)(property)
+		result.subscribe({ next: resultCB })
+		expect(tapCB).not.toHaveBeenCalled()
+		expect(resultCB).not.toHaveBeenCalled()
+		emitter.next(now())
+		expect(tapCB).toHaveBeenCalledTimes(1)
+		expect(resultCB).toHaveBeenCalledTimes(1)
+		emitter.next(now())
+		expect(tapCB).toHaveBeenCalledTimes(1)
+		expect(resultCB).toHaveBeenCalledTimes(1)
+	})
+	it('does not call source property.get() on subscription, is lazy', () => {
+		const cb = jest.fn(now)
+		const emitter = newEmitter()
+		const property = newProperty(cb, emitter.subscribe)
+		const result = tap(constVoid)(property)
+		result.subscribe({ next: constVoid })
+		expect(cb).not.toHaveBeenCalled()
+		emitter.next(now())
+		expect(cb).toHaveBeenCalledTimes(1)
 	})
 })
 

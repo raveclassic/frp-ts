@@ -51,13 +51,25 @@ export const tap =
 	<A>(f: (a: A) => unknown) =>
 	(fa: Property<A>): Property<A> => ({
 		...fa,
-		subscribe: (observer) =>
-			fa.subscribe({
+		subscribe: (observer) => {
+			let lastValue: A | undefined
+			const subscription = fa.subscribe({
 				next: (t) => {
-					f(fa.get())
-					observer.next(t)
+					const newValue = fa.get()
+					if (lastValue !== newValue) {
+						lastValue = newValue
+						f(newValue)
+						observer.next(t)
+					}
 				},
-			}),
+			})
+			return {
+				unsubscribe: () => {
+					lastValue = undefined
+					subscription.unsubscribe()
+				},
+			}
+		},
 	})
 
 export const fromObservable = <A>(initial: A, ma: Observable<A>): [Property<A>, Subscription] =>
