@@ -1,4 +1,4 @@
-import { Property, atom, emitter, property } from '@frp-ts/core'
+import { newAtom, newEmitter, newProperty, Property } from '@frp-ts/core'
 import React, { useEffect } from 'react'
 import { useProperty } from './use-property'
 import { constVoid } from '@frp-ts/utils'
@@ -16,22 +16,22 @@ function Test<A>(props: TestProps<A>) {
 
 describe('useProperty', () => {
 	it('returns initial value', () => {
-		const a = atom.newAtom(123)
+		const a = newAtom(123)
 		const cb = jest.fn(constVoid)
 		render(<Test property={a} onValue={cb} />)
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(cb).toHaveBeenLastCalledWith(123)
 	})
 	it('returns new value from new property', () => {
-		const a = atom.newAtom(1)
-		const b = atom.newAtom(2)
+		const a = newAtom(1)
+		const b = newAtom(2)
 		const cb = jest.fn(constVoid)
 		const tree = render(<Test onValue={cb} property={a} />)
 		tree.rerender(<Test onValue={cb} property={b} />)
 		expect(cb).toHaveBeenLastCalledWith(2)
 	})
 	it('subscribes to property immediately during rendering', () => {
-		const a = atom.newAtom(1)
+		const a = newAtom(1)
 		const cb = jest.fn()
 		const Component = () => {
 			const value = useProperty(a)
@@ -44,8 +44,8 @@ describe('useProperty', () => {
 		expect(cb.mock.calls).toEqual([[1], [2]])
 	})
 	it('unsubscribes from the previous property and subscribes to the new one', () => {
-		const a = atom.newAtom(1)
-		const b = atom.newAtom(10)
+		const a = newAtom(1)
+		const b = newAtom(10)
 		const cbA = jest.fn(constVoid)
 		const cbB = jest.fn(constVoid)
 		const tree = render(<Test onValue={cbA} property={a} />)
@@ -57,8 +57,8 @@ describe('useProperty', () => {
 		expect(cbB).toHaveBeenCalledTimes(2)
 	})
 	it('does not trigger rerender if value of the new property is the same as value of the previous', () => {
-		const e = emitter.newEmitter()
-		const p = property.newProperty(() => 1, e.subscribe)
+		const e = newEmitter()
+		const p = newProperty(() => 1, e.subscribe)
 		const cb = jest.fn(constVoid)
 		render(<Test property={p} onValue={cb} />)
 		cb.mockClear()
@@ -68,8 +68,8 @@ describe('useProperty', () => {
 	})
 	it('triggers rerender even if newValue is emitted on the same tick', () => {
 		let counter = 0
-		const e = emitter.newEmitter()
-		const p: Property<number> = property.newProperty(() => counter++, e.subscribe)
+		const e = newEmitter()
+		const p: Property<number> = newProperty(() => counter++, e.subscribe)
 		const cb = jest.fn(constVoid)
 		render(<Test property={p} onValue={cb} />)
 		cb.mockClear()
@@ -78,7 +78,7 @@ describe('useProperty', () => {
 		expect(cb).toHaveBeenCalledTimes(1)
 	})
 	it('unsubscribes from property on unmount', () => {
-		const a = atom.newAtom(1)
+		const a = newAtom(1)
 		const cb = jest.fn(constVoid)
 		const tree = render(<Test onValue={cb} property={a} />)
 		cb.mockClear()
@@ -87,7 +87,7 @@ describe('useProperty', () => {
 		expect(cb).not.toHaveBeenCalled()
 	})
 	it('subscribe in strict mode with nested components', () => {
-		const a = atom.newAtom(1)
+		const a = newAtom(1)
 		const cb = jest.fn()
 
 		const InnerComponent = (props: { value: number }) => {

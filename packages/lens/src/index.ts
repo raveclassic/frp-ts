@@ -1,2 +1,2 @@
+export { Lens, LensedAtom, toLensedAtom, newLensedAtom } from './lensed-atom'
 export * as lensedAtom from './lensed-atom'
-export { Lens, LensedAtom } from './lensed-atom'

@@ -4,7 +4,7 @@ import { pipeable } from 'fp-ts/lib/pipeable'
 import { sequenceS as sequenceSApply, sequenceT as sequenceTApply } from 'fp-ts/lib/Apply'
 import { Functor2C, Functor2, Functor3, Functor3C, Functor4, Functor1, Functor } from 'fp-ts/lib/Functor'
 import { HKT, Kind, Kind2, Kind3, Kind4, URIS, URIS2, URIS3, URIS4 } from 'fp-ts/lib/HKT'
-import { Property, observable, emitter, property } from '@frp-ts/core'
+import { mergeMany, never, newProperty, Property, multicast } from '@frp-ts/core'
 import { IO } from 'fp-ts/lib/IO'
 
 const URI = '@frp-ts/fp-ts/Property'
@@ -20,21 +20,20 @@ declare module 'fp-ts/lib/HKT' {
 const memoApply = memo2(<A, B>(f: (a: A) => B, a: A): B => f(a))
 
 export const instance: Applicative1<URI> = {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	URI: URI,
+	URI,
 	map: (fa, f) => {
 		const memoF = memo1(f)
 		const get = () => memoF(fa.get())
-		return property.newProperty(get, fa.subscribe)
+		return newProperty(get, fa.subscribe)
 	},
 	of: (a) => {
 		const get = () => a
-		return property.newProperty(get, observable.never.subscribe)
+		return newProperty(get, never.subscribe)
 	},
 	ap: (fab, fa) => {
-		const observable = emitter.multicast(emitter.mergeMany([fab, fa]))
+		const observable = multicast(mergeMany([fab, fa]))
 		const get = () => memoApply(fab.get(), fa.get())
-		return property.newProperty(get, observable.subscribe)
+		return newProperty(get, observable.subscribe)
 	},
 }
 
