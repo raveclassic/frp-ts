@@ -2,10 +2,11 @@ import { Atom, newAtom } from './atom'
 
 import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
-import { combine, flatten, fromObservable, Property, scan, tap } from './property'
+import { combine, flatten, fromObservable, newProperty, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
 import { emitterUtils } from '@frp-ts/test-utils'
-import { action } from './emitter'
+import { action, newEmitter } from './emitter'
+import { now } from './clock'
 
 describe('combine', () => {
 	it('combines', () => {
@@ -89,6 +90,65 @@ describe('combine', () => {
 		})
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(cb).toHaveBeenLastCalledWith(2)
+	})
+	it('does not emit if projected value did not change and combined property has at least one consumer', () => {
+		const a = newAtom(0)
+		const b = newAtom(1)
+		const c = combine(a, b, (a, b) => a + b)
+		const o = {
+			next: jest.fn(),
+		}
+		c.subscribe(o)
+		expect(o.next).toHaveBeenCalledTimes(0)
+		// imitate consumer to warm up the cache
+		c.get()
+		action(() => {
+			a.set(1)
+			b.set(0)
+		})
+		action(() => {
+			a.set(0)
+			b.set(1)
+		})
+		expect(o.next).toHaveBeenCalledTimes(0)
+	})
+	it('emits the very first time when there is no consumer and then skips duplicates', () => {
+		const a = newAtom(0)
+		const b = newAtom(1)
+		const c = combine(a, b, (a, b) => a + b)
+		const o = {
+			next: jest.fn(),
+		}
+		c.subscribe(o)
+		expect(o.next).toHaveBeenCalledTimes(0)
+		// no consumer, there will be at least one notification
+		// because `c` does not store last value
+		action(() => {
+			a.set(1)
+			b.set(0)
+		})
+		action(() => {
+			a.set(0)
+			b.set(1)
+		})
+		expect(o.next).toHaveBeenCalledTimes(1)
+	})
+	it('multicasts the result observable', () => {
+		const emitter = newEmitter()
+		// we need a property that always has a new value
+		// so that projection function is not memoized by combine
+		const a = newProperty(now, emitter.subscribe)
+		const cb = jest.fn(now)
+		const c = combine(a, cb)
+		const cb1 = jest.fn(constVoid)
+		const cb2 = jest.fn(constVoid)
+		c.subscribe({ next: cb1 })
+		c.subscribe({ next: cb2 })
+		// imitate consumer to warm up the cache
+		c.get()
+		cb.mockClear()
+		emitter.next(now())
+		expect(cb).toHaveBeenCalledTimes(1)
 	})
 })
 
