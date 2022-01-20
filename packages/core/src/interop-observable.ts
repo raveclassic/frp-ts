@@ -21,7 +21,11 @@ export const newInteropObservable = <A>(
 	subscribe: Observable<Time>['subscribe'],
 ): InteropObservable<A> => ({
 	subscribe: (observer) => {
-		const emitNext = () => observer.next?.(get())
+		const emitNext = () => {
+			if (observer.next) {
+				observer.next(get())
+			}
+		}
 		emitNext()
 		return subscribe({
 			next: emitNext,
