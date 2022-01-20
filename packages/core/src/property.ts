@@ -93,10 +93,12 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
 	if (doesNotEmit) return newProperty(get, never.subscribe)
 
-	let lastValue: Result | undefined
+	let hasCachedValue = false
+	let cachedValue: Result | undefined
 	const getAndCache = () => {
 		const result = get()
-		lastValue = result
+		hasCachedValue = true
+		cachedValue = result
 		return result
 	}
 
@@ -105,10 +107,11 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 		subscribe: (observer) =>
 			merged.subscribe({
 				next: (time) => {
-					// getAndCache() overwrites lastValue, we need to store it
-					const currentLastValue = lastValue
+					// getAndCache() overwrites cachedValue and hasCachedValue, we need to store it
+					const currentCachedValue = cachedValue
+					const currentHasCachedValue = hasCachedValue
 					const newValue = getAndCache()
-					if (currentLastValue !== newValue) {
+					if (!currentHasCachedValue || currentCachedValue !== newValue) {
 						observer.next(time)
 					}
 				},

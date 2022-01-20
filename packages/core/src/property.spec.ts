@@ -150,6 +150,16 @@ describe('combine', () => {
 		emitter.next(now())
 		expect(cb).toHaveBeenCalledTimes(1)
 	})
+	it('correctly caches undefined value', () => {
+		const a = newAtom<number | undefined>(0)
+		const b = combine(a, (a) => a)
+		// at this moment cache is not initialized
+		const cb = jest.fn(constVoid)
+		b.subscribe({ next: cb })
+		expect(cb).toHaveBeenCalledTimes(0)
+		a.set(undefined)
+		expect(cb).toHaveBeenCalledTimes(1)
+	})
 })
 
 describe('flatten', () => {
