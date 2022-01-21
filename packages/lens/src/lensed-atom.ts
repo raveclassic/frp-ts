@@ -1,4 +1,4 @@
-import { Atom, atom, property } from '@frp-ts/core'
+import { Atom, newAtom, newProperty } from '@frp-ts/core'
 
 export interface Lens<S, A> {
 	readonly get: (s: S) => A
@@ -9,7 +9,7 @@ export interface LensedAtom<A> extends Atom<A> {
 	readonly view: <B>(lens: Lens<A, B>) => LensedAtom<B>
 }
 
-export const newLensedAtom = <A>(initial: A): LensedAtom<A> => toLensedAtom(atom.newAtom(initial))
+export const newLensedAtom = <A>(initial: A): LensedAtom<A> => toLensedAtom(newAtom(initial))
 
 export const toLensedAtom = <A>(atom: Atom<A>): LensedAtom<A> => {
 	const { set, get, subscribe } = atom
@@ -19,7 +19,7 @@ export const toLensedAtom = <A>(atom: Atom<A>): LensedAtom<A> => {
 		const lensedSet = (b: B) => set(lens.set(b)(get()))
 
 		return {
-			...property.newProperty(lensedGet, subscribe),
+			...newProperty(lensedGet, subscribe),
 			set: lensedSet,
 			view: (bc) => view(composeLens(lens, bc)),
 			modify: (...updates) => {

@@ -4,16 +4,16 @@ import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
 import { combine, flatten, fromObservable, newProperty, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
-import { emitterUtils } from '@frp-ts/test-utils'
 import { action, newEmitter } from './emitter'
+import { attachSubscription } from '@frp-ts/test-utils'
 import { now } from './clock'
 
 describe('combine', () => {
 	it('combines', () => {
 		const disposeA = jest.fn(constVoid)
 		const disposeB = jest.fn(constVoid)
-		const a = emitterUtils.attachSubscription(newAtom(0), { unsubscribe: disposeA })
-		const b = emitterUtils.attachSubscription(newAtom(1), { unsubscribe: disposeB })
+		const a = attachSubscription(newAtom(0), { unsubscribe: disposeA })
+		const b = attachSubscription(newAtom(1), { unsubscribe: disposeB })
 		const { get: getC, subscribe: c } = combine(a, b, (...args) => args)
 		expect(getC()).toEqual([0, 1])
 		const listenerC = jest.fn()
@@ -220,7 +220,7 @@ describe('flatten', () => {
 	it('disposes previous subscription to inner source on passed source emit', () => {
 		const a = newAtom(0)
 		const inner1Dispose = jest.fn()
-		const innerSource1 = emitterUtils.attachSubscription(newAtom(''), { unsubscribe: inner1Dispose })
+		const innerSource1 = attachSubscription(newAtom(''), { unsubscribe: inner1Dispose })
 		const inner2 = newAtom('')
 		const [{ subscribe: b }] = flatten(combine(a, (a) => (a === 0 ? innerSource1 : inner2)))
 		const cb = jest.fn()
