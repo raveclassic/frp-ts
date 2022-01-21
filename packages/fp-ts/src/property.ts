@@ -32,7 +32,7 @@ export const instance: Applicative1<URI> = {
 		return property.newProperty(get, observable.never.subscribe)
 	},
 	ap: (fab, fa) => {
-		const observable = emitter.mergeMany([fab, fa])
+		const observable = emitter.multicast(emitter.mergeMany([fab, fa]))
 		const get = () => memoApply(fab.get(), fa.get())
 		return property.newProperty(get, observable.subscribe)
 	},

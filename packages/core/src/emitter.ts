@@ -1,5 +1,5 @@
 import { Time } from './clock'
-import { never, Observable, Observer, subscriptionNone } from './observable'
+import { never, Observable, Observer, Subscription } from './observable'
 
 let isLocked = false
 let lastTime: Time | undefined = undefined
@@ -69,10 +69,10 @@ export const newEmitter = (): Emitter => {
 	}
 }
 
-const multicast = (a: Observable<Time>): Observable<Time> => {
+export const multicast = (a: Observable<Time>): Observable<Time> => {
 	const emitter = newEmitter()
 	let counter = 0
-	let outer = subscriptionNone
+	let outer: Subscription | undefined
 	return {
 		subscribe: (listener) => {
 			counter++
@@ -84,8 +84,9 @@ const multicast = (a: Observable<Time>): Observable<Time> => {
 				unsubscribe: () => {
 					counter--
 					inner.unsubscribe()
-					if (counter === 0) {
+					if (counter === 0 && outer) {
 						outer.unsubscribe()
+						outer = undefined
 					}
 				},
 			}
@@ -98,10 +99,10 @@ export const mergeMany = (observables: readonly Observable<Time>[]): Observable<
 		return never
 	}
 	if (observables.length === 1) {
-		return multicast(observables[0])
+		return observables[0]
 	}
-	let lastNotifiedTime = -Infinity
-	return multicast({
+	let lastNotifiedTime: Time | undefined
+	return {
 		subscribe: (listener) => {
 			const observer: Observer<Time> = {
 				next: (t) => {
@@ -119,5 +120,5 @@ export const mergeMany = (observables: readonly Observable<Time>[]): Observable<
 				},
 			}
 		},
-	})
+	}
 }

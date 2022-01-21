@@ -1,5 +1,5 @@
-import { never, Observable, Subscription, subscriptionNone } from './observable'
-import { mergeMany, newEmitter } from './emitter'
+import { never, Observable, Observer, Subscription, subscriptionNone } from './observable'
+import { mergeMany, multicast, newEmitter } from './emitter'
 import { newAtom } from './atom'
 import { Time } from './clock'
 import { memoMany } from '@frp-ts/utils'
@@ -10,7 +10,7 @@ export interface Property<A> extends Observable<Time> {
 	readonly [Symbol.observable]: () => InteropObservable<A>
 }
 
-export const newProperty = <A>(get: () => A, subscribe: Observable<Time>['subscribe']): Property<A> => ({
+export const newProperty = <A>(get: () => A, subscribe: (observer: Observer<Time>) => Subscription): Property<A> => ({
 	get,
 	subscribe,
 	[observableSymbol]: () => newInteropObservable(get, subscribe),
@@ -87,8 +87,35 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	// eslint-disable-next-line no-restricted-syntax
 	const properties: Properties = args.slice(0, args.length - 1) as never
 	const memoProject = memoMany(project)
+
 	const get = () => memoProject(...properties.map((property) => property.get()))
+
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
-	const subscribe = doesNotEmit ? never.subscribe : mergeMany(properties).subscribe
-	return newProperty(get, subscribe)
+	if (doesNotEmit) return newProperty(get, never.subscribe)
+
+	let hasCachedValue = false
+	let cachedValue: Result | undefined
+	const getAndCache = () => {
+		const result = get()
+		hasCachedValue = true
+		cachedValue = result
+		return result
+	}
+
+	const merged = mergeMany(properties)
+	const proxy: Observable<Time> = multicast({
+		subscribe: (observer) =>
+			merged.subscribe({
+				next: (time) => {
+					// getAndCache() overwrites cachedValue and hasCachedValue, we need to store it
+					const currentCachedValue = cachedValue
+					const currentHasCachedValue = hasCachedValue
+					const newValue = getAndCache()
+					if (!currentHasCachedValue || currentCachedValue !== newValue) {
+						observer.next(time)
+					}
+				},
+			}),
+	})
+	return newProperty(getAndCache, proxy.subscribe)
 }
