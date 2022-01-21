@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.13](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.12...v1.0.0-alpha.13) (2022-01-21)
+
+
+### Bug Fixes
+
+* **core:** fix property.combine emission to skip duplicates in result ([#42](https://github.com/raveclassic/frp-ts/issues/42)) ([ff1436e](https://github.com/raveclassic/frp-ts/commit/ff1436ed575033c1c16210687b55525b4e459f9b))
+
+
+### BREAKING CHANGES
+
+* **core:** emitter.mergeMany does not multicast anymore
+
+
+
+
+
 # [1.0.0-alpha.12](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.11...v1.0.0-alpha.12) (2022-01-17)
 
 

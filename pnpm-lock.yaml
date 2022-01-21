@@ -79,8 +79,8 @@ importers:
 
   packages/core:
     specifiers:
-      '@frp-ts/test-utils': ^1.0.0-alpha.12
-      '@frp-ts/utils': ^1.0.0-alpha.12
+      '@frp-ts/test-utils': ^1.0.0-alpha.13
+      '@frp-ts/utils': ^1.0.0-alpha.13
       rimraf: ^3.0.2
       rxjs: ^7.4.0
       tslib: ^2.1.0
@@ -96,8 +96,8 @@ importers:
 
   packages/fp-ts:
     specifiers:
-      '@frp-ts/core': ^1.0.0-alpha.12
-      '@frp-ts/utils': ^1.0.0-alpha.12
+      '@frp-ts/core': ^1.0.0-alpha.13
+      '@frp-ts/utils': ^1.0.0-alpha.13
       fp-ts: ^2.11.5
       rimraf: ^3.0.2
       rxjs: ^7.4.0
@@ -115,7 +115,7 @@ importers:
 
   packages/lens:
     specifiers:
-      '@frp-ts/core': ^1.0.0-alpha.12
+      '@frp-ts/core': ^1.0.0-alpha.13
       tslib: ^2.1.0
     dependencies:
       '@frp-ts/core': link:../core
@@ -124,8 +124,8 @@ importers:
 
   packages/react:
     specifiers:
-      '@frp-ts/core': ^1.0.0-alpha.12
-      '@frp-ts/utils': ^1.0.0-alpha.12
+      '@frp-ts/core': ^1.0.0-alpha.13
+      '@frp-ts/utils': ^1.0.0-alpha.13
       '@testing-library/react': ^12.1.2
       '@types/react': '>=16.0.0'
       '@types/react-dom': '>=16.0.0'

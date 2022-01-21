@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/test-utils",
-  "version": "1.0.0-alpha.12",
+  "version": "1.0.0-alpha.13",
   "description": "Testing utilities for @frp-ts project",
   "typedocMain": "./src/index.ts",
   "author": "raveclassic",
