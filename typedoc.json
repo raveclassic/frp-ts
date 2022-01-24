@@ -3,6 +3,7 @@
   "entryPointStrategy": "Packages",
   "entryPoints": [
     "./packages/core",
+    "./packages/form",
     "./packages/fp-ts",
     "./packages/lens",
     "./packages/test-utils",

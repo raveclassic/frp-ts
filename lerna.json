@@ -2,6 +2,7 @@
   "packages": [
     "./packages/core",
     "./packages/lens",
+    "./packages/form",
     "./packages/fp-ts",
     "./packages/react",
     "./packages/test-utils",

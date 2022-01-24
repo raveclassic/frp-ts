@@ -1,1 +1,6 @@
-export { memo1, memo2, constVoid, memoMany } from './function'
+export { memo1, memo2, constVoid, memoMany, identity } from './function'
+export * as function from './function'
+export { success, failure, Result, ResultError, ResultValue, sequenceS } from './result'
+export * as result from './result'
+export { objectEntries, mapRecord, objectValues } from './object'
+export * as object from './object'

@@ -1,0 +1,31 @@
+{
+  "name": "@frp-ts/form",
+  "version": "1.0.0-alpha.13",
+  "description": "Forms for frp-ts atoms",
+  "typedocMain": "./src/index.ts",
+  "author": "raveclassic",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raveclassic/frp-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/raveclassic/frp-ts/issues"
+  },
+  "homepage": "https://github.com/raveclassic/frp-ts#readme",
+  "scripts": {},
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "tslib": "^2.3.1"
+  },
+  "dependencies": {
+    "@frp-ts/core": "^1.0.0-alpha.13",
+    "@frp-ts/utils": "^1.0.0-alpha.13"
+  },
+  "devDependencies": {
+    "tslib": "^2.3.1"
+  }
+}

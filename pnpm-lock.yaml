@@ -94,6 +94,17 @@ importers:
       tslib: 2.3.1
       typescript: 4.5.4
 
+  packages/form:
+    specifiers:
+      '@frp-ts/core': ^1.0.0-alpha.13
+      '@frp-ts/utils': ^1.0.0-alpha.13
+      tslib: ^2.1.0
+    dependencies:
+      '@frp-ts/core': link:../core
+      '@frp-ts/utils': link:../utils
+    devDependencies:
+      tslib: 2.3.1
+
   packages/fp-ts:
     specifiers:
       '@frp-ts/core': ^1.0.0-alpha.13
