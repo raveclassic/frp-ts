@@ -20,3 +20,16 @@ export const mapRecord = <Target extends Record<string, unknown>, Result>(
 	}
 	return result
 }
+
+export const mapRecordWithKey = <Target extends Record<PropertyKey, unknown>, ResultKey extends PropertyKey, Result>(
+	target: Target,
+	f: (value: Target[keyof Target], key: keyof Target) => readonly [ResultKey, Result],
+) => {
+	// eslint-disable-next-line no-restricted-syntax
+	const result: Record<ResultKey, Result> = {} as never
+	for (const [key, value] of objectEntries(target)) {
+		const [newKey, newValue] = f(value, key)
+		result[newKey] = newValue
+	}
+	return result
+}
