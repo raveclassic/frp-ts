@@ -4,14 +4,13 @@ import { NumberFromString } from 'io-ts-types/lib/NumberFromString'
 import * as Z from 'zod'
 import * as J from 'joi'
 import * as R from 'runtypes'
-import { Schema11, Schema21, Validation1C } from './abstract/schema-f'
+import { Schema11, Schema21, Validation1C } from './types'
 import { either } from 'fp-ts'
 import { makeNewForm } from './form'
 import { ValidationError } from 'joi'
 import { Failure } from 'runtypes/lib/result'
 
 declare module './hkt' {
-	interface URItoKind3<R, E, A> {}
 	interface URItoKind2<E, A> {
 		readonly IOTSSchema: I.Type<A, E>
 	}
@@ -20,14 +19,14 @@ declare module './hkt' {
 		readonly JOISchema: J.Schema<A>
 		readonly RuntypesSchema: R.Runtype<A>
 		readonly IOTSValidation: I.Validation<A>
-		readonly Exception: A
+		readonly Identity: A
 		readonly ZODSafeParseReturnType: Z.SafeParseReturnType<A, A>
 		readonly JOIValidationResult: J.ValidationResult<A>
 		readonly RuntypesResult: R.Result<A>
 	}
 }
 
-const ZODSchema: Schema11<'ZODSchema', 'Exception'> = {
+const ZODSchema: Schema11<'ZODSchema', 'Identity'> = {
 	URI: 'ZODSchema',
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.parse(encoded),
@@ -57,8 +56,8 @@ const RuntypesSchema: Schema11<'RuntypesSchema', 'RuntypesResult'> = {
 	decode: (schema, value) => schema.validate(value),
 }
 
-const Exception: Validation1C<'Exception', never> = {
-	URI: 'Exception',
+const IdentityValidation: Validation1C<'Identity', never> = {
+	URI: 'Identity',
 	success: identity,
 	failure: identity,
 	isSuccess: () => true,
@@ -70,8 +69,10 @@ const ZODSafeParseReturnType: Validation1C<'ZODSafeParseReturnType', Z.ZodError>
 	URI: 'ZODSafeParseReturnType',
 	success: (data) => ({ success: true, data }),
 	failure: (error) => ({ success: false, error }),
+	// eslint-disable-next-line no-restricted-syntax
 	map: (value, f) => (value.success ? { success: true, data: f(value.data) } : (value as never)),
 	isSuccess: (value) => value.success,
+	// eslint-disable-next-line no-restricted-syntax
 	chain: (value, f) => (value.success ? f(value.data) : (value as never)),
 }
 
@@ -501,5 +502,15 @@ describe('form', () => {
 			form.views.bar.set('a')
 			expect(form.get()).toEqual(IOTSValidation.failure([expect.any(Object)]))
 		})
+	})
+})
+
+describe('zod + exception', () => {
+	const newForm = makeNewForm(ZODSchema, IdentityValidation)
+	it('encodes', () => {
+		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
+		expect(form.get()).toEqual({ foo: 'foo' })
+		form.views.foo.set(123)
+		expect(form.get()).toEqual({ foo: '123' })
 	})
 })

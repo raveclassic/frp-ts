@@ -1,110 +1,29 @@
-import { Atom, combine, newAtom, Property } from '@frp-ts/core'
-import { HKT, Kind, URIS, URIS2 } from './hkt'
+import { combine, newAtom, Property } from '@frp-ts/core'
+import { HKT, URIS, URIS2 } from './hkt'
 import {
 	DecodedObjectValue1,
 	DecodedObjectValue2,
 	DecodedObjectValueHKT,
-	DecodedValue1,
-	DecodedValue2,
 	DecodedValueHKT,
-	EncodedValue2,
+	Form11,
+	Form21,
+	FormHKT,
+	FormStateHKT,
+	FormViewHKT,
+	FormViewsHKT,
 	Schema11,
 	Schema21,
 	SchemaHKT,
+	StateItemHKT,
 	UnknownObjectSchema1,
 	UnknownObjectSchema2,
-	UnknownObjectSchemaHKT,
 	Validation1,
 	Validation1C,
 	ValidationHKT,
-} from './abstract/schema-f'
-import { buildState } from './abstract/build-state'
+} from './types'
 import { mapRecord, objectEntries, objectValues } from '@frp-ts/utils'
 
-export interface FormViewHKT<ValidationURI, Value> extends Atom<Value> {
-	readonly decoded: Property<HKT<ValidationURI, Value>>
-	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
-}
-
-export interface FormView11<ValidationURI extends URIS, Value> extends Atom<Value> {
-	readonly decoded: Property<Kind<ValidationURI, Value>>
-	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
-}
-
-export interface FormView21<ValidationURI extends URIS, Decoded, Encoded> extends Atom<Encoded> {
-	readonly decoded: Property<Kind<ValidationURI, Decoded>>
-	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
-}
-
-export type FormViewsHKT<SchemaURI, ValidationURI, Schema extends UnknownObjectSchemaHKT<SchemaURI>> = {
-	readonly [Field in keyof Schema]: FormViewHKT<ValidationURI, DecodedValueHKT<SchemaURI, Schema[Field]>>
-}
-
-export type FormViews11<
-	SchemaURI extends URIS,
-	ValidationURI extends URIS,
-	Schema extends UnknownObjectSchema1<SchemaURI>,
-> = {
-	readonly [Field in keyof Schema]: FormView11<ValidationURI, DecodedValue1<SchemaURI, Schema[Field]>>
-}
-
-export type FormViews21<
-	SchemaURI extends URIS2,
-	ValidationURI extends URIS,
-	Schema extends UnknownObjectSchema2<SchemaURI>,
-> = {
-	readonly [Field in keyof Schema]: FormView21<
-		ValidationURI,
-		DecodedValue2<SchemaURI, Schema[Field]>,
-		EncodedValue2<SchemaURI, Schema[Field]>
-	>
-}
-
-export interface FormHKT<SchemaURI, ValidationURI, Schema extends UnknownObjectSchemaHKT<SchemaURI>>
-	extends Property<HKT<ValidationURI, DecodedObjectValueHKT<SchemaURI, Schema>>> {
-	readonly reset: (value?: DecodedObjectValueHKT<SchemaURI, Schema>) => void
-	readonly commit: () => void
-	readonly views: FormViewsHKT<SchemaURI, ValidationURI, Schema>
-	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
-}
-
-export interface Form11<
-	SchemaURI extends URIS,
-	ValidationURI extends URIS,
-	Schema extends UnknownObjectSchema1<SchemaURI>,
-> extends Property<Kind<ValidationURI, DecodedObjectValue1<SchemaURI, Schema>>> {
-	readonly reset: (value?: DecodedObjectValue1<SchemaURI, Schema>) => void
-	readonly commit: () => void
-	readonly views: FormViews11<SchemaURI, ValidationURI, Schema>
-	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
-}
-
-export interface Form21<
-	SchemaURI extends URIS2,
-	ValidationURI extends URIS,
-	Schema extends UnknownObjectSchema2<SchemaURI>,
-> extends Property<Kind<ValidationURI, DecodedObjectValue2<SchemaURI, Schema>>> {
-	readonly reset: (value?: DecodedObjectValue2<SchemaURI, Schema>) => void
-	readonly commit: () => void
-	readonly views: FormViews21<SchemaURI, ValidationURI, Schema>
-	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
-}
-
-interface StateItemHKT<ValidationURI, Value> {
-	readonly encoded: Value
-	readonly decoded: HKT<ValidationURI, Value>
-	readonly isDirty: boolean
-}
-
-type FormStateHKT<SchemaURI, ValidationURI, Schema extends UnknownObjectSchemaHKT<SchemaURI>> = {
-	readonly [Field in keyof Schema]: StateItemHKT<ValidationURI, DecodedValueHKT<SchemaURI, Schema[Field]>>
-}
+export { FormHKT, Form11, Form21, SchemaHKT, Schema11, Schema21, ValidationHKT, Validation1, Validation1C }
 
 export function makeNewForm<SchemaURI extends URIS2, ValidationURI extends URIS, Failure>(
 	schemaF: Schema21<SchemaURI, ValidationURI>,
@@ -243,4 +162,24 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 			isDecoded,
 		}
 	}
+}
+
+function buildState<SchemaURI, ValidationURI>(
+	schemaF: SchemaHKT<SchemaURI, ValidationURI>,
+	validationF: ValidationHKT<ValidationURI>,
+): (
+	schema: Record<string, HKT<SchemaURI, unknown>>,
+	initial: Record<string, unknown>,
+) => FormStateHKT<SchemaURI, ValidationURI, Record<string, HKT<SchemaURI, unknown>>> {
+	return (schema, initial) =>
+		mapRecord(schema, (field, name) => {
+			const value = initial[name]
+			const encoded = schemaF.encode(field, value)
+			const decoded = validationF.success(value)
+			return {
+				encoded,
+				decoded,
+				isDirty: false,
+			}
+		})
 }

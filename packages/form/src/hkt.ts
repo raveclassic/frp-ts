@@ -12,12 +12,15 @@ export interface HKT3<URI, R, E, A> extends HKT2<URI, E, A> {
 const URI_TO_KIND = Symbol('URI_TO_KIND')
 const URI_TO_KIND2 = Symbol('URI_TO_KIND2')
 const URI_TO_KIND3 = Symbol('URI_TO_KIND3')
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface URItoKind<A> {
 	readonly [URI_TO_KIND]: never
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface URItoKind2<E, A> {
 	readonly [URI_TO_KIND2]: never
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface URItoKind3<R, E, A> {
 	readonly [URI_TO_KIND3]: never
 }
