@@ -56,35 +56,47 @@ export interface Validation1C<ValidationURI extends URIS, Failure> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type UnknownSchemaHKT<SchemaURI> = HKT<SchemaURI, any>
+export type AnySchemaHKT<SchemaURI> = HKT<SchemaURI, any>
+export type UnknownSchemaHKT<SchemaURI> = HKT<SchemaURI, unknown>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type UnknownSchema1<SchemaURI extends URIS> = Kind<SchemaURI, any>
+export type AnySchema1<SchemaURI extends URIS> = Kind<SchemaURI, any>
+export type UnknownSchema1<SchemaURI extends URIS> = Kind<SchemaURI, unknown>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type UnknownSchema2<SchemaURI extends URIS2> = Kind2<SchemaURI, any, any>
+export type AnySchema2<SchemaURI extends URIS2> = Kind2<SchemaURI, any, any>
+export type UnknownSchema2<SchemaURI extends URIS2> = Kind2<SchemaURI, unknown, unknown>
 
+export interface AnyObjectSchemaHKT<SchemaURI> {
+	readonly [field: string]: AnySchemaHKT<SchemaURI>
+}
 export interface UnknownObjectSchemaHKT<SchemaURI> {
 	readonly [field: string]: UnknownSchemaHKT<SchemaURI>
 }
+export interface AnyObjectSchema1<SchemaURI extends URIS> {
+	readonly [field: string]: AnySchema1<SchemaURI>
+}
 export interface UnknownObjectSchema1<SchemaURI extends URIS> {
 	readonly [field: string]: UnknownSchema1<SchemaURI>
+}
+export interface AnyObjectSchema2<SchemaURI extends URIS2> {
+	readonly [field: string]: AnySchema2<SchemaURI>
 }
 export interface UnknownObjectSchema2<SchemaURI extends URIS2> {
 	readonly [field: string]: UnknownSchema2<SchemaURI>
 }
 
-export type DecodedValueHKT<SchemaURI, Schema extends UnknownSchemaHKT<SchemaURI>> = Schema extends HKT<
+export type DecodedValueHKT<SchemaURI, Schema extends AnySchemaHKT<SchemaURI>> = Schema extends HKT<
 	SchemaURI,
 	infer Value
 >
 	? Value
 	: never
-export type DecodedValue1<SchemaURI extends URIS, Schema extends UnknownSchema1<SchemaURI>> = Schema extends Kind<
+export type DecodedValue1<SchemaURI extends URIS, Schema extends AnySchema1<SchemaURI>> = Schema extends Kind<
 	SchemaURI,
 	infer Value
 >
 	? Value
 	: never
-export type DecodedValue2<SchemaURI extends URIS2, Schema extends UnknownSchema2<SchemaURI>> = Schema extends Kind2<
+export type DecodedValue2<SchemaURI extends URIS2, Schema extends AnySchema2<SchemaURI>> = Schema extends Kind2<
 	SchemaURI,
 	// `any` is required for type inference from `Kin2<any, any, any>`
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,19 +106,19 @@ export type DecodedValue2<SchemaURI extends URIS2, Schema extends UnknownSchema2
 	? Decoded
 	: never
 
-export type EncodedValueHKT<SchemaURI, Schema extends UnknownSchemaHKT<SchemaURI>> = Schema extends HKT<
+export type EncodedValueHKT<SchemaURI, Schema extends AnySchemaHKT<SchemaURI>> = Schema extends HKT<
 	SchemaURI,
 	infer Value
 >
 	? Value
 	: never
-export type EncodedValue1<SchemaURI extends URIS, Schema extends UnknownSchema1<SchemaURI>> = Schema extends Kind<
+export type EncodedValue1<SchemaURI extends URIS, Schema extends AnySchema1<SchemaURI>> = Schema extends Kind<
 	SchemaURI,
 	infer Value
 >
 	? Value
 	: never
-export type EncodedValue2<SchemaURI extends URIS2, Schema extends UnknownSchema2<SchemaURI>> = Schema extends Kind2<
+export type EncodedValue2<SchemaURI extends URIS2, Schema extends AnySchema2<SchemaURI>> = Schema extends Kind2<
 	SchemaURI,
 	infer Encoded,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,13 +127,13 @@ export type EncodedValue2<SchemaURI extends URIS2, Schema extends UnknownSchema2
 	? Encoded
 	: never
 
-export type DecodedObjectValueHKT<SchemaURI, Schema extends UnknownObjectSchemaHKT<SchemaURI>> = {
+export type DecodedObjectValueHKT<SchemaURI, Schema extends AnyObjectSchemaHKT<SchemaURI>> = {
 	readonly [Field in keyof Schema]: DecodedValueHKT<SchemaURI, Schema[Field]>
 }
-export type DecodedObjectValue1<SchemaURI extends URIS, Schema extends UnknownObjectSchema1<SchemaURI>> = {
+export type DecodedObjectValue1<SchemaURI extends URIS, Schema extends AnyObjectSchema1<SchemaURI>> = {
 	readonly [Field in keyof Schema]: DecodedValue1<SchemaURI, Schema[Field]>
 }
-export type DecodedObjectValue2<SchemaURI extends URIS2, Schema extends UnknownObjectSchema2<SchemaURI>> = {
+export type DecodedObjectValue2<SchemaURI extends URIS2, Schema extends AnyObjectSchema2<SchemaURI>> = {
 	readonly [Field in keyof Schema]: DecodedValue2<SchemaURI, Schema[Field]>
 }
 
@@ -145,20 +157,20 @@ export interface FormView21<ValidationURI extends URIS, Decoded, Encoded> extend
 	readonly isDecoded: Property<boolean>
 }
 
-export type FormViewsHKT<SchemaURI, ValidationURI, Schema extends UnknownObjectSchemaHKT<SchemaURI>> = {
+export type FormViewsHKT<SchemaURI, ValidationURI, Schema extends AnyObjectSchemaHKT<SchemaURI>> = {
 	readonly [Field in keyof Schema]: FormViewHKT<ValidationURI, DecodedValueHKT<SchemaURI, Schema[Field]>>
 }
 export type FormViews11<
 	SchemaURI extends URIS,
 	ValidationURI extends URIS,
-	Schema extends UnknownObjectSchema1<SchemaURI>,
+	Schema extends AnyObjectSchema1<SchemaURI>,
 > = {
 	readonly [Field in keyof Schema]: FormView11<ValidationURI, DecodedValue1<SchemaURI, Schema[Field]>>
 }
 export type FormViews21<
 	SchemaURI extends URIS2,
 	ValidationURI extends URIS,
-	Schema extends UnknownObjectSchema2<SchemaURI>,
+	Schema extends AnyObjectSchema2<SchemaURI>,
 > = {
 	readonly [Field in keyof Schema]: FormView21<
 		ValidationURI,
@@ -167,7 +179,7 @@ export type FormViews21<
 	>
 }
 
-export interface FormHKT<SchemaURI, ValidationURI, Schema extends UnknownObjectSchemaHKT<SchemaURI>>
+export interface FormHKT<SchemaURI, ValidationURI, Schema extends AnyObjectSchemaHKT<SchemaURI>>
 	extends Property<HKT<ValidationURI, DecodedObjectValueHKT<SchemaURI, Schema>>> {
 	readonly reset: (value?: DecodedObjectValueHKT<SchemaURI, Schema>) => void
 	readonly commit: () => void
@@ -176,11 +188,8 @@ export interface FormHKT<SchemaURI, ValidationURI, Schema extends UnknownObjectS
 	readonly isDecoded: Property<boolean>
 }
 
-export interface Form11<
-	SchemaURI extends URIS,
-	ValidationURI extends URIS,
-	Schema extends UnknownObjectSchema1<SchemaURI>,
-> extends Property<Kind<ValidationURI, DecodedObjectValue1<SchemaURI, Schema>>> {
+export interface Form11<SchemaURI extends URIS, ValidationURI extends URIS, Schema extends AnyObjectSchema1<SchemaURI>>
+	extends Property<Kind<ValidationURI, DecodedObjectValue1<SchemaURI, Schema>>> {
 	readonly reset: (value?: DecodedObjectValue1<SchemaURI, Schema>) => void
 	readonly commit: () => void
 	readonly views: FormViews11<SchemaURI, ValidationURI, Schema>
@@ -188,11 +197,8 @@ export interface Form11<
 	readonly isDecoded: Property<boolean>
 }
 
-export interface Form21<
-	SchemaURI extends URIS2,
-	ValidationURI extends URIS,
-	Schema extends UnknownObjectSchema2<SchemaURI>,
-> extends Property<Kind<ValidationURI, DecodedObjectValue2<SchemaURI, Schema>>> {
+export interface Form21<SchemaURI extends URIS2, ValidationURI extends URIS, Schema extends AnyObjectSchema2<SchemaURI>>
+	extends Property<Kind<ValidationURI, DecodedObjectValue2<SchemaURI, Schema>>> {
 	readonly reset: (value?: DecodedObjectValue2<SchemaURI, Schema>) => void
 	readonly commit: () => void
 	readonly views: FormViews21<SchemaURI, ValidationURI, Schema>
@@ -206,6 +212,6 @@ export interface StateItemHKT<ValidationURI, Value> {
 	readonly isDirty: boolean
 }
 
-export type FormStateHKT<SchemaURI, ValidationURI, Schema extends UnknownObjectSchemaHKT<SchemaURI>> = {
+export type FormStateHKT<SchemaURI, ValidationURI, Schema extends AnyObjectSchemaHKT<SchemaURI>> = {
 	readonly [Field in keyof Schema]: StateItemHKT<ValidationURI, DecodedValueHKT<SchemaURI, Schema[Field]>>
 }

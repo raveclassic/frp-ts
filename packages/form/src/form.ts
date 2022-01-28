@@ -15,11 +15,12 @@ import {
 	Schema21,
 	SchemaHKT,
 	StateItemHKT,
-	UnknownObjectSchema1,
-	UnknownObjectSchema2,
+	AnyObjectSchema1,
+	AnyObjectSchema2,
 	Validation1,
 	Validation1C,
 	ValidationHKT,
+	UnknownObjectSchemaHKT,
 } from './types'
 import { mapRecord, objectEntries, objectValues } from '@frp-ts/utils'
 
@@ -28,28 +29,28 @@ export { FormHKT, Form11, Form21, SchemaHKT, Schema11, Schema21, ValidationHKT, 
 export function makeNewForm<SchemaURI extends URIS2, ValidationURI extends URIS, Failure>(
 	schemaF: Schema21<SchemaURI, ValidationURI>,
 	validationF: Validation1C<ValidationURI, Failure>,
-): <Schema extends UnknownObjectSchema2<SchemaURI>>(
+): <Schema extends AnyObjectSchema2<SchemaURI>>(
 	schema: Schema,
 	initial: DecodedObjectValue2<SchemaURI, Schema>,
 ) => Form21<SchemaURI, ValidationURI, Schema>
 export function makeNewForm<SchemaURI extends URIS2, ValidationURI extends URIS>(
 	schemaF: Schema21<SchemaURI, ValidationURI>,
 	validationF: Validation1<ValidationURI>,
-): <Schema extends UnknownObjectSchema2<SchemaURI>>(
+): <Schema extends AnyObjectSchema2<SchemaURI>>(
 	schema: Schema,
 	initial: DecodedObjectValue2<SchemaURI, Schema>,
 ) => Form21<SchemaURI, ValidationURI, Schema>
 export function makeNewForm<SchemaURI extends URIS, ValidationURI extends URIS, Failure>(
 	schemaF: Schema11<SchemaURI, ValidationURI>,
 	validationF: Validation1C<ValidationURI, Failure>,
-): <Schema extends UnknownObjectSchema1<SchemaURI>>(
+): <Schema extends AnyObjectSchema1<SchemaURI>>(
 	schema: Schema,
 	initial: DecodedObjectValue1<SchemaURI, Schema>,
 ) => Form11<SchemaURI, ValidationURI, Schema>
 export function makeNewForm<SchemaURI extends URIS, ValidationURI extends URIS>(
 	schemaF: Schema11<SchemaURI, ValidationURI>,
 	validationF: Validation1<ValidationURI>,
-): <Schema extends UnknownObjectSchema1<SchemaURI>>(
+): <Schema extends AnyObjectSchema1<SchemaURI>>(
 	schema: Schema,
 	initial: DecodedObjectValue1<SchemaURI, Schema>,
 ) => Form11<SchemaURI, ValidationURI, Schema>
@@ -57,16 +58,16 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 	schemaF: SchemaHKT<SchemaURI, ValidationURI>,
 	validationF: ValidationHKT<ValidationURI>,
 ): (
-	schema: Record<string, HKT<SchemaURI, unknown>>,
+	schema: UnknownObjectSchemaHKT<SchemaURI>,
 	initial: Record<string, unknown>,
-) => FormHKT<SchemaURI, ValidationURI, Record<string, HKT<SchemaURI, unknown>>>
+) => FormHKT<SchemaURI, ValidationURI, UnknownObjectSchemaHKT<SchemaURI>>
 export function makeNewForm<SchemaURI, ValidationURI>(
 	schemaF: SchemaHKT<SchemaURI, ValidationURI>,
 	validationF: ValidationHKT<ValidationURI>,
 ): (
-	schema: Record<string, HKT<SchemaURI, unknown>>,
+	schema: UnknownObjectSchemaHKT<SchemaURI>,
 	initial: Record<string, unknown>,
-) => FormHKT<SchemaURI, ValidationURI, Record<string, HKT<SchemaURI, unknown>>> {
+) => FormHKT<SchemaURI, ValidationURI, UnknownObjectSchemaHKT<SchemaURI>> {
 	const buildStateF = buildState(schemaF, validationF)
 	type Schema = Record<string, HKT<SchemaURI, unknown>>
 	return (schema, initial) => {
@@ -168,9 +169,9 @@ function buildState<SchemaURI, ValidationURI>(
 	schemaF: SchemaHKT<SchemaURI, ValidationURI>,
 	validationF: ValidationHKT<ValidationURI>,
 ): (
-	schema: Record<string, HKT<SchemaURI, unknown>>,
+	schema: UnknownObjectSchemaHKT<SchemaURI>,
 	initial: Record<string, unknown>,
-) => FormStateHKT<SchemaURI, ValidationURI, Record<string, HKT<SchemaURI, unknown>>> {
+) => FormStateHKT<SchemaURI, ValidationURI, UnknownObjectSchemaHKT<SchemaURI>> {
 	return (schema, initial) =>
 		mapRecord(schema, (field, name) => {
 			const value = initial[name]
