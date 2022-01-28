@@ -4,11 +4,9 @@ import { NumberFromString } from 'io-ts-types/lib/NumberFromString'
 import * as Z from 'zod'
 import * as J from 'joi'
 import * as R from 'runtypes'
-import { Schema11, Schema21, Validation1C } from './types'
+import { Schema11, Schema21 } from './types'
 import { either } from 'fp-ts'
 import { makeNewForm } from './form'
-import { ValidationError } from 'joi'
-import { Failure } from 'runtypes/lib/result'
 
 declare module './hkt' {
 	interface URItoKind2<E, A> {
@@ -19,101 +17,87 @@ declare module './hkt' {
 		readonly JOISchema: J.Schema<A>
 		readonly RuntypesSchema: R.Runtype<A>
 		readonly IOTSValidation: I.Validation<A>
-		readonly Identity: A
+		readonly Exception: A
 		readonly ZODSafeParseReturnType: Z.SafeParseReturnType<A, A>
 		readonly JOIValidationResult: J.ValidationResult<A>
 		readonly RuntypesResult: R.Result<A>
 	}
 }
 
-const ZODSchema: Schema11<'ZODSchema', 'Identity'> = {
+const ZODSchema: Schema11<'ZODSchema', 'Exception'> = {
 	URI: 'ZODSchema',
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.parse(encoded),
+	decodingSuccess: identity,
+	isDecoded: () => true,
+	mapDecoded: (value, f) => f(value),
+	chainDecoded: (value, f) => f(value),
 }
 
 const ZODSafeSchema: Schema11<'ZODSchema', 'ZODSafeParseReturnType'> = {
 	URI: 'ZODSchema',
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.safeParse(encoded),
+	decodingSuccess: (data) => ({ success: true, data }),
+	// eslint-disable-next-line no-restricted-syntax
+	mapDecoded: (value, f) => (value.success ? { success: true, data: f(value.data) } : (value as never)),
+	isDecoded: (value) => value.success,
+	// eslint-disable-next-line no-restricted-syntax
+	chainDecoded: (value, f) => (value.success ? f(value.data) : (value as never)),
 }
 
 const IOTSSchema: Schema21<'IOTSSchema', 'IOTSValidation'> = {
 	URI: 'IOTSSchema',
 	encode: (schema, decoded) => schema.encode(decoded),
 	decode: (schema, encoded) => schema.decode(encoded),
+	chainDecoded: either.Monad.chain,
+	mapDecoded: either.Monad.map,
+	decodingSuccess: either.Monad.of,
+	isDecoded: either.isRight,
 }
 
 const JOISchema: Schema11<'JOISchema', 'JOIValidationResult'> = {
 	URI: 'JOISchema',
 	encode: (schema, value) => value,
 	decode: (schema, value) => schema.validate(value),
+	decodingSuccess: (value) => ({ error: undefined, value }),
+	isDecoded: (value) => value.error !== undefined,
+	mapDecoded: <A, B>(value: J.ValidationResult<A>, f: (a: A) => B): J.ValidationResult<B> =>
+		value.error === undefined
+			? {
+					error: undefined,
+					value: f(value.value),
+			  }
+			: value,
+	chainDecoded: (value, f) => (value.error === undefined ? f(value.value) : value),
 }
 
-const RuntypesSchema: Schema11<'RuntypesSchema', 'RuntypesResult'> = {
+const RuntypesSchema: Schema11<'RuntypesSchema', 'Exception'> = {
+	URI: 'RuntypesSchema',
+	encode: (schema, value) => value,
+	decode: (schema, value) => schema.check(value),
+	decodingSuccess: identity,
+	isDecoded: () => true,
+	mapDecoded: (value, f) => f(value),
+	chainDecoded: (value, f) => f(value),
+}
+
+const RuntypesSafeSchema: Schema11<'RuntypesSchema', 'RuntypesResult'> = {
 	URI: 'RuntypesSchema',
 	encode: (schema, value) => value,
 	decode: (schema, value) => schema.validate(value),
-}
-
-const IdentityValidation: Validation1C<'Identity', never> = {
-	URI: 'Identity',
-	success: identity,
-	failure: identity,
-	isSuccess: () => true,
-	map: (value, f) => f(value),
-	chain: (value, f) => f(value),
-}
-
-const ZODSafeParseReturnType: Validation1C<'ZODSafeParseReturnType', Z.ZodError> = {
-	URI: 'ZODSafeParseReturnType',
-	success: (data) => ({ success: true, data }),
-	failure: (error) => ({ success: false, error }),
-	// eslint-disable-next-line no-restricted-syntax
-	map: (value, f) => (value.success ? { success: true, data: f(value.data) } : (value as never)),
-	isSuccess: (value) => value.success,
-	// eslint-disable-next-line no-restricted-syntax
-	chain: (value, f) => (value.success ? f(value.data) : (value as never)),
-}
-
-const IOTSValidation: Validation1C<'IOTSValidation', I.Errors> = {
-	...either.Monad,
-	success: either.Monad.of,
-	failure: either.left,
-	URI: 'IOTSValidation',
-	isSuccess: either.isRight,
-}
-
-const JOIValidationResult: Validation1C<'JOIValidationResult', ValidationError> = {
-	URI: 'JOIValidationResult',
-	success: (value) => ({ error: undefined, value }),
-	failure: (error) => ({ error, value: undefined }),
-	isSuccess: (value) => value.error !== undefined,
-	map: <A, B>(value: J.ValidationResult<A>, f: (a: A) => B): J.ValidationResult<B> =>
-		value.error !== undefined
-			? {
-					error: undefined,
-					value: f(value.value as never),
-			  }
-			: (value as never),
-	chain: (value, f) => (value.error !== undefined ? f(value.value as never) : (value as never)),
-}
-
-const RuntypesResult: Validation1C<'RuntypesResult', Failure> = {
-	URI: 'RuntypesResult',
-	success: (value) => ({ success: true, value }),
-	failure: () => ({ success: false, code: 'VALUE_INCORRECT', message: '' }),
-	isSuccess: (value) => value.success,
-	map: (value, f) => (value.success ? { success: true, value: f(value.value) } : value),
-	chain: (value, f) => (value.success ? f(value.value) : value),
+	decodingSuccess: (value) => ({ success: true, value }),
+	isDecoded: (value) => value.success,
+	mapDecoded: (value, f) => (value.success ? { success: true, value: f(value.value) } : value),
+	chainDecoded: (value, f) => (value.success ? f(value.value) : value),
 }
 
 describe('form', () => {
-	const newForm = makeNewForm(IOTSSchema, IOTSValidation)
+	const newForm = makeNewForm(IOTSSchema)
 	describe('newForm', () => {
 		it('initializes form with initial state', () => {
 			const form = newForm({ foo: NumberFromString }, { foo: 123 })
-			expect(form.get()).toEqual(IOTSValidation.success({ foo: 123 }))
+			expect(form.get()).toEqual(IOTSSchema.decodingSuccess({ foo: 123 }))
 		})
 		it('initializes form with all fields isDirty set to false', () => {
 			const form = newForm({ foo: NumberFromString }, { foo: 123 })
@@ -170,7 +154,7 @@ describe('form', () => {
 						const cb = jest.fn(constVoid)
 						form.views.foo.isDirty.subscribe({ next: cb })
 						form.views.foo.set('456')
-						expect(form.views.foo.decoded.get()).toEqual(IOTSValidation.success(456))
+						expect(form.views.foo.decoded.get()).toEqual(IOTSSchema.decodingSuccess(456))
 						expect(cb).toHaveBeenCalledTimes(1)
 						cb.mockClear()
 						form.views.foo.set('456')
@@ -194,7 +178,7 @@ describe('form', () => {
 						const cb = jest.fn(constVoid)
 						form.views.foo.isDirty.subscribe({ next: cb })
 						form.views.foo.set('456')
-						expect(form.get()).toEqual(IOTSValidation.success({ foo: 456 }))
+						expect(form.get()).toEqual(IOTSSchema.decodingSuccess({ foo: 456 }))
 						expect(cb).toHaveBeenCalledTimes(1)
 						cb.mockClear()
 						form.views.foo.set('456')
@@ -253,7 +237,7 @@ describe('form', () => {
 						const cb = jest.fn(constVoid)
 						form.views.foo.isDirty.subscribe({ next: cb })
 						form.views.foo.set('a')
-						expect(form.views.foo.decoded.get()).toEqual(IOTSValidation.failure([expect.any(Object)]))
+						expect(form.views.foo.decoded.get()).toEqual(I.failures([expect.any(Object)]))
 						expect(cb).toHaveBeenCalledTimes(1)
 						cb.mockClear()
 						form.views.foo.set('a')
@@ -277,7 +261,7 @@ describe('form', () => {
 						const cb = jest.fn(constVoid)
 						form.views.foo.isDirty.subscribe({ next: cb })
 						form.views.foo.set('a')
-						expect(form.get()).toEqual(IOTSValidation.failure([expect.any(Object)]))
+						expect(form.get()).toEqual(I.failures([expect.any(Object)]))
 						expect(cb).toHaveBeenCalledTimes(1)
 						cb.mockClear()
 						form.views.foo.set('a')
@@ -338,7 +322,7 @@ describe('form', () => {
 						const cb = jest.fn(constVoid)
 						form.views.foo.isDirty.subscribe({ next: cb })
 						form.views.foo.modify(() => '456')
-						expect(form.views.foo.decoded.get()).toEqual(IOTSValidation.success(456))
+						expect(form.views.foo.decoded.get()).toEqual(IOTSSchema.decodingSuccess(456))
 						expect(cb).toHaveBeenCalledTimes(1)
 						cb.mockClear()
 						form.views.foo.modify(() => '456')
@@ -362,7 +346,7 @@ describe('form', () => {
 						const cb = jest.fn(constVoid)
 						form.views.foo.isDirty.subscribe({ next: cb })
 						form.views.foo.modify(() => '456')
-						expect(form.get()).toEqual(IOTSValidation.success({ foo: 456 }))
+						expect(form.get()).toEqual(IOTSSchema.decodingSuccess({ foo: 456 }))
 						expect(cb).toHaveBeenCalledTimes(1)
 						cb.mockClear()
 						form.views.foo.modify(() => '456')
@@ -421,7 +405,7 @@ describe('form', () => {
 						const cb = jest.fn(constVoid)
 						form.views.foo.isDirty.subscribe({ next: cb })
 						form.views.foo.modify(() => 'a')
-						expect(form.views.foo.decoded.get()).toEqual(IOTSValidation.failure([expect.any(Object)]))
+						expect(form.views.foo.decoded.get()).toEqual(I.failures([expect.any(Object)]))
 						expect(cb).toHaveBeenCalledTimes(1)
 						cb.mockClear()
 						form.views.foo.modify(() => 'a')
@@ -445,7 +429,7 @@ describe('form', () => {
 						const cb = jest.fn(constVoid)
 						form.views.foo.isDirty.subscribe({ next: cb })
 						form.views.foo.modify(() => 'a')
-						expect(form.get()).toEqual(IOTSValidation.failure([expect.any(Object)]))
+						expect(form.get()).toEqual(I.failures([expect.any(Object)]))
 						expect(cb).toHaveBeenCalledTimes(1)
 						cb.mockClear()
 						form.views.foo.modify(() => 'a')
@@ -488,7 +472,7 @@ describe('form', () => {
 			)
 			form.views.foo.set('123')
 			form.views.bar.set('123')
-			expect(form.get()).toEqual(IOTSValidation.success({ foo: 123, bar: 123 }))
+			expect(form.get()).toEqual(IOTSSchema.decodingSuccess({ foo: 123, bar: 123 }))
 		})
 		it('sequences failed views', () => {
 			const form = newForm(
@@ -500,17 +484,147 @@ describe('form', () => {
 			)
 			form.views.foo.set('a')
 			form.views.bar.set('a')
-			expect(form.get()).toEqual(IOTSValidation.failure([expect.any(Object)]))
+			expect(form.get()).toEqual(I.failures([expect.any(Object)]))
 		})
 	})
 })
 
-describe('zod + exception', () => {
-	const newForm = makeNewForm(ZODSchema, IdentityValidation)
-	it('encodes', () => {
+describe('zod', () => {
+	const newForm = makeNewForm(ZODSchema)
+	it('gets', () => {
 		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
 		expect(form.get()).toEqual({ foo: 'foo' })
+		expect(form.views.foo.get()).toEqual('foo')
+		expect(form.views.foo.decoded.get()).toEqual('foo')
+	})
+	it('sets success', () => {
+		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
+		form.views.foo.set('bar')
+		expect(form.get()).toEqual({ foo: 'bar' })
+		expect(form.views.foo.get()).toEqual('bar')
+		expect(form.views.foo.decoded.get()).toEqual('bar')
+	})
+	it('sets failure', () => {
+		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
+		expect(() => form.views.foo.set(123)).toThrow()
+		expect(form.get()).toEqual({ foo: 'foo' })
+		expect(form.views.foo.get()).toEqual('foo')
+		expect(form.views.foo.decoded.get()).toEqual('foo')
+	})
+})
+
+describe('zod safe', () => {
+	const newForm = makeNewForm(ZODSafeSchema)
+	it('gets', () => {
+		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
+		expect(form.get()).toEqual(ZODSafeSchema.decodingSuccess({ foo: 'foo' }))
+		expect(form.views.foo.get()).toEqual('foo')
+		expect(form.views.foo.decoded.get()).toEqual(ZODSafeSchema.decodingSuccess('foo'))
+	})
+	it('sets success', () => {
+		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
+		form.views.foo.set('bar')
+		expect(form.get()).toEqual(ZODSafeSchema.decodingSuccess({ foo: 'bar' }))
+		expect(form.views.foo.get()).toEqual('bar')
+		expect(form.views.foo.decoded.get()).toEqual(ZODSafeSchema.decodingSuccess('bar'))
+	})
+	it('sets failure', () => {
+		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
 		form.views.foo.set(123)
-		expect(form.get()).toEqual({ foo: '123' })
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		expect(form.get()).toEqual({ success: false, error: expect.any(Object) })
+		expect(form.views.foo.get()).toEqual(123)
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		expect(form.views.foo.decoded.get()).toEqual({ success: false, error: expect.any(Object) })
+	})
+})
+
+describe('runtypes', () => {
+	const newForm = makeNewForm(RuntypesSchema)
+	it('gets', () => {
+		const form = newForm({ foo: R.String }, { foo: 'foo' })
+		expect(form.get()).toEqual({ foo: 'foo' })
+		expect(form.views.foo.get()).toEqual('foo')
+		expect(form.views.foo.decoded.get()).toEqual('foo')
+	})
+	it('sets success', () => {
+		const form = newForm({ foo: R.String }, { foo: 'foo' })
+		form.views.foo.set('bar')
+		expect(form.get()).toEqual({ foo: 'bar' })
+		expect(form.views.foo.get()).toEqual('bar')
+		expect(form.views.foo.decoded.get()).toEqual('bar')
+	})
+	it('sets failure', () => {
+		const form = newForm({ foo: R.String }, { foo: 'foo' })
+		expect(() => form.views.foo.set(123)).toThrow()
+		expect(form.get()).toEqual({ foo: 'foo' })
+		expect(form.views.foo.get()).toEqual('foo')
+		expect(form.views.foo.decoded.get()).toEqual('foo')
+	})
+})
+
+describe('runtypes safe', () => {
+	const newForm = makeNewForm(RuntypesSafeSchema)
+	it('gets', () => {
+		const form = newForm({ foo: R.String }, { foo: 'foo' })
+		expect(form.get()).toEqual(RuntypesSafeSchema.decodingSuccess({ foo: 'foo' }))
+		expect(form.views.foo.get()).toEqual('foo')
+		expect(form.views.foo.decoded.get()).toEqual(RuntypesSafeSchema.decodingSuccess('foo'))
+	})
+	it('sets success', () => {
+		const form = newForm({ foo: R.String }, { foo: 'foo' })
+		form.views.foo.set('bar')
+		expect(form.get()).toEqual(RuntypesSafeSchema.decodingSuccess({ foo: 'bar' }))
+		expect(form.views.foo.get()).toEqual('bar')
+		expect(form.views.foo.decoded.get()).toEqual(RuntypesSafeSchema.decodingSuccess('bar'))
+	})
+	it('sets failure', () => {
+		const form = newForm({ foo: R.String }, { foo: 'foo' })
+		form.views.foo.set(123)
+		expect(form.get()).toEqual({
+			success: false,
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			code: expect.any(String),
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			message: expect.any(String),
+		})
+		expect(form.views.foo.get()).toEqual(123)
+		expect(form.views.foo.decoded.get()).toEqual({
+			success: false,
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			code: expect.any(String),
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			message: expect.any(String),
+		})
+	})
+})
+
+describe('joi', () => {
+	const newForm = makeNewForm(JOISchema)
+	it('gets', () => {
+		const form = newForm({ foo: J.string() }, { foo: 'foo' })
+		expect(form.get()).toEqual(JOISchema.decodingSuccess({ foo: 'foo' }))
+		expect(form.views.foo.get()).toEqual('foo')
+		expect(form.views.foo.decoded.get()).toEqual(JOISchema.decodingSuccess('foo'))
+	})
+	it('sets success', () => {
+		const form = newForm({ foo: J.string() }, { foo: 'foo' })
+		form.views.foo.set('bar')
+		expect(form.get()).toEqual(JOISchema.decodingSuccess({ foo: 'bar' }))
+		expect(form.views.foo.get()).toEqual('bar')
+		expect(form.views.foo.decoded.get()).toEqual(JOISchema.decodingSuccess('bar'))
+	})
+	it('sets failure', () => {
+		const form = newForm({ foo: J.string() }, { foo: 'foo' })
+		form.views.foo.set(123)
+		expect(form.get()).toMatchObject({
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			error: expect.any(Object),
+		})
+		expect(form.views.foo.get()).toEqual(123)
+		expect(form.views.foo.decoded.get()).toMatchObject({
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			error: expect.any(Object),
+		})
 	})
 })

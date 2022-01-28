@@ -5,18 +5,26 @@ export interface SchemaHKT<SchemaURI, ValidationURI> {
 	readonly URI: SchemaURI
 	readonly encode: <Value>(schema: HKT<SchemaURI, Value>, value: Value) => Value
 	readonly decode: <Value>(schema: HKT<SchemaURI, Value>, value: unknown) => HKT<ValidationURI, Value>
+	readonly decodingSuccess: <Value>(value: Value) => HKT<ValidationURI, Value>
+	readonly isDecoded: <Value>(value: HKT<ValidationURI, Value>) => boolean
+	readonly mapDecoded: <A, B>(value: HKT<ValidationURI, A>, f: (a: A) => B) => HKT<ValidationURI, B>
+	readonly chainDecoded: <A, B>(
+		value: HKT<ValidationURI, A>,
+		f: (a: A) => HKT<ValidationURI, B>,
+	) => HKT<ValidationURI, B>
 }
 
 export interface Schema11<SchemaURI extends URIS, ValidationURI extends URIS> {
 	readonly URI: SchemaURI
 	readonly encode: <Value>(schema: Kind<SchemaURI, Value>, value: Value) => Value
 	readonly decode: <Value>(schema: Kind<SchemaURI, Value>, value: unknown) => Kind<ValidationURI, Value>
-}
-
-export interface Schema12<SchemaURI extends URIS, ValidationURI extends URIS2, Failure> {
-	readonly URI: SchemaURI
-	readonly encode: <Value>(schema: Kind<SchemaURI, Value>, value: Value) => Value
-	readonly decode: <Value>(schema: Kind<SchemaURI, Value>, value: unknown) => Kind2<ValidationURI, Failure, Value>
+	readonly decodingSuccess: <Value>(value: Value) => Kind<ValidationURI, Value>
+	readonly isDecoded: <Value>(value: Kind<ValidationURI, Value>) => boolean
+	readonly mapDecoded: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => B) => Kind<ValidationURI, B>
+	readonly chainDecoded: <A, B>(
+		value: Kind<ValidationURI, A>,
+		f: (a: A) => Kind<ValidationURI, B>,
+	) => Kind<ValidationURI, B>
 }
 
 export interface Schema21<SchemaURI extends URIS2, ValidationURI extends URIS> {
@@ -26,33 +34,13 @@ export interface Schema21<SchemaURI extends URIS2, ValidationURI extends URIS> {
 		schema: Kind2<SchemaURI, Encoded, Decoded>,
 		encoded: Encoded,
 	) => Kind<ValidationURI, Decoded>
-}
-
-export interface ValidationHKT<ValidationURI> {
-	readonly URI: ValidationURI
-	readonly success: <Value>(value: Value) => HKT<ValidationURI, Value>
-	readonly failure: <Failure>(error: Failure) => HKT<ValidationURI, Failure>
-	readonly isSuccess: <Value>(value: HKT<ValidationURI, Value>) => boolean
-	readonly map: <A, B>(value: HKT<ValidationURI, A>, f: (a: A) => B) => HKT<ValidationURI, B>
-	readonly chain: <A, B>(value: HKT<ValidationURI, A>, f: (a: A) => HKT<ValidationURI, B>) => HKT<ValidationURI, B>
-}
-
-export interface Validation1<ValidationURI extends URIS> {
-	readonly URI: ValidationURI
-	readonly success: <Value>(value: Value) => Kind<ValidationURI, Value>
-	readonly failure: <Failure>(error: Failure) => Kind<ValidationURI, Failure>
-	readonly isSuccess: <Value>(value: Kind<ValidationURI, Value>) => boolean
-	readonly map: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => B) => Kind<ValidationURI, B>
-	readonly chain: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => Kind<ValidationURI, B>) => Kind<ValidationURI, B>
-}
-
-export interface Validation1C<ValidationURI extends URIS, Failure> {
-	readonly URI: ValidationURI
-	readonly success: <Value>(value: Value) => Kind<ValidationURI, Value>
-	readonly failure: (error: Failure) => Kind<ValidationURI, Failure>
-	readonly isSuccess: <Value>(value: Kind<ValidationURI, Value>) => boolean
-	readonly map: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => B) => Kind<ValidationURI, B>
-	readonly chain: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => Kind<ValidationURI, B>) => Kind<ValidationURI, B>
+	readonly decodingSuccess: <Value>(value: Value) => Kind<ValidationURI, Value>
+	readonly isDecoded: <Value>(value: Kind<ValidationURI, Value>) => boolean
+	readonly mapDecoded: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => B) => Kind<ValidationURI, B>
+	readonly chainDecoded: <A, B>(
+		value: Kind<ValidationURI, A>,
+		f: (a: A) => Kind<ValidationURI, B>,
+	) => Kind<ValidationURI, B>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
