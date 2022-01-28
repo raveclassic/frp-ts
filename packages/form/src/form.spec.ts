@@ -23,7 +23,22 @@ declare module './hkt' {
 		readonly RuntypesResult: R.Result<A>
 		readonly Promise: Promise<A>
 		readonly ZODPromiseSafeParseReturnType: Promise<Z.SafeParseReturnType<A, A>>
+		readonly CustomEitherSchema: CustomEitherSchema<A>
+		readonly CustomEitherSchemaResult: either.Either<Error, A>
 	}
+}
+
+interface CustomEitherSchema<A> {
+	readonly decode: (value: unknown) => either.Either<Error, A>
+}
+
+const CustomEitherSchema: Schema11<'CustomEitherSchema', 'CustomEitherSchemaResult'> = {
+	URI: 'CustomEitherSchema',
+	decode: (schema, value) => schema.decode(value),
+	encode: (schema, value) => value,
+	decodingSuccess: either.right,
+	chainDecoded: either.Monad.chain,
+	mapDecoded: either.Monad.map,
 }
 
 const ZODSchema: Schema11<'ZODSchema', 'Exception'> = {
@@ -40,16 +55,8 @@ const ZODPromiseSchema: Schema11<'ZODSchema', 'Promise'> = {
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.parseAsync(encoded),
 	decodingSuccess: (value) => Promise.resolve(value),
-	mapDecoded: (value, f) => {
-		return value.then((value) => {
-			return f(value)
-		})
-	},
-	chainDecoded: (value, f) => {
-		return value.then((value) => {
-			return f(value)
-		})
-	},
+	mapDecoded: (value, f) => value.then(f),
+	chainDecoded: (value, f) => value.then(f),
 }
 
 const ZODSafeSchema: Schema11<'ZODSchema', 'ZODSafeParseReturnType'> = {
@@ -633,5 +640,35 @@ describe('joi promise', () => {
 		await expect(form.get()).rejects.toMatchObject(expect.any(Object))
 		expect(form.views.foo.get()).toEqual(123)
 		await expect(form.views.foo.decoded.get()).rejects.toMatchObject(expect.any(Object))
+	})
+})
+
+describe('custom either', () => {
+	const newForm = makeNewForm(CustomEitherSchema)
+	const String: CustomEitherSchema<string> = {
+		decode: (value) =>
+			typeof value === 'string' ? either.right(value) : either.left(new Error('Cannot decode value to string')),
+	}
+	it('gets', () => {
+		const form = newForm({ foo: String }, { foo: 'foo' })
+		expect(form.get()).toEqual(CustomEitherSchema.decodingSuccess({ foo: 'foo' }))
+		expect(form.views.foo.get()).toEqual('foo')
+		expect(form.views.foo.decoded.get()).toEqual(CustomEitherSchema.decodingSuccess('foo'))
+	})
+	it('sets success', () => {
+		const form = newForm({ foo: String }, { foo: 'foo' })
+		form.views.foo.set('bar')
+		expect(form.get()).toEqual(CustomEitherSchema.decodingSuccess({ foo: 'bar' }))
+		expect(form.views.foo.get()).toEqual('bar')
+		expect(form.views.foo.decoded.get()).toEqual(CustomEitherSchema.decodingSuccess('bar'))
+	})
+	it('sets failure', () => {
+		const form = newForm({ foo: String }, { foo: 'foo' })
+		form.views.foo.set(123)
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		expect(form.get()).toEqual(either.left(expect.any(Error)))
+		expect(form.views.foo.get()).toEqual(123)
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		expect(form.views.foo.decoded.get()).toEqual(either.left(expect.any(Error)))
 	})
 })
