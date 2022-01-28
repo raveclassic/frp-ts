@@ -21,7 +21,7 @@ import {
 } from './types'
 import { mapRecord, objectEntries, objectValues } from '@frp-ts/utils'
 
-export { FormHKT, Form11, Form21, SchemaHKT }
+export { FormHKT, Form11, Form21, SchemaHKT, Schema11, Schema21 }
 
 export function makeNewForm<SchemaURI extends URIS2, ValidationURI extends URIS>(
 	schemaF: Schema21<SchemaURI, ValidationURI>,

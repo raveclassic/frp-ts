@@ -24,9 +24,9 @@ export interface URItoKind2<E, A> {
 export interface URItoKind3<R, E, A> {
 	readonly [URI_TO_KIND3]: never
 }
-export type URIS = keyof URItoKind<any>
-export type URIS2 = keyof URItoKind2<any, any>
-export type URIS3 = keyof URItoKind3<any, any, any>
-export type Kind<URI extends URIS, A> = URI extends URIS ? URItoKind<A>[URI] : any
-export type Kind2<URI extends URIS2, E, A> = URI extends URIS2 ? URItoKind2<E, A>[URI] : any
-export type Kind3<URI extends URIS3, R, E, A> = URI extends URIS3 ? URItoKind3<R, E, A>[URI] : any
+export type URIS = keyof URItoKind<never>
+export type URIS2 = keyof URItoKind2<never, never>
+export type URIS3 = keyof URItoKind3<never, never, never>
+export type Kind<URI extends URIS, A> = URI extends URIS ? URItoKind<A>[URI] : never
+export type Kind2<URI extends URIS2, E, A> = URI extends URIS2 ? URItoKind2<E, A>[URI] : never
+export type Kind3<URI extends URIS3, R, E, A> = URI extends URIS3 ? URItoKind3<R, E, A>[URI] : never

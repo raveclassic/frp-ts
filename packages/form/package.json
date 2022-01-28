@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/raveclassic/frp-ts#readme",
   "scripts": {},
-  "private": false,
+  "private": true,
   "publishConfig": {
     "access": "public"
   },
