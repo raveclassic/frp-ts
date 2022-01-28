@@ -61,14 +61,6 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 					isDirty: false,
 				})),
 			)
-		const isDecoded: Property<boolean> = combine(state, (state) => {
-			for (const item of objectValues(state)) {
-				if (!schemaF.isDecoded(item.decoded)) {
-					return false
-				}
-			}
-			return true
-		})
 		const isDirty: Property<boolean> = combine(state, (state) => {
 			for (const item of objectValues(state)) {
 				if (item.isDirty) {
@@ -95,7 +87,6 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 				}
 				const decoded: Property<HKT<ValidationURI, unknown>> = combine(item, (item) => item.decoded)
 				const isDirty: Property<boolean> = combine(item, (item) => item.isDirty)
-				const isDecoded: Property<boolean> = combine(item, (item) => schemaF.isDecoded(item.decoded))
 				return {
 					...fieldValue,
 					set: lensedSet,
@@ -107,7 +98,6 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 						lensedSet(value)
 					},
 					isDirty,
-					isDecoded,
 					decoded,
 				}
 			},
@@ -123,8 +113,8 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 					}
 				> = schemaF.decodingSuccess({})
 				for (const [name, decoded] of objectEntries(mapped)) {
-					result = schemaF.chainDecoded(decoded, (decoded) =>
-						schemaF.mapDecoded(result, (result) => {
+					result = schemaF.chainDecoded(result, (result) =>
+						schemaF.mapDecoded(decoded, (decoded) => {
 							result[name] = decoded
 							return result
 						}),
@@ -139,7 +129,6 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 			commit,
 			views,
 			isDirty,
-			isDecoded,
 		}
 	}
 }

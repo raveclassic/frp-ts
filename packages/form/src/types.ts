@@ -6,7 +6,6 @@ export interface SchemaHKT<SchemaURI, ValidationURI> {
 	readonly encode: <Value>(schema: HKT<SchemaURI, Value>, value: Value) => Value
 	readonly decode: <Value>(schema: HKT<SchemaURI, Value>, value: unknown) => HKT<ValidationURI, Value>
 	readonly decodingSuccess: <Value>(value: Value) => HKT<ValidationURI, Value>
-	readonly isDecoded: <Value>(value: HKT<ValidationURI, Value>) => boolean
 	readonly mapDecoded: <A, B>(value: HKT<ValidationURI, A>, f: (a: A) => B) => HKT<ValidationURI, B>
 	readonly chainDecoded: <A, B>(
 		value: HKT<ValidationURI, A>,
@@ -19,7 +18,6 @@ export interface Schema11<SchemaURI extends URIS, ValidationURI extends URIS> {
 	readonly encode: <Value>(schema: Kind<SchemaURI, Value>, value: Value) => Value
 	readonly decode: <Value>(schema: Kind<SchemaURI, Value>, value: unknown) => Kind<ValidationURI, Value>
 	readonly decodingSuccess: <Value>(value: Value) => Kind<ValidationURI, Value>
-	readonly isDecoded: <Value>(value: Kind<ValidationURI, Value>) => boolean
 	readonly mapDecoded: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => B) => Kind<ValidationURI, B>
 	readonly chainDecoded: <A, B>(
 		value: Kind<ValidationURI, A>,
@@ -35,7 +33,6 @@ export interface Schema21<SchemaURI extends URIS2, ValidationURI extends URIS> {
 		encoded: Encoded,
 	) => Kind<ValidationURI, Decoded>
 	readonly decodingSuccess: <Value>(value: Value) => Kind<ValidationURI, Value>
-	readonly isDecoded: <Value>(value: Kind<ValidationURI, Value>) => boolean
 	readonly mapDecoded: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => B) => Kind<ValidationURI, B>
 	readonly chainDecoded: <A, B>(
 		value: Kind<ValidationURI, A>,
@@ -130,19 +127,16 @@ export interface FormViewBase<Value> extends Property<Value>, Pick<Atom<unknown>
 export interface FormViewHKT<ValidationURI, Value> extends FormViewBase<Value> {
 	readonly decoded: Property<HKT<ValidationURI, Value>>
 	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
 }
 
 export interface FormView11<ValidationURI extends URIS, Value> extends FormViewBase<Value> {
 	readonly decoded: Property<Kind<ValidationURI, Value>>
 	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
 }
 
 export interface FormView21<ValidationURI extends URIS, Decoded, Encoded> extends FormViewBase<Encoded> {
 	readonly decoded: Property<Kind<ValidationURI, Decoded>>
 	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
 }
 
 export type FormViewsHKT<SchemaURI, ValidationURI, Schema extends AnyObjectSchemaHKT<SchemaURI>> = {
@@ -173,7 +167,6 @@ export interface FormHKT<SchemaURI, ValidationURI, Schema extends AnyObjectSchem
 	readonly commit: () => void
 	readonly views: FormViewsHKT<SchemaURI, ValidationURI, Schema>
 	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
 }
 
 export interface Form11<SchemaURI extends URIS, ValidationURI extends URIS, Schema extends AnyObjectSchema1<SchemaURI>>
@@ -182,7 +175,6 @@ export interface Form11<SchemaURI extends URIS, ValidationURI extends URIS, Sche
 	readonly commit: () => void
 	readonly views: FormViews11<SchemaURI, ValidationURI, Schema>
 	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
 }
 
 export interface Form21<SchemaURI extends URIS2, ValidationURI extends URIS, Schema extends AnyObjectSchema2<SchemaURI>>
@@ -191,7 +183,6 @@ export interface Form21<SchemaURI extends URIS2, ValidationURI extends URIS, Sch
 	readonly commit: () => void
 	readonly views: FormViews21<SchemaURI, ValidationURI, Schema>
 	readonly isDirty: Property<boolean>
-	readonly isDecoded: Property<boolean>
 }
 
 export interface StateItemHKT<ValidationURI, Value> {
