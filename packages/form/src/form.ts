@@ -19,7 +19,7 @@ import {
 	Schema11,
 	Schema21,
 } from './types'
-import { mapRecord, objectEntries, objectValues } from '@frp-ts/utils'
+import { mapRecord, objectValues } from '@frp-ts/utils'
 
 export { FormHKT, Form11, Form21, SchemaHKT, Schema11, Schema21 }
 
@@ -105,20 +105,22 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 		const value: Property<HKT<ValidationURI, DecodedObjectValueHKT<SchemaURI, Schema>>> = combine(
 			state,
 			(state) => {
-				const mapped = mapRecord(state, (item) => item.decoded)
-				let result: HKT<
-					ValidationURI,
-					{
-						[Field in keyof Schema]: DecodedValueHKT<SchemaURI, Schema[Field]>
+				type Result = {
+					[Field in keyof Schema]: DecodedValueHKT<SchemaURI, Schema[Field]>
+				}
+				let result: HKT<ValidationURI, Result> = schemaF.decodingSuccess({})
+				const run =
+					(name: string | number) =>
+					(decoded: unknown) =>
+					(result: Result): Result => {
+						result[name] = decoded
+						return result
 					}
-				> = schemaF.decodingSuccess({})
-				for (const [name, decoded] of objectEntries(mapped)) {
-					result = schemaF.chainDecoded(result, (result) =>
-						schemaF.mapDecoded(decoded, (decoded) => {
-							result[name] = decoded
-							return result
-						}),
-					)
+				for (const name in state) {
+					result = schemaF.combineDecoded(result, state[name].decoded, (result, decoded) => {
+						result[name] = decoded
+						return result
+					})
 				}
 				return result
 			},

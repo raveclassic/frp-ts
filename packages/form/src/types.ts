@@ -6,11 +6,11 @@ export interface SchemaHKT<SchemaURI, ValidationURI> {
 	readonly encode: <Value>(schema: HKT<SchemaURI, Value>, value: Value) => Value
 	readonly decode: <Value>(schema: HKT<SchemaURI, Value>, value: unknown) => HKT<ValidationURI, Value>
 	readonly decodingSuccess: <Value>(value: Value) => HKT<ValidationURI, Value>
-	readonly mapDecoded: <A, B>(value: HKT<ValidationURI, A>, f: (a: A) => B) => HKT<ValidationURI, B>
-	readonly chainDecoded: <A, B>(
-		value: HKT<ValidationURI, A>,
-		f: (a: A) => HKT<ValidationURI, B>,
-	) => HKT<ValidationURI, B>
+	readonly combineDecoded: <A, B, C>(
+		a: HKT<ValidationURI, A>,
+		b: HKT<ValidationURI, B>,
+		f: (a: A, b: B) => C,
+	) => HKT<ValidationURI, C>
 }
 
 export interface Schema11<SchemaURI extends URIS, ValidationURI extends URIS> {
@@ -18,11 +18,11 @@ export interface Schema11<SchemaURI extends URIS, ValidationURI extends URIS> {
 	readonly encode: <Value>(schema: Kind<SchemaURI, Value>, value: Value) => Value
 	readonly decode: <Value>(schema: Kind<SchemaURI, Value>, value: unknown) => Kind<ValidationURI, Value>
 	readonly decodingSuccess: <Value>(value: Value) => Kind<ValidationURI, Value>
-	readonly mapDecoded: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => B) => Kind<ValidationURI, B>
-	readonly chainDecoded: <A, B>(
-		value: Kind<ValidationURI, A>,
-		f: (a: A) => Kind<ValidationURI, B>,
-	) => Kind<ValidationURI, B>
+	readonly combineDecoded: <A, B, C>(
+		a: Kind<ValidationURI, A>,
+		b: Kind<ValidationURI, B>,
+		f: (a: A, b: B) => C,
+	) => Kind<ValidationURI, C>
 }
 
 export interface Schema21<SchemaURI extends URIS2, ValidationURI extends URIS> {
@@ -33,11 +33,11 @@ export interface Schema21<SchemaURI extends URIS2, ValidationURI extends URIS> {
 		encoded: Encoded,
 	) => Kind<ValidationURI, Decoded>
 	readonly decodingSuccess: <Value>(value: Value) => Kind<ValidationURI, Value>
-	readonly mapDecoded: <A, B>(value: Kind<ValidationURI, A>, f: (a: A) => B) => Kind<ValidationURI, B>
-	readonly chainDecoded: <A, B>(
-		value: Kind<ValidationURI, A>,
-		f: (a: A) => Kind<ValidationURI, B>,
-	) => Kind<ValidationURI, B>
+	readonly combineDecoded: <A, B, C>(
+		a: Kind<ValidationURI, A>,
+		b: Kind<ValidationURI, B>,
+		f: (a: A, b: B) => C,
+	) => Kind<ValidationURI, C>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

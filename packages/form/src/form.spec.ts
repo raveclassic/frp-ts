@@ -37,8 +37,7 @@ const CustomEitherSchema: Schema11<'CustomEitherSchema', 'CustomEitherSchemaResu
 	decode: (schema, value) => schema.decode(value),
 	encode: (schema, value) => value,
 	decodingSuccess: either.right,
-	chainDecoded: either.Monad.chain,
-	mapDecoded: either.Monad.map,
+	combineDecoded: (a, b, f) => (either.isRight(a) ? (either.isRight(b) ? either.right(f(a.right, b.right)) : b) : a),
 }
 
 const ZODSchema: Schema11<'ZODSchema', 'Exception'> = {
@@ -46,8 +45,7 @@ const ZODSchema: Schema11<'ZODSchema', 'Exception'> = {
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.parse(encoded),
 	decodingSuccess: identity,
-	mapDecoded: (value, f) => f(value),
-	chainDecoded: (value, f) => f(value),
+	combineDecoded: (a, b, f) => f(a, b),
 }
 
 const ZODPromiseSchema: Schema11<'ZODSchema', 'Promise'> = {
@@ -55,8 +53,7 @@ const ZODPromiseSchema: Schema11<'ZODSchema', 'Promise'> = {
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.parseAsync(encoded),
 	decodingSuccess: (value) => Promise.resolve(value),
-	mapDecoded: (value, f) => value.then(f),
-	chainDecoded: (value, f) => value.then(f),
+	combineDecoded: (a, b, f) => Promise.all([a, b]).then(([a, b]) => f(a, b)),
 }
 
 const ZODSafeSchema: Schema11<'ZODSchema', 'ZODSafeParseReturnType'> = {
@@ -64,10 +61,15 @@ const ZODSafeSchema: Schema11<'ZODSchema', 'ZODSafeParseReturnType'> = {
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.safeParse(encoded),
 	decodingSuccess: (data) => ({ success: true, data }),
-	// eslint-disable-next-line no-restricted-syntax
-	mapDecoded: (value, f) => (value.success ? { success: true, data: f(value.data) } : (value as never)),
-	// eslint-disable-next-line no-restricted-syntax
-	chainDecoded: (value, f) => (value.success ? f(value.data) : (value as never)),
+	combineDecoded: (a, b, f) =>
+		a.success
+			? b.success
+				? {
+						success: true,
+						data: f(a.data, b.data),
+				  }
+				: (b as never)
+			: (a as never),
 }
 
 const ZODPromiseSafeSchema: Schema11<'ZODSchema', 'ZODPromiseSafeParseReturnType'> = {
@@ -75,19 +77,21 @@ const ZODPromiseSafeSchema: Schema11<'ZODSchema', 'ZODPromiseSafeParseReturnType
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.safeParseAsync(encoded),
 	decodingSuccess: (data) => Promise.resolve({ success: true, data }),
-	mapDecoded: (value, f) =>
-		// eslint-disable-next-line no-restricted-syntax
-		value.then((value) => (value.success ? { success: true, data: f(value.data) } : (value as never))),
-	// eslint-disable-next-line no-restricted-syntax
-	chainDecoded: (value, f) => value.then((value) => (value.success ? f(value.data) : (value as never))),
+	combineDecoded: (a, b, f) => Promise.all([a, b]).then(([a, b]) => ZODSafeSchema.combineDecoded(a, b, f)),
 }
 const IOTSSchema: Schema21<'IOTSSchema', 'IOTSValidation'> = {
 	URI: 'IOTSSchema',
 	encode: (schema, decoded) => schema.encode(decoded),
 	decode: (schema, encoded) => schema.decode(encoded),
-	chainDecoded: either.Monad.chain,
-	mapDecoded: either.Monad.map,
-	decodingSuccess: either.Monad.of,
+	decodingSuccess: I.success,
+	combineDecoded: (a, b, f) =>
+		either.isRight(a)
+			? either.isRight(b)
+				? either.right(f(a.right, b.right))
+				: b
+			: either.isRight(b)
+			? a
+			: I.failures(a.left.concat(...b.left)),
 }
 
 const JOISchema: Schema11<'JOISchema', 'JOIValidationResult'> = {
@@ -95,8 +99,8 @@ const JOISchema: Schema11<'JOISchema', 'JOIValidationResult'> = {
 	encode: (schema, value) => value,
 	decode: (schema, value) => schema.validate(value),
 	decodingSuccess: (value) => ({ error: undefined, value }),
-	mapDecoded: (value, f) => (value.error === undefined ? { error: undefined, value: f(value.value) } : value),
-	chainDecoded: (value, f) => (value.error === undefined ? f(value.value) : value),
+	combineDecoded: (a, b, f) =>
+		a.error === undefined ? (b.error === undefined ? { error: undefined, value: f(a.value, b.value) } : b) : a,
 }
 
 const JOIPromiseSchema: Schema11<'JOISchema', 'Promise'> = {
@@ -104,8 +108,7 @@ const JOIPromiseSchema: Schema11<'JOISchema', 'Promise'> = {
 	encode: (schema, value) => value,
 	decode: (schema, value) => schema.validateAsync(value),
 	decodingSuccess: (value) => Promise.resolve(value),
-	mapDecoded: (value, f) => value.then(f),
-	chainDecoded: (value, f) => value.then(f),
+	combineDecoded: (a, b, f) => Promise.all([a, b]).then(([a, b]) => f(a, b)),
 }
 
 const RuntypesSchema: Schema11<'RuntypesSchema', 'Exception'> = {
@@ -113,8 +116,7 @@ const RuntypesSchema: Schema11<'RuntypesSchema', 'Exception'> = {
 	encode: (schema, value) => value,
 	decode: (schema, value) => schema.check(value),
 	decodingSuccess: identity,
-	mapDecoded: (value, f) => f(value),
-	chainDecoded: (value, f) => f(value),
+	combineDecoded: (a, b, f) => f(a, b),
 }
 
 const RuntypesSafeSchema: Schema11<'RuntypesSchema', 'RuntypesResult'> = {
@@ -122,8 +124,7 @@ const RuntypesSafeSchema: Schema11<'RuntypesSchema', 'RuntypesResult'> = {
 	encode: (schema, value) => value,
 	decode: (schema, value) => schema.validate(value),
 	decodingSuccess: (value) => ({ success: true, value }),
-	mapDecoded: (value, f) => (value.success ? { success: true, value: f(value.value) } : value),
-	chainDecoded: (value, f) => (value.success ? f(value.value) : value),
+	combineDecoded: (a, b, f) => (a.success ? (b.success ? { success: true, value: f(a.value, b.value) } : b) : a),
 }
 
 describe('form', () => {
@@ -424,7 +425,8 @@ describe('form', () => {
 			)
 			form.views.foo.set('a')
 			form.views.bar.set('a')
-			expect(form.get()).toEqual(I.failures([expect.any(Object)]))
+			// Validation collects errors in an array on the left
+			expect(form.get()).toEqual(I.failures([expect.any(Object), expect.any(Object)]))
 		})
 	})
 })
