@@ -61,15 +61,20 @@ const ZODSafeSchema: Schema11<'ZODSchema', 'ZODSafeParseReturnType'> = {
 	encode: (schema, decoded) => decoded,
 	decode: (schema, encoded) => schema.safeParse(encoded),
 	decodingSuccess: (data) => ({ success: true, data }),
-	combineDecoded: (a, b, f) =>
-		a.success
-			? b.success
+	combineDecoded: (a, b, f) => {
+		if (a.success) {
+			return b.success
 				? {
 						success: true,
 						data: f(a.data, b.data),
 				  }
-				: (b as never)
-			: (a as never),
+				: // eslint-disable-next-line no-restricted-syntax
+				  (b as never)
+		} else {
+			// eslint-disable-next-line no-restricted-syntax
+			return a as never
+		}
+	},
 }
 
 const ZODPromiseSafeSchema: Schema11<'ZODSchema', 'ZODPromiseSafeParseReturnType'> = {
@@ -84,14 +89,13 @@ const IOTSSchema: Schema21<'IOTSSchema', 'IOTSValidation'> = {
 	encode: (schema, decoded) => schema.encode(decoded),
 	decode: (schema, encoded) => schema.decode(encoded),
 	decodingSuccess: I.success,
-	combineDecoded: (a, b, f) =>
-		either.isRight(a)
-			? either.isRight(b)
-				? either.right(f(a.right, b.right))
-				: b
-			: either.isRight(b)
-			? a
-			: I.failures(a.left.concat(...b.left)),
+	combineDecoded: (a, b, f) => {
+		if (either.isRight(a)) {
+			return either.isRight(b) ? either.right(f(a.right, b.right)) : b
+		} else {
+			return either.isRight(b) ? a : I.failures(a.left.concat(...b.left))
+		}
+	},
 }
 
 const JOISchema: Schema11<'JOISchema', 'JOIValidationResult'> = {
@@ -447,8 +451,8 @@ describe('zod', () => {
 		expect(form.views.foo.decoded.get()).toEqual('bar')
 	})
 	it('sets failure', () => {
-		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
-		expect(() => form.views.foo.set(123)).toThrow()
+		const form = newForm({ foo: Z.string().refine((s) => s === 'foo') }, { foo: 'foo' })
+		expect(() => form.views.foo.set('bar')).toThrow()
 		expect(form.get()).toEqual({ foo: 'foo' })
 		expect(form.views.foo.get()).toEqual('foo')
 		expect(form.views.foo.decoded.get()).toEqual('foo')
@@ -471,10 +475,10 @@ describe('zod promise', () => {
 		expect(await form.views.foo.decoded.get()).toEqual('bar')
 	})
 	it('sets failure', async () => {
-		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
-		form.views.foo.set(123)
+		const form = newForm({ foo: Z.string().refine((s) => s === 'foo') }, { foo: 'foo' })
+		form.views.foo.set('bar')
 		await expect(form.get()).rejects.toBeTruthy()
-		expect(form.views.foo.get()).toEqual(123)
+		expect(form.views.foo.get()).toEqual('bar')
 		await expect(form.views.foo.decoded.get()).rejects.toBeTruthy()
 	})
 })
@@ -495,11 +499,11 @@ describe('zod safe', () => {
 		expect(form.views.foo.decoded.get()).toEqual(ZODSafeSchema.decodingSuccess('bar'))
 	})
 	it('sets failure', () => {
-		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
-		form.views.foo.set(123)
+		const form = newForm({ foo: Z.string().refine((s) => s === 'foo') }, { foo: 'foo' })
+		form.views.foo.set('bar')
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		expect(form.get()).toEqual({ success: false, error: expect.any(Object) })
-		expect(form.views.foo.get()).toEqual(123)
+		expect(form.views.foo.get()).toEqual('bar')
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		expect(form.views.foo.decoded.get()).toEqual({ success: false, error: expect.any(Object) })
 	})
@@ -521,11 +525,11 @@ describe('zod safe promise', () => {
 		expect(await form.views.foo.decoded.get()).toEqual(await ZODPromiseSafeSchema.decodingSuccess('bar'))
 	})
 	it('sets failure', async () => {
-		const form = newForm({ foo: Z.string() }, { foo: 'foo' })
-		form.views.foo.set(123)
+		const form = newForm({ foo: Z.string().refine((s) => s === 'foo') }, { foo: 'foo' })
+		form.views.foo.set('bar')
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		expect(await form.get()).toEqual({ success: false, error: expect.any(Object) })
-		expect(form.views.foo.get()).toEqual(123)
+		expect(form.views.foo.get()).toEqual('bar')
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		expect(await form.views.foo.decoded.get()).toEqual({ success: false, error: expect.any(Object) })
 	})
@@ -547,8 +551,9 @@ describe('runtypes', () => {
 		expect(form.views.foo.decoded.get()).toEqual('bar')
 	})
 	it('sets failure', () => {
-		const form = newForm({ foo: R.String }, { foo: 'foo' })
-		expect(() => form.views.foo.set(123)).toThrow()
+		// TODO support R.Constraint
+		const form = newForm({ foo: R.String.withConstraint<string>((s) => s === 'foo') }, { foo: 'foo' })
+		expect(() => form.views.foo.set('bar')).toThrow()
 		expect(form.get()).toEqual({ foo: 'foo' })
 		expect(form.views.foo.get()).toEqual('foo')
 		expect(form.views.foo.decoded.get()).toEqual('foo')
@@ -571,8 +576,8 @@ describe('runtypes safe', () => {
 		expect(form.views.foo.decoded.get()).toEqual(RuntypesSafeSchema.decodingSuccess('bar'))
 	})
 	it('sets failure', () => {
-		const form = newForm({ foo: R.String }, { foo: 'foo' })
-		form.views.foo.set(123)
+		const form = newForm({ foo: R.String.withConstraint<string>((s) => s === 'foo') }, { foo: 'foo' })
+		form.views.foo.set('bar')
 		expect(form.get()).toEqual({
 			success: false,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -580,7 +585,7 @@ describe('runtypes safe', () => {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			message: expect.any(String),
 		})
-		expect(form.views.foo.get()).toEqual(123)
+		expect(form.views.foo.get()).toEqual('bar')
 		expect(form.views.foo.decoded.get()).toEqual({
 			success: false,
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -651,6 +656,9 @@ describe('custom either', () => {
 		decode: (value) =>
 			typeof value === 'string' ? either.right(value) : either.left(new Error('Cannot decode value to string')),
 	}
+	const literal = <T>(value: T): CustomEitherSchema<T> => ({
+		decode: (v) => (v === value ? either.right(value) : either.left(new Error('Cannot decode value to literal'))),
+	})
 	it('gets', () => {
 		const form = newForm({ foo: String }, { foo: 'foo' })
 		expect(form.get()).toEqual(CustomEitherSchema.decodingSuccess({ foo: 'foo' }))
@@ -665,11 +673,11 @@ describe('custom either', () => {
 		expect(form.views.foo.decoded.get()).toEqual(CustomEitherSchema.decodingSuccess('bar'))
 	})
 	it('sets failure', () => {
-		const form = newForm({ foo: String }, { foo: 'foo' })
-		form.views.foo.set(123)
+		const form = newForm({ foo: literal('foo') }, { foo: 'foo' })
+		form.views.foo.set('123')
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		expect(form.get()).toEqual(either.left(expect.any(Error)))
-		expect(form.views.foo.get()).toEqual(123)
+		expect(form.views.foo.get()).toEqual('123')
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		expect(form.views.foo.decoded.get()).toEqual(either.left(expect.any(Error)))
 	})

@@ -109,13 +109,6 @@ export function makeNewForm<SchemaURI, ValidationURI>(
 					[Field in keyof Schema]: DecodedValueHKT<SchemaURI, Schema[Field]>
 				}
 				let result: HKT<ValidationURI, Result> = schemaF.decodingSuccess({})
-				const run =
-					(name: string | number) =>
-					(decoded: unknown) =>
-					(result: Result): Result => {
-						result[name] = decoded
-						return result
-					}
 				for (const name in state) {
 					result = schemaF.combineDecoded(result, state[name].decoded, (result, decoded) => {
 						result[name] = decoded

@@ -4,7 +4,7 @@ import { Atom, Property } from '@frp-ts/core'
 export interface SchemaHKT<SchemaURI, ValidationURI> {
 	readonly URI: SchemaURI
 	readonly encode: <Value>(schema: HKT<SchemaURI, Value>, value: Value) => Value
-	readonly decode: <Value>(schema: HKT<SchemaURI, Value>, value: unknown) => HKT<ValidationURI, Value>
+	readonly decode: <Value>(schema: HKT<SchemaURI, Value>, value: Value) => HKT<ValidationURI, Value>
 	readonly decodingSuccess: <Value>(value: Value) => HKT<ValidationURI, Value>
 	readonly combineDecoded: <A, B, C>(
 		a: HKT<ValidationURI, A>,
@@ -16,7 +16,7 @@ export interface SchemaHKT<SchemaURI, ValidationURI> {
 export interface Schema11<SchemaURI extends URIS, ValidationURI extends URIS> {
 	readonly URI: SchemaURI
 	readonly encode: <Value>(schema: Kind<SchemaURI, Value>, value: Value) => Value
-	readonly decode: <Value>(schema: Kind<SchemaURI, Value>, value: unknown) => Kind<ValidationURI, Value>
+	readonly decode: <Value>(schema: Kind<SchemaURI, Value>, value: Value) => Kind<ValidationURI, Value>
 	readonly decodingSuccess: <Value>(value: Value) => Kind<ValidationURI, Value>
 	readonly combineDecoded: <A, B, C>(
 		a: Kind<ValidationURI, A>,
@@ -122,7 +122,7 @@ export type DecodedObjectValue2<SchemaURI extends URIS2, Schema extends AnyObjec
 	readonly [Field in keyof Schema]: DecodedValue2<SchemaURI, Schema[Field]>
 }
 
-export interface FormViewBase<Value> extends Property<Value>, Pick<Atom<unknown>, 'set' | 'modify'> {}
+export interface FormViewBase<Value> extends Property<Value>, Pick<Atom<Value>, 'set' | 'modify'> {}
 
 export interface FormViewHKT<ValidationURI, Value> extends FormViewBase<Value> {
 	readonly decoded: Property<HKT<ValidationURI, Value>>
