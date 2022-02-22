@@ -2,7 +2,7 @@ import { never, Observable, Observer, Subscription, subscriptionNone } from './o
 import { mergeMany, multicast, newEmitter } from './emitter'
 import { newAtom } from './atom'
 import { Time } from './clock'
-import { memo0, memo1, memo2, memo3, memo4, memo5, memoMany } from '@frp-ts/utils'
+import { memo0, memo1, memo2, memo3, memo4, memo5, memoMany, identity } from '@frp-ts/utils'
 import { InteropObservableHolder, newInteropObservable, observableSymbol } from './interop-observable'
 
 export interface Property<A> extends Observable<Time>, InteropObservableHolder<A> {
@@ -163,4 +163,32 @@ const memoizeProjectionFunction = <Result>(
 		// eslint-disable-next-line prefer-spread
 		return memoF.apply(undefined, values)
 	}
+}
+
+export function go<Result>(execution: (at: <Value>(input: Property<Value>) => Value) => Result): Property<Result> {
+	const subscriptions = new Map<Property<unknown>, Subscription>()
+	const emitter = newEmitter()
+	const sample = <Value>(input: Property<Value>): Value => {
+		!subscriptions.has(input) && subscriptions.set(input, input.subscribe(emitter))
+		return input.get()
+	}
+	let isInitialized = false
+	const proxy = newProperty(
+		() => {
+			for (const s of subscriptions.values()) s.unsubscribe()
+			subscriptions.clear()
+			return execution(sample)
+		},
+		(observer) => {
+			// warmup cache
+			if (!isInitialized) {
+				isInitialized = true
+				execution(sample)
+			}
+			return emitter.subscribe(observer)
+		},
+	)
+	return proxy
+	// TODO skip duplicates for subscriptions
+	return combine<[Property<Result>], Result>(proxy, identity)
 }

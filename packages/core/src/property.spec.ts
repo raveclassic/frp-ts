@@ -2,7 +2,7 @@ import { Atom, newAtom } from './atom'
 
 import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
-import { combine, flatten, fromObservable, newProperty, Property, scan, tap } from './property'
+import { combine, flatten, fromObservable, go, newProperty, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
 import { action, newEmitter } from './emitter'
 import { attachSubscription } from '@frp-ts/test-utils'
@@ -534,5 +534,124 @@ describe('scan', () => {
 		s.next(1)
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(getA()).toBe(3)
+	})
+})
+
+describe('go', () => {
+	it('gets executes computation and returns result', () => {
+		const a = newAtom(1)
+		const b = newAtom(2)
+		const c = go((at) => at(a) + at(b))
+		expect(c.get()).toEqual(3)
+	})
+	it('propagates notifications', () => {
+		const a = newAtom(1)
+		const b = newAtom(2)
+		const c = go((at) => at(a) + at(b))
+		const next = jest.fn()
+		c.subscribe({ next })
+		a.set(2)
+		expect(next).toHaveBeenCalledTimes(1)
+		expect(c.get()).toEqual(4)
+	})
+	it('gets only requires dependencies', () => {
+		const getA = jest.fn(() => 1)
+		const a = newProperty(getA, never.subscribe)
+		const getB = jest.fn(() => 2)
+		const b = newProperty(getB, never.subscribe)
+		// eslint-disable-next-line no-constant-condition
+		const c = go((at) => (1 < 2 ? at(a) : at(b)))
+		expect(c.get()).toEqual(1)
+		expect(getA).toHaveBeenCalled()
+		expect(getB).not.toHaveBeenCalled()
+	})
+	it('subscribes only to required dependencies', () => {
+		const a = newAtom(1)
+		const b = newAtom(2)
+		// eslint-disable-next-line no-constant-condition
+		const c = go((at) => (1 < 2 ? at(a) : at(b)))
+		const next = jest.fn()
+		c.subscribe({ next })
+		expect(next).not.toHaveBeenCalled()
+		a.set(2)
+		expect(next).toHaveBeenCalledTimes(1)
+		b.set(3)
+		expect(next).toHaveBeenCalledTimes(1)
+	})
+	it('gets only required dependencies if layout changes', () => {
+		const getA = jest.fn(() => 1)
+		const a = newProperty(getA, never.subscribe)
+		const getB = jest.fn(() => 2)
+		const b = newProperty(getB, never.subscribe)
+		const c = newAtom(3)
+		const d = go((at) => (at(c) === 3 ? at(a) : at(b)))
+		expect(getA).not.toHaveBeenCalled()
+		expect(getB).not.toHaveBeenCalled()
+		expect(d.get()).toEqual(1)
+		expect(getA).toHaveBeenCalledTimes(1)
+		expect(getB).toHaveBeenCalledTimes(0)
+		getA.mockClear()
+		getB.mockClear()
+		c.set(4)
+		expect(d.get()).toEqual(2)
+		expect(getA).toHaveBeenCalledTimes(0)
+		expect(getB).toHaveBeenCalledTimes(1)
+	})
+	it('does not emit if result value did not change and result property has at least one consumer', () => {
+		const a = newAtom(1)
+		const b = newAtom(2)
+		const c = go((at) => at(a) + at(b))
+		const next = jest.fn()
+		c.subscribe({ next })
+		expect(next).toHaveBeenCalledTimes(0)
+		// imitate consumer to warm up the cache
+		c.get()
+		action(() => {
+			a.set(2)
+			b.set(1)
+		})
+		expect(next).toHaveBeenCalledTimes(0)
+	})
+	it('emits the very first time when there is no consumer and then skips duplicates', () => {
+		const a = newAtom(1)
+		const b = newAtom(2)
+		const c = go((at) => at(a) + at(b))
+		const next = jest.fn()
+		c.subscribe({ next })
+		expect(next).toHaveBeenCalledTimes(0)
+		action(() => {
+			a.set(2)
+			b.set(1)
+		})
+		action(() => {
+			a.set(1)
+			b.set(2)
+		})
+		expect(next).toHaveBeenCalledTimes(1)
+	})
+	it('covers use case', () => {
+		const firstName = newAtom('John')
+		const lastName = newAtom('Doe')
+		const isFirstNameShort = go((at) => at(firstName).length < 10)
+		const buildFullName = jest.fn((firstName: string, lastName: string) => {
+			return `${firstName} ${lastName}`
+		})
+		const fullName = go((at) => buildFullName(at(firstName), at(lastName)))
+		const displayName = go((at) => (at(isFirstNameShort) ? at(firstName) : at(fullName)))
+		const next = jest.fn()
+		displayName.subscribe({ next })
+		expect(displayName.get()).toBe('John')
+		expect(next).toHaveBeenCalledTimes(0)
+		expect(buildFullName).toHaveBeenCalledTimes(0)
+
+		firstName.set('123456789') // less than 10 symbols
+		expect(displayName.get()).toBe('123456789')
+		expect(buildFullName).toHaveBeenCalledTimes(0)
+		expect(next).toHaveBeenCalledTimes(1)
+
+		firstName.set('1234567890') // 10 symbols
+		// expect(displayName.get()).toBe('1234567890 Doe')
+		// expect(buildFullName).toHaveBeenCalledTimes(1)
+		expect(next).toHaveBeenCalledTimes(2)
 	})
 })
