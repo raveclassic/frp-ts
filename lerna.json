@@ -1,5 +1,6 @@
 {
   "packages": [
+    "./apps/benchmark",
     "./packages/core",
     "./packages/lens",
     "./packages/fp-ts",

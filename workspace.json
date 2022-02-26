@@ -1,6 +1,7 @@
 {
   "version": 2,
   "projects": {
+    "benchmark": "apps/benchmark",
     "core": "packages/core",
     "fp-ts": "packages/fp-ts",
     "lens": "packages/lens",

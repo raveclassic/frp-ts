@@ -13,6 +13,7 @@
   },
   "homepage": "https://github.com/raveclassic/frp-ts#readme",
   "workspaces": [
+    "./apps/perf",
     "./packages/core",
     "./packages/lens",
     "./packages/fp-ts",
@@ -38,11 +39,14 @@
     "@commitlint/config-angular": "^15.0.0",
     "@commitlint/config-conventional": "^8.3.4",
     "@commitlint/travis-cli": "^8.3.5",
+    "@frp-ts/core": "file://./dist/packages/core",
+    "@frp-ts/utils": "file://./dist/packages/utils",
     "@nrwl/cli": "13.4.1",
     "@nrwl/eslint-plugin-nx": "13.4.1",
     "@nrwl/jest": "13.4.1",
     "@nrwl/js": "13.4.1",
     "@nrwl/linter": "13.4.1",
+    "@nrwl/node": "13.4.1",
     "@nrwl/nx-cloud": "^13.0.1",
     "@nrwl/tao": "13.4.1",
     "@nrwl/workspace": "13.4.1",
@@ -75,6 +79,9 @@
     }
   },
   "resolutions": {
+    "tslib": "^2.1.0"
+  },
+  "dependencies": {
     "tslib": "^2.1.0"
   }
 }
