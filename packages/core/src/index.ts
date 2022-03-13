@@ -18,3 +18,5 @@ export {
 	fromObservable,
 } from './property'
 export * as property from './property'
+export * from './scope'
+export * as scope from './scope'
