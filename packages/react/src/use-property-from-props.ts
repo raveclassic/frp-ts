@@ -1,8 +1,8 @@
 import { newAtom, Property } from '@frp-ts/core'
-import { useEffect, useMemo } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 
 export const usePropertyFromProps = <Value>(value: Value): Property<Value> => {
 	const atom = useMemo(() => newAtom(value), [])
-	useEffect(() => atom.set(value), [value])
+	useLayoutEffect(() => atom.set(value), [value])
 	return atom
 }
