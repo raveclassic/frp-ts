@@ -3,6 +3,7 @@ import { usePropertyFromProps } from './use-property-from-props'
 import React, { useMemo } from 'react'
 import { render } from '@testing-library/react'
 import { constVoid } from '@frp-ts/utils'
+import { useProperty } from './use-property'
 
 interface TestProps<T> {
 	readonly value: T
@@ -28,5 +29,29 @@ describe('usePropertyFromProps', () => {
 		expect(cb).toHaveBeenCalledTimes(1)
 		tree.rerender(<Test value={2} onProperty={onProperty} />)
 		expect(cb).toHaveBeenCalledTimes(1)
+	})
+	it('renders without errors with child consumer', () => {
+		jest.spyOn(console, 'error').mockImplementation()
+
+		interface ConsumerProps {
+			property: Property<number>
+		}
+		const Consumer = (props: ConsumerProps) => {
+			const value = useProperty(props.property)
+			return <>{value}</>
+		}
+		interface ComponentProps {
+			enabled: boolean
+			value: number
+		}
+		const Component = (props: ComponentProps) => {
+			const property = usePropertyFromProps(props.value)
+			return <Consumer property={property} />
+		}
+
+		const tree = render(<Component enabled={true} value={1} />)
+		tree.rerender(<Component enabled={false} value={2} />)
+
+		expect(console.error).not.toBeCalled()
 	})
 })
