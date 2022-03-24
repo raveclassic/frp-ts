@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.14](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.13...v1.0.0-alpha.14) (2022-03-24)
+
+
+### Bug Fixes
+
+* **react:** resolve bad `setState` in `usePropertyFromProps` ([#49](https://github.com/raveclassic/frp-ts/issues/49)) ([a0c83f9](https://github.com/raveclassic/frp-ts/commit/a0c83f9fb87aaf16fffe52f6891d88d75f8c9b56))
+
+
+
+
+
 # [1.0.0-alpha.13](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.12...v1.0.0-alpha.13) (2022-01-21)
 
 
