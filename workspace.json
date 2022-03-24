@@ -2,6 +2,7 @@
   "version": 2,
   "projects": {
     "core": "packages/core",
+    "form": "packages/form",
     "fp-ts": "packages/fp-ts",
     "lens": "packages/lens",
     "react": "packages/react",

@@ -60,3 +60,5 @@ export const memoMany = <Args extends readonly unknown[], Result>(
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const constVoid = (): void => {}
+
+export const identity = <T>(value: T): T => value
