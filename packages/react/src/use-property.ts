@@ -1,5 +1,5 @@
 import { Property, Subscription } from '@frp-ts/core'
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export const useProperty = <A>(property: Property<A>): A => {
 	const [, forceUpdate] = useState<Record<string, unknown>>()

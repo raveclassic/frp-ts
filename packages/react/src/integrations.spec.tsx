@@ -1,6 +1,5 @@
-import { memo } from 'react'
+import React, { memo } from 'react'
 import { newAtom, Property } from '@frp-ts/core'
-import React from 'react'
 import { usePropertyFromProps } from './use-property-from-props'
 import { useProperty } from './use-property'
 import { act, render } from '@testing-library/react'
@@ -20,11 +19,7 @@ describe('integrations', () => {
 		}
 		const Mediator = memo((props: MediatorProps) => {
 			const value = usePropertyFromProps(props.value)
-			if (props.value === undefined) {
-				return <span data-testid={'output'}>INITIAL</span>
-			} else {
-				return <Child value={value} />
-			}
+			return props.value === undefined ? <span data-testid={'output'}>INITIAL</span> : <Child value={value} />
 		})
 
 		const source = newAtom<string | undefined>(undefined)
