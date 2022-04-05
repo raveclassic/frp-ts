@@ -1,5 +1,5 @@
 import { newAtom, newEmitter, newProperty, Property } from '@frp-ts/core'
-import React, { useEffect } from 'react'
+import React, { useEffect, useLayoutEffect, useRef } from 'react'
 import { useProperty } from './use-property'
 import { constVoid } from '@frp-ts/utils'
 import { render, screen } from '@testing-library/react'
@@ -29,19 +29,6 @@ describe('useProperty', () => {
 		const tree = render(<Test onValue={cb} property={a} />)
 		tree.rerender(<Test onValue={cb} property={b} />)
 		expect(cb).toHaveBeenLastCalledWith(2)
-	})
-	it('subscribes to property immediately during rendering', () => {
-		const a = newAtom(1)
-		const cb = jest.fn()
-		const Component = () => {
-			const value = useProperty(a)
-			cb(value)
-			useEffect(() => a.set(2), [])
-			return <></>
-		}
-
-		render(<Component />)
-		expect(cb.mock.calls).toEqual([[1], [2]])
 	})
 	it('unsubscribes from the previous property and subscribes to the new one', () => {
 		const a = newAtom(1)
@@ -115,5 +102,89 @@ describe('useProperty', () => {
 		expect(screen.getByText('Value 2')).toBeDefined()
 		expect(cb).toBeCalledTimes(4)
 		expect(cb).toHaveBeenLastCalledWith(2)
+	})
+	describe('races', () => {
+		it('renders update in useLayoutEffect before useProperty', () => {
+			const a = newAtom(0)
+			const cb = jest.fn()
+			const Component = () => {
+				useLayoutEffect(() => {
+					a.set(1)
+				}, [])
+				cb(useProperty(a))
+				return null
+			}
+			render(<Component />)
+			expect(cb.mock.calls).toEqual([[0], [1]])
+		})
+		it('renders update in useEffect before useProperty', () => {
+			const a = newAtom(0)
+			const cb = jest.fn()
+			const Component = () => {
+				useEffect(() => {
+					a.set(1)
+				}, [])
+				cb(useProperty(a))
+				return null
+			}
+			render(<Component />)
+			expect(cb.mock.calls).toEqual([[0], [1]])
+		})
+		it('renders direct synchronuous update before useProperty', () => {
+			const a = newAtom(0)
+			const cb = jest.fn()
+			const Component = () => {
+				const hasRendered = useRef(false)
+				if (!hasRendered.current) {
+					hasRendered.current = true
+					a.set(1)
+				}
+				cb(useProperty(a))
+				return null
+			}
+			render(<Component />)
+			expect(cb.mock.calls).toEqual([[1]])
+		})
+		it('renders direct synchronuous update after useProperty', () => {
+			const a = newAtom(0)
+			const cb = jest.fn()
+			const Component = () => {
+				cb(useProperty(a))
+				const hasRendered = useRef(false)
+				if (!hasRendered.current) {
+					hasRendered.current = true
+					a.set(1)
+				}
+				return null
+			}
+			render(<Component />)
+			expect(cb.mock.calls).toEqual([[0], [1]])
+		})
+		it('renders update in useEffect after useProperty', () => {
+			const a = newAtom(0)
+			const cb = jest.fn()
+			const Component = () => {
+				cb(useProperty(a))
+				useEffect(() => {
+					a.set(1)
+				}, [])
+				return null
+			}
+			render(<Component />)
+			expect(cb.mock.calls).toEqual([[0], [1]])
+		})
+		it('renders update in useLayoutEffect after useProperty', () => {
+			const a = newAtom(0)
+			const cb = jest.fn()
+			const Component = () => {
+				cb(useProperty(a))
+				useLayoutEffect(() => {
+					a.set(1)
+				}, [])
+				return null
+			}
+			render(<Component />)
+			expect(cb.mock.calls).toEqual([[0], [1]])
+		})
 	})
 })

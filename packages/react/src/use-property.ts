@@ -1,41 +1,31 @@
-import { Property, Subscription } from '@frp-ts/core'
+import { Property } from '@frp-ts/core'
 import { useState, useEffect, useRef } from 'react'
 
 export const useProperty = <A>(property: Property<A>): A => {
-	const [, forceUpdate] = useState<Record<string, unknown>>()
+	const [, forceUpdate] = useState<unknown>()
 
 	const newValue = property.get()
 	const valueRef = useRef(newValue)
 	valueRef.current = newValue
 
-	const propertyRef = useRef<Property<A>>()
-	const subscriptionRef = useRef<Subscription>()
-
-	if (propertyRef.current !== property) {
-		propertyRef.current = property
-		subscriptionRef.current?.unsubscribe()
-		subscriptionRef.current = property.subscribe({
-			next: () => {
-				const newValue = property.get()
-				if (newValue !== valueRef.current) {
-					valueRef.current = newValue
-					forceUpdate({})
-				}
-			},
-		})
-	}
-
-	useEffect(
-		() => () => {
-			// istanbul ignore else
-			if (subscriptionRef.current) {
-				subscriptionRef.current.unsubscribe()
+	useEffect(() => {
+		const checkForUpdates = () => {
+			const newValue = property.get()
+			if (newValue !== valueRef.current) {
+				valueRef.current = newValue
+				forceUpdate({})
 			}
-			propertyRef.current = undefined
-			subscriptionRef.current = undefined
-		},
-		[],
-	)
+		}
+
+		const subscription = property.subscribe({ next: checkForUpdates })
+
+		// account for:
+		//  - direct synchronuous updates during rendering
+		//  - updates in useLayoutEffect
+		checkForUpdates()
+
+		return subscription.unsubscribe
+	}, [property])
 
 	return valueRef.current
 }
