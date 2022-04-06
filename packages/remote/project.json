@@ -1,0 +1,41 @@
+{
+  "root": "packages/remote",
+  "sourceRoot": "packages/remote/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/remote",
+        "main": "packages/remote/src/index.ts",
+        "tsConfig": "packages/remote/tsconfig.lib.json",
+        "assets": ["packages/remote/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/remote/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/remote"],
+      "options": {
+        "jestConfig": "packages/remote/jest.config.js",
+        "passWithNoTests": true,
+        "codeCoverage": true
+      }
+    },
+    "deploy": {
+      "executor": "ngx-deploy-npm:deploy",
+      "options": {
+        "access": "public",
+        "noBuild": true
+      }
+    }
+  },
+  "tags": []
+}
