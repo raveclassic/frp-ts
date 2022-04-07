@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.15](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.14...v1.0.0-alpha.15) (2022-04-07)
+
+
+### Bug Fixes
+
+* **react:** fix race condition in usePropertyFromProp ([#50](https://github.com/raveclassic/frp-ts/issues/50)) ([859e4c5](https://github.com/raveclassic/frp-ts/commit/859e4c5f9590cd1408fa6351af02fb4a8e60f205))
+
+
+
+
+
 # [1.0.0-alpha.14](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.13...v1.0.0-alpha.14) (2022-03-24)
 
 
