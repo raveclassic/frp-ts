@@ -113,6 +113,19 @@ importers:
       tslib: 2.3.1
       typescript: 4.5.4
 
+  packages/immer:
+    specifiers:
+      '@frp-ts/core': ^1.0.0-alpha.15
+      '@frp-ts/utils': ^1.0.0-alpha.15
+      immer: ^9.0.12
+      tslib: ^2.1.0
+    dependencies:
+      '@frp-ts/core': link:../core
+      '@frp-ts/utils': link:../utils
+    devDependencies:
+      immer: 9.0.12
+      tslib: 2.3.1
+
   packages/lens:
     specifiers:
       '@frp-ts/core': ^1.0.0-alpha.15
@@ -5044,6 +5057,10 @@ packages:
   /ignore/5.2.0:
     resolution: {integrity: sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==}
     engines: {node: '>= 4'}
+    dev: true
+
+  /immer/9.0.12:
+    resolution: {integrity: sha512-lk7UNmSbAukB5B6dh9fnh5D0bJTOFKxVg2cyJWTYrWRfhLrLMBquONcUs3aFq507hNoIZEDDh8lb8UtOizSMhA==}
     dev: true
 
   /import-fresh/2.0.0:

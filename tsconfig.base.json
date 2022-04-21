@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@frp-ts/core": ["packages/core/src/index.ts"],
+      "@frp-ts/immer": ["packages/immer/src/index.ts"],
       "@frp-ts/fp-ts": ["packages/fp-ts/src/index.ts"],
       "@frp-ts/lens": ["packages/lens/src/index.ts"],
       "@frp-ts/react": ["packages/react/src/index.ts"],

@@ -1,7 +1,8 @@
 packages:
   - packages/core
-  - packages/lens
+  - packages/immer
   - packages/fp-ts
+  - packages/lens
   - packages/react
   - packages/test-utils
   - packages/utils
