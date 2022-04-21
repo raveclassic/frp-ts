@@ -17,4 +17,36 @@ describe('immer', () => {
 			expect(state.get().foo).toEqual(1)
 		})
 	})
+	describe('stress test', () => {
+		it('runs', () => {
+			interface Dog {
+				name: string
+			}
+			interface House {
+				dog: Dog
+			}
+			interface AppState {
+				house: House
+			}
+
+			const initialState: AppState = { house: { dog: { name: 'Fido' } } }
+			const storeState = newAtom(initialState)
+			const storeMethods = produceMany(storeState, {
+				renameTheDog: (newName: string) => (state) => {
+					state.house.dog.name = newName
+				},
+			})
+
+			const store = { ...storeState, ...storeMethods }
+
+			store.renameTheDog('Odif')
+			expect(store.get()).toEqual<AppState>({
+				house: {
+					dog: {
+						name: 'Odif',
+					},
+				},
+			})
+		})
+	})
 })
