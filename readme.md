@@ -143,8 +143,7 @@ const newCounter = (initial: number): Counter => {
 	// expose readonly API
 	const inc = () => state.modify((n) => n + 1)
 	return {
-		subscribe: state.subscribe,
-		get: state.get,
+		...state,
 		inc,
 	}
 }
