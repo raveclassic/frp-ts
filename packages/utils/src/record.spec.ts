@@ -3,7 +3,7 @@ import { mapRecord, recordKeys } from './record'
 describe('record', () => {
 	describe('recordKeys', () => {
 		it('returns keys a list of keys', () => {
-			expect(recordKeys({ foo: 'foo', bar: 123 })).toEqual(['foo', 123])
+			expect(recordKeys({ foo: 'foo', bar: 123 })).toEqual(['foo', 'bar'])
 		})
 	})
 	describe('mapObject', () => {
