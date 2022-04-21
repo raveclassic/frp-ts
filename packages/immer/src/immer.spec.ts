@@ -1,7 +1,22 @@
 import { newAtom } from '@frp-ts/core'
 import { produceMany } from './immer'
+import { produce } from 'immer'
 
 describe('immer', () => {
+	describe('direct integration', () => {
+		it('updates the state with "produce"', () => {
+			interface State {
+				readonly foo: number
+			}
+			const state = newAtom<State>({ foo: 0 })
+			state.modify(
+				produce((state) => {
+					state.foo++
+				}),
+			)
+			expect(state.get()).toEqual<State>({ foo: 1 })
+		})
+	})
 	describe('produceMany', () => {
 		it('updates nested values', () => {
 			interface State {
