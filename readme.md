@@ -9,7 +9,7 @@
 
 ## Overview
 
-This library provides an **experimental** `TypeScript` implementation of an "Applicative Data-Driven Computation"
+This library provides a `TypeScript` implementation of an "Applicative Data-Driven Computation"
 described by [Conal Elliot](http://conal.net/) in his [paper](http://conal.net/papers/data-driven/paper.pdf).
 
 The implementation:
