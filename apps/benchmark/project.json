@@ -1,0 +1,45 @@
+{
+  "root": "apps/benchmark",
+  "sourceRoot": "apps/benchmark/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/benchmark",
+        "main": "apps/benchmark/src/index.ts",
+        "tsConfig": "apps/benchmark/tsconfig.app.json"
+      }
+    },
+    "oldserve": {
+      "executor": "@nrwl/node:execute",
+      "options": {
+        "buildTarget": "benchmark:build"
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "cwd": "apps/benchmark",
+        "command": "ts-node ./src/index.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/benchmark/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/benchmark"],
+      "options": {
+        "jestConfig": "apps/benchmark/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
