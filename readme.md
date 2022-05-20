@@ -297,5 +297,5 @@ lerna version <version>
 Then
 
 ```shell
-pnpm deploy
+npm run deploy
 ```
