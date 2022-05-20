@@ -1,6 +1,7 @@
 {
   "packages": [
     "./packages/core",
+    "./packages/immer",
     "./packages/lens",
     "./packages/fp-ts",
     "./packages/react",
