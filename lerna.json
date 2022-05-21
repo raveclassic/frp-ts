@@ -7,7 +7,7 @@
     "./packages/test-utils",
     "./packages/utils"
   ],
-  "version": "1.0.0-alpha.15",
+  "version": "1.0.0-alpha.16",
   "npmClient": "pnpm",
   "useWorkspaces": true,
   "command": {

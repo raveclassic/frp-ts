@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/react",
-  "version": "1.0.0-alpha.15",
+  "version": "1.0.0-alpha.16",
   "description": "React bindings for @frp-ts project",
   "typedocMain": "./src/index.ts",
   "author": "raveclassic",
@@ -18,8 +18,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@frp-ts/core": "^1.0.0-alpha.15",
-    "@frp-ts/utils": "^1.0.0-alpha.15"
+    "@frp-ts/core": "^1.0.0-alpha.16",
+    "@frp-ts/utils": "^1.0.0-alpha.16"
   },
   "devDependencies": {
     "@testing-library/react": "^12.1.2",

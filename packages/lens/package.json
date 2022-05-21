@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/lens",
-  "version": "1.0.0-alpha.15",
+  "version": "1.0.0-alpha.16",
   "description": "Lenses for frp-ts atoms",
   "typedocMain": "./src/index.ts",
   "author": "raveclassic",
@@ -22,7 +22,7 @@
     "tslib": "^2.3.1"
   },
   "dependencies": {
-    "@frp-ts/core": "^1.0.0-alpha.15"
+    "@frp-ts/core": "^1.0.0-alpha.16"
   },
   "devDependencies": {
     "tslib": "^2.3.1"
