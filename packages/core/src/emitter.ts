@@ -37,6 +37,9 @@ export const newEmitter = (): Emitter => {
 					lastTime = time
 				}
 
+				// performance
+				if (listeners.size === 0) return
+
 				isNotifying = true
 				for (const listener of Array.from(listeners)) {
 					if (isLocked) {
