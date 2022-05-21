@@ -1,3 +1,65 @@
+export const memo5 = <A, B, C, D, E, F>(
+	f: (a: A, b: B, c: C, d: D, e: E) => F,
+): ((a: A, b: B, c: C, d: D, e: E) => F) => {
+	let hasValue = false
+	let lastA: A
+	let lastB: B
+	let lastC: C
+	let lastD: D
+	let lastE: E
+	let lastF: F
+	return (a, b, c, d, e) => {
+		if (!hasValue || a !== lastA || b !== lastB || c !== lastC || d !== lastD || e !== lastE) {
+			hasValue = true
+			lastA = a
+			lastB = b
+			lastC = c
+			lastD = d
+			lastE = e
+			lastF = f(a, b, c, d, e)
+		}
+		return lastF
+	}
+}
+
+export const memo4 = <A, B, C, D, E>(f: (a: A, b: B, c: C, d: D) => E): ((a: A, b: B, c: C, d: D) => E) => {
+	let hasValue = false
+	let lastA: A
+	let lastB: B
+	let lastC: C
+	let lastD: D
+	let lastE: E
+	return (a, b, c, d) => {
+		if (!hasValue || a !== lastA || b !== lastB || c !== lastC || d !== lastD) {
+			hasValue = true
+			lastA = a
+			lastB = b
+			lastC = c
+			lastD = d
+			lastE = f(a, b, c, d)
+		}
+		return lastE
+	}
+}
+
+export const memo3 = <A, B, C, D>(f: (a: A, b: B, c: C) => D): ((a: A, b: B, c: C) => D) => {
+	let hasValue = false
+	let lastA: A
+	let lastB: B
+	let lastC: C
+	let lastD: D
+	return (a, b, c) => {
+		if (!hasValue || a !== lastA || b !== lastB || c !== lastC) {
+			hasValue = true
+			lastA = a
+			lastB = b
+			lastC = c
+			lastD = f(a, b, c)
+		}
+		return lastD
+	}
+}
+
 export const memo2 = <A, B, C>(f: (a: A, b: B) => C): ((a: A, b: B) => C) => {
 	let hasValue = false
 	let lastA: A
@@ -25,6 +87,18 @@ export const memo1 = <A, B>(f: (a: A) => B): ((a: A) => B) => {
 			lastB = f(a)
 		}
 		return lastB
+	}
+}
+
+export const memo0 = <A>(f: () => A): (() => A) => {
+	let hasValue = false
+	let lastA: A
+	return () => {
+		if (!hasValue) {
+			hasValue = true
+			lastA = f()
+		}
+		return lastA
 	}
 }
 
