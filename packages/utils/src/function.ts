@@ -90,6 +90,18 @@ export const memo1 = <A, B>(f: (a: A) => B): ((a: A) => B) => {
 	}
 }
 
+export const memo0 = <A>(f: () => A): (() => A) => {
+	let hasValue = false
+	let lastA: A
+	return () => {
+		if (!hasValue) {
+			hasValue = true
+			lastA = f()
+		}
+		return lastA
+	}
+}
+
 export const memoMany = <Args extends readonly unknown[], Result>(
 	f: (...args: Args) => Result,
 ): ((...args: Args) => Result) => {

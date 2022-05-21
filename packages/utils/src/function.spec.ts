@@ -1,4 +1,14 @@
-import { constVoid, memo1, memo2, memo3, memo4, memo5, memoMany } from './function'
+import { constVoid, memo0, memo1, memo2, memo3, memo4, memo5, memoMany } from './function'
+
+describe('memo0', () => {
+	it('caches forever', () => {
+		const f = jest.fn(constVoid)
+		const mf = memo0(f)
+		mf()
+		mf()
+		expect(f).toHaveBeenCalledTimes(1)
+	})
+})
 
 describe('memo1', () => {
 	it('caches until argument is updated', () => {
