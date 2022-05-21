@@ -2,7 +2,7 @@ import { never, Observable, Observer, Subscription, subscriptionNone } from './o
 import { mergeMany, multicast, newEmitter } from './emitter'
 import { newAtom } from './atom'
 import { Time } from './clock'
-import { memoMany } from '@frp-ts/utils'
+import { memo0, memo1, memo2, memo3, memo4, memo5, memoMany } from '@frp-ts/utils'
 import { InteropObservable, newInteropObservable, observableSymbol } from './interop-observable'
 
 export interface Property<A> extends Observable<Time> {
@@ -86,9 +86,8 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	// type is guaranteed by variadic function signature
 	// eslint-disable-next-line no-restricted-syntax
 	const properties: Properties = args.slice(0, args.length - 1) as never
-	const memoProject = memoMany(project)
 
-	const get = () => memoProject(...properties.map((property) => property.get()))
+	const get = memoizeProjectionFunction(properties, project)
 
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
 	if (doesNotEmit) return newProperty(get, never.subscribe)
@@ -118,4 +117,59 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 			}),
 	})
 	return newProperty(getAndCache, proxy.subscribe)
+}
+
+const memoizeProjectionFunction = <Result>(
+	inputs: readonly Property<unknown>[],
+	f: (...values: readonly unknown[]) => Result,
+): (() => Result) => {
+	const length = inputs.length
+	if (length === 0) {
+		return memo0(f)
+	}
+	if (length === 1) {
+		const a = inputs[0]
+		const memoF = memo1(f)
+		return () => memoF(a.get())
+	}
+	if (length === 2) {
+		const a = inputs[0]
+		const b = inputs[1]
+		const memoF = memo2(f)
+		return () => memoF(a.get(), b.get())
+	}
+	if (length === 3) {
+		const a = inputs[0]
+		const b = inputs[1]
+		const c = inputs[2]
+		const memoF = memo3(f)
+		return () => memoF(a.get(), b.get(), c.get())
+	}
+	if (length === 4) {
+		const a = inputs[0]
+		const b = inputs[1]
+		const c = inputs[2]
+		const d = inputs[3]
+		const memoF = memo4(f)
+		return () => memoF(a.get(), b.get(), c.get(), d.get())
+	}
+	if (length === 5) {
+		const a = inputs[0]
+		const b = inputs[1]
+		const c = inputs[2]
+		const d = inputs[3]
+		const e = inputs[4]
+		const memoF = memo5(f)
+		return () => memoF(a.get(), b.get(), c.get(), d.get(), e.get())
+	}
+	const memoF = memoMany(f)
+	return () => {
+		const values: unknown[] = Array(length)
+		for (let i = 0; i < length; i++) {
+			values[i] = inputs[i].get()
+		}
+		// performance
+		// eslint-disable-next-line prefer-spread
+		return memoF.apply(undefined, values)
+	}
 }
