@@ -1,6 +1,6 @@
-module.exports = {
+export default {
 	testRunner: 'jasmine2',
-	displayName: 'fp-ts',
+	displayName: 'test-utils',
 	preset: '../../jest.preset.js',
 	globals: {
 		'ts-jest': {
@@ -11,5 +11,5 @@ module.exports = {
 		'^.+\\.[tj]s$': 'ts-jest',
 	},
 	moduleFileExtensions: ['ts', 'js', 'html'],
-	coverageDirectory: '../../coverage/packages/fp-ts',
+	coverageDirectory: '../../coverage/packages/test-utils',
 }

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	testRunner: 'jasmine2',
 	displayName: 'lens',
 	preset: '../../jest.preset.js',

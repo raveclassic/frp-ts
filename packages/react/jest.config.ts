@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	testRunner: 'jasmine2',
 	displayName: 'react',
 	preset: '../../jest.preset.js',
