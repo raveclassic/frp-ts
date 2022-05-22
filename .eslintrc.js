@@ -154,5 +154,11 @@ module.exports = {
 				'@typescript-eslint/no-unsafe-assignment': 0,
 			},
 		},
+		{
+			files: ['jest.config.ts'],
+			rules: {
+				'import/no-default-export': 'off',
+			},
+		},
 	],
 }

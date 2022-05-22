@@ -1,5 +1,3 @@
-/* eslint-disable */
-/* eslint-disable */
 export default {
 	testRunner: 'jasmine2',
 	displayName: 'lens',
