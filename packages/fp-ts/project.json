@@ -1,5 +1,4 @@
 {
-  "root": "packages/fp-ts",
   "sourceRoot": "packages/fp-ts/src",
   "projectType": "library",
   "targets": {
@@ -24,7 +23,7 @@
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/packages/fp-ts"],
       "options": {
-        "jestConfig": "packages/fp-ts/jest.config.js",
+        "jestConfig": "packages/fp-ts/jest.config.ts",
         "passWithNoTests": true,
         "codeCoverage": true
       }

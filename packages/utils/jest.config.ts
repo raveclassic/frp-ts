@@ -1,6 +1,8 @@
-module.exports = {
+/* eslint-disable */
+/* eslint-disable */
+export default {
 	testRunner: 'jasmine2',
-	displayName: 'core',
+	displayName: 'utils',
 	preset: '../../jest.preset.js',
 	globals: {
 		'ts-jest': {
@@ -11,5 +13,5 @@ module.exports = {
 		'^.+\\.[tj]s$': 'ts-jest',
 	},
 	moduleFileExtensions: ['ts', 'js', 'html'],
-	coverageDirectory: '../../coverage/packages/core',
+	coverageDirectory: '../../coverage/packages/utils',
 }

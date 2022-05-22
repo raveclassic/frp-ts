@@ -1,4 +1,6 @@
-module.exports = {
+/* eslint-disable */
+/* eslint-disable */
+export default {
 	testRunner: 'jasmine2',
 	displayName: 'fp-ts',
 	preset: '../../jest.preset.js',

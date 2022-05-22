@@ -1,5 +1,4 @@
 {
-  "root": "packages/lens",
   "sourceRoot": "packages/lens/src",
   "projectType": "library",
   "targets": {
@@ -24,7 +23,7 @@
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/packages/lens"],
       "options": {
-        "jestConfig": "packages/lens/jest.config.js",
+        "jestConfig": "packages/lens/jest.config.ts",
         "passWithNoTests": true,
         "codeCoverage": true
       }

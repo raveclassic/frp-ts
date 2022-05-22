@@ -1,4 +1,6 @@
-module.exports = {
+/* eslint-disable */
+/* eslint-disable */
+export default {
 	testRunner: 'jasmine2',
 	displayName: 'react',
 	preset: '../../jest.preset.js',

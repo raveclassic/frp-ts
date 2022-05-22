@@ -1,6 +1,6 @@
 const { getJestProjects } = require('@nrwl/jest')
 
-module.exports = {
+export default {
 	projects: getJestProjects(),
 	testRunner: 'jasmine2',
 	collectCoverage: false,
