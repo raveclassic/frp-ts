@@ -206,28 +206,6 @@ describe('combine', () => {
 		a.set(undefined)
 		expect(cb).toHaveBeenCalledTimes(1)
 	})
-	it('does not emit if combined property has not change value', () => {
-		const a = newAtom({ foo: 1, bar: '1' })
-		const foo = combine(a, (a) => a.foo)
-		const bar = combine(a, (a) => a.bar)
-
-		const fooObserver = {
-			next: jest.fn(),
-		}
-		const barObserver = {
-			next: jest.fn(),
-		}
-		foo.subscribe(fooObserver)
-		bar.subscribe(barObserver)
-
-		a.modify(p => ({ ...p, foo: 2 }))
-		expect(fooObserver.next).toHaveBeenCalledTimes(1)
-		expect(barObserver.next).toHaveBeenCalledTimes(0)
-
-		a.modify(p => ({ ...p, bar: '2' }))
-		expect(barObserver.next).toHaveBeenCalledTimes(1)
-		expect(fooObserver.next).toHaveBeenCalledTimes(1)
-	})
 })
 
 describe('flatten', () => {

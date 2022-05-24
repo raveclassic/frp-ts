@@ -121,6 +121,9 @@ describe('view', () => {
 		}
 		foo.subscribe(fooObserver)
 		bar.subscribe(barObserver)
+		// imitate consumer to warm up the cache
+		foo.get()
+		bar.get()
 
 		foo.set(2)
 		expect(fooObserver.next).toHaveBeenCalledTimes(1)
