@@ -1,4 +1,4 @@
-import {Atom, combine, newAtom, newProperty} from '@frp-ts/core'
+import { Atom, combine, newAtom } from '@frp-ts/core'
 
 export interface Lens<S, A> {
 	readonly get: (s: S) => A
