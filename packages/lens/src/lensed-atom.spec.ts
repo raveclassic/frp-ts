@@ -109,4 +109,28 @@ describe('view', () => {
 		expect(ao.next).toHaveBeenCalledTimes(1)
 		expect(bo.next).toHaveBeenCalledTimes(1)
 	})
+	it('distinct changes', () => {
+		const a = newLensedAtom({ foo: 0, bar: 'bar' })
+		const foo = a.view(prop('foo'))
+		const bar = a.view(prop('bar'))
+		const fooObserver = {
+			next: jest.fn(),
+		}
+		const barObserver = {
+			next: jest.fn(),
+		}
+		foo.subscribe(fooObserver)
+		bar.subscribe(barObserver)
+		// imitate consumer to warm up the cache
+		foo.get()
+		bar.get()
+
+		foo.set(2)
+		expect(fooObserver.next).toHaveBeenCalledTimes(1)
+		expect(barObserver.next).toHaveBeenCalledTimes(0)
+
+		bar.set('baz')
+		expect(barObserver.next).toHaveBeenCalledTimes(1)
+		expect(fooObserver.next).toHaveBeenCalledTimes(1)
+	})
 })
