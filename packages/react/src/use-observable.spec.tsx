@@ -1,8 +1,9 @@
-import { newObservable, Observable, Observer } from '@frp-ts/core'
+import { Observable } from '@frp-ts/core'
 import { useObservable } from './use-observable'
 import { constVoid } from '@frp-ts/utils'
 import { act, render } from '@testing-library/react'
 import React from 'react'
+import { newAdapter } from '@frp-ts/test-utils'
 
 interface TestProps<T> {
 	readonly source: Observable<T>
@@ -14,21 +15,10 @@ function TestComponent<T>(props: TestProps<T>) {
 	return null
 }
 
-function newAdapter<T = never>(): [observable: Observable<T>, next: (value: T) => void] {
-	let observer: Observer<T> | undefined
-	const observable = newObservable<T>((o) => {
-		observer = o
-		return () => {
-			observer = undefined
-		}
-	})
-	return [observable, (value) => observer?.next(value)]
-}
-
 describe('useObservable', () => {
 	it('returns initial value', () => {
 		const cb = jest.fn(constVoid)
-		const [source, next] = newAdapter<string>()
+		const [source] = newAdapter<string>()
 		render(<TestComponent source={source} initial={'bar'} onValue={cb} />)
 		expect(cb).toHaveBeenLastCalledWith('bar')
 	})
@@ -63,7 +53,7 @@ describe('useObservable', () => {
 	})
 	it('ignores next "initial"', () => {
 		const cb = jest.fn(constVoid)
-		const [source, next] = newAdapter<string>()
+		const [source] = newAdapter<string>()
 		const tree = render(<TestComponent source={source} onValue={cb} initial={'initial'} />)
 		cb.mockClear()
 		tree.rerender(<TestComponent source={source} onValue={cb} initial={'next'} />)
