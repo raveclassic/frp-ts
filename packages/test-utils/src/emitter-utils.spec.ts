@@ -28,5 +28,3 @@ describe('attachSubscription', () => {
 		expect(additional.unsubscribe).toHaveBeenCalled()
 	})
 })
-
-describe('expectToMulticast', () => {})

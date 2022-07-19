@@ -1,14 +1,4 @@
-export interface Observer<A> {
-	readonly next: (a: A) => void
-}
-
-export interface Subscription {
-	readonly unsubscribe: () => void
-}
-
-export interface Observable<A> {
-	readonly subscribe: (observer: Observer<A>) => Subscription
-}
+import { Observable, Subscription } from './observable-utils'
 
 export const attachSubscription = <A, S extends Observable<A>>(source: S, subscription: Subscription): S => ({
 	...source,
