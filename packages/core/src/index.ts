@@ -2,7 +2,15 @@ export { Time, now } from './clock'
 export * as clock from './clock'
 export { Emitter, newEmitter, action, mergeMany, multicast } from './emitter'
 export * as emitter from './emitter'
-export { Observer, Subscription, Observable, newObservable, subscriptionNone, never } from './observable'
+export {
+	Observer,
+	Subscription,
+	Observable,
+	newObservable,
+	subscriptionNone,
+	never,
+	fromInteropObservable,
+} from './observable'
 export * as observable from './observable'
 export { Atom, Update, newAtom } from './atom'
 export * as atom from './atom'

@@ -3,11 +3,10 @@ import { mergeMany, multicast, newEmitter } from './emitter'
 import { newAtom } from './atom'
 import { Time } from './clock'
 import { memo0, memo1, memo2, memo3, memo4, memo5, memoMany } from '@frp-ts/utils'
-import { InteropObservable, newInteropObservable, observableSymbol } from './interop-observable'
+import { InteropObservableHolder, newInteropObservable, observableSymbol } from './interop-observable'
 
-export interface Property<A> extends Observable<Time> {
+export interface Property<A> extends Observable<Time>, InteropObservableHolder<A> {
 	readonly get: () => A
-	readonly [Symbol.observable]: () => InteropObservable<A>
 }
 
 export const newProperty = <A>(get: () => A, subscribe: (observer: Observer<Time>) => Subscription): Property<A> => ({
