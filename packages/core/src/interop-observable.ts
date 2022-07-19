@@ -1,5 +1,5 @@
-import { Observable, Observer, Subscription } from './observable'
-import { Time } from './clock'
+import { type Observable, type Observer, type Subscription } from './observable'
+import { type Time } from './clock'
 
 declare global {
 	interface SymbolConstructor {
@@ -8,12 +8,16 @@ declare global {
 }
 
 // A hack for typing and (RxJS / Most) compatibility
-// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment
-export const observableSymbol: typeof Symbol.observable = ((): any =>
-	(typeof Symbol === 'function' && Symbol.observable) || '@@observable')()
+export const observableSymbol: typeof Symbol.observable =
+	// eslint-disable-next-line no-restricted-syntax
+	(typeof Symbol === 'function' && Symbol.observable) || ('@@observable' as never)
 
 export interface InteropObservable<A> {
 	subscribe: (observer: Partial<Observer<A>>) => Subscription
+}
+
+export interface InteropObservableHolder<A> {
+	readonly [Symbol.observable]: () => InteropObservable<A>
 }
 
 export const newInteropObservable = <A>(

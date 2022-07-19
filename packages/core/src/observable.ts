@@ -1,6 +1,7 @@
 // minimal required interface adhering https://github.com/tc39/proposal-observable
 
 import { constVoid } from '@frp-ts/utils'
+import { type InteropObservable, type InteropObservableHolder, observableSymbol } from './interop-observable'
 
 export interface Observer<A> {
 	readonly next: (a: A) => void
@@ -26,4 +27,15 @@ export const subscriptionNone: Subscription = {
 
 export const never: Observable<never> = {
 	subscribe: () => subscriptionNone,
+}
+
+export function fromInteropObservable<Value>(source: InteropObservableHolder<Value>): Observable<Value>
+export function fromInteropObservable<Value>(source: Observable<Value>): Observable<Value>
+export function fromInteropObservable<Value>(
+	source: InteropObservableHolder<Value> | Observable<Value>,
+): Observable<Value> {
+	// eslint-disable-next-line no-restricted-syntax,@typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+	const interop: (() => InteropObservable<Value>) | undefined = (source as any)[observableSymbol]
+	// eslint-disable-next-line no-restricted-syntax
+	return interop ? interop() : (source as Observable<Value>)
 }
