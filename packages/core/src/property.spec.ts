@@ -4,7 +4,7 @@ import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
 import { combine, flatten, fromObservable, newProperty, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
-import { action, newEmitter } from './emitter'
+import {action, mergeMany, multicast, newEmitter} from './emitter'
 import { attachSubscription } from '@frp-ts/test-utils'
 import { now } from './clock'
 
@@ -34,6 +34,25 @@ describe('combine', () => {
 		disposableC.unsubscribe()
 		expect(disposeA).toHaveBeenCalledTimes(1)
 		expect(disposeB).toHaveBeenCalledTimes(1)
+	})
+	it('emits notifications of middle node when someone get value before proxy notification', () => {
+		const a = newAtom(1)
+		const b = combine(a, (a) => [a])
+
+		const c = combine(a, b, (v1, v2) => [v1, v2])
+
+		const cb1 = jest.fn()
+		// subscribe and read value
+		c.subscribe({
+			next: () => c.get()
+		})
+
+		b.subscribe({
+			next: cb1
+		})
+
+		a.set(2)
+		expect(cb1).toBeCalledTimes(1)
 	})
 	it('maps', () => {
 		const f = (n: number) => `value: ${n}`
@@ -146,8 +165,7 @@ describe('combine', () => {
 		}
 		c.subscribe(o)
 		expect(o.next).toHaveBeenCalledTimes(0)
-		// imitate consumer to warm up the cache
-		c.get()
+
 		action(() => {
 			a.set(1)
 			b.set(0)
@@ -157,27 +175,6 @@ describe('combine', () => {
 			b.set(1)
 		})
 		expect(o.next).toHaveBeenCalledTimes(0)
-	})
-	it('emits the very first time when there is no consumer and then skips duplicates', () => {
-		const a = newAtom(0)
-		const b = newAtom(1)
-		const c = combine(a, b, (a, b) => a + b)
-		const o = {
-			next: jest.fn(),
-		}
-		c.subscribe(o)
-		expect(o.next).toHaveBeenCalledTimes(0)
-		// no consumer, there will be at least one notification
-		// because `c` does not store last value
-		action(() => {
-			a.set(1)
-			b.set(0)
-		})
-		action(() => {
-			a.set(0)
-			b.set(1)
-		})
-		expect(o.next).toHaveBeenCalledTimes(1)
 	})
 	it('multicasts the result observable', () => {
 		const emitter = newEmitter()
