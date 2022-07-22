@@ -4,7 +4,7 @@ import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
 import { combine, flatten, fromObservable, newProperty, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
-import {action, mergeMany, multicast, newEmitter} from './emitter'
+import { action, newEmitter } from './emitter'
 import { attachSubscription } from '@frp-ts/test-utils'
 import { now } from './clock'
 
@@ -44,11 +44,11 @@ describe('combine', () => {
 		const cb1 = jest.fn()
 		// subscribe and read value
 		c.subscribe({
-			next: () => c.get()
+			next: () => c.get(),
 		})
 
 		b.subscribe({
-			next: cb1
+			next: cb1,
 		})
 
 		a.set(2)
