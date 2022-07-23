@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.0](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.16...v1.0.0-beta.0) (2022-07-23)
+
+
+### Features
+
+* **react:** useObservable ([b23f772](https://github.com/raveclassic/frp-ts/commit/b23f7728a28fe98ffa60f23a75ebd8a18d6895ad))
+
+
+
+
+
 # [1.0.0-alpha.16](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2022-05-21)
 
 **Note:** Version bump only for package @frp-ts/react

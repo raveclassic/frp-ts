@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.0](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.16...v1.0.0-beta.0) (2022-07-23)
+
+
+### Bug Fixes
+
+* **lens:** lensed atom distinct changes ([#57](https://github.com/raveclassic/frp-ts/issues/57)) ([d56fd2b](https://github.com/raveclassic/frp-ts/commit/d56fd2b690bf651d46e49a394429860279b79c61))
+
+
+
+
+
 # [1.0.0-alpha.16](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2022-05-21)
 
 **Note:** Version bump only for package @frp-ts/lens

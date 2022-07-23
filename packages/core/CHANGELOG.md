@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.0](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.16...v1.0.0-beta.0) (2022-07-23)
+
+
+### Bug Fixes
+
+* **core:** combine lost notification of middle node ([#61](https://github.com/raveclassic/frp-ts/issues/61)) ([2b022b5](https://github.com/raveclassic/frp-ts/commit/2b022b5242944dc49a61dc3a7648a2834297cd70))
+
+
+### Features
+
+* **core:** add fromInteropObservable to observable namespace ([9390892](https://github.com/raveclassic/frp-ts/commit/9390892b917545b6b098654f57fa971d1ae071b2))
+
+
+
+
+
 # [1.0.0-alpha.16](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2022-05-21)
 
 

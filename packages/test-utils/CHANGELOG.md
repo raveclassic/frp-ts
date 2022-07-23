@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.0](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.16...v1.0.0-beta.0) (2022-07-23)
+
+
+### Features
+
+* **test-utils:** newAdapter ([3f6c3cc](https://github.com/raveclassic/frp-ts/commit/3f6c3cc057749f431c9e7491038872ae4e9dea0d))
+
+
+
+
+
 # [1.0.0-alpha.16](https://github.com/raveclassic/frp-ts/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2022-05-21)
 
 **Note:** Version bump only for package @frp-ts/test-utils
