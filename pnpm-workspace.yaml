@@ -3,5 +3,6 @@ packages:
   - packages/lens
   - packages/fp-ts
   - packages/react
+  - packages/solid
   - packages/test-utils
   - packages/utils

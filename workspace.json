@@ -5,6 +5,7 @@
     "fp-ts": "packages/fp-ts",
     "lens": "packages/lens",
     "react": "packages/react",
+    "solid": "packages/solid",
     "test-utils": "packages/test-utils",
     "utils": "packages/utils"
   }
