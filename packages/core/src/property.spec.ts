@@ -176,6 +176,22 @@ describe('combine', () => {
 		})
 		expect(o.next).toHaveBeenCalledTimes(0)
 	})
+	it('emits notification if read new value after being set inside action', () => {
+		const a = newAtom(1)
+		const b = combine(a, (a) => [a])
+
+		const cb1 = jest.fn()
+		b.subscribe({
+			next: cb1,
+		})
+
+		action(() => {
+			a.set(2)
+			b.get() // trigger shouldNotify
+		})
+
+		expect(cb1).toBeCalledTimes(1)
+	})
 	it('multicasts the result observable', () => {
 		const emitter = newEmitter()
 		// we need a property that always has a new value
