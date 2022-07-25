@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/fp-ts",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "Bindings to fp-ts library",
   "typedocMain": "./src/index.ts",
   "author": "raveclassic",
@@ -18,11 +18,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@frp-ts/core": "^1.0.0-beta.0",
-    "@frp-ts/utils": "^1.0.0-beta.0"
+    "@frp-ts/core": "^1.0.0-beta.1",
+    "@frp-ts/utils": "^1.0.0-beta.1"
   },
   "devDependencies": {
-    "@frp-ts/test-utils": "^1.0.0-beta.0",
+    "@frp-ts/test-utils": "^1.0.0-beta.1",
     "fp-ts": "^2.11.5",
     "rimraf": "^3.0.2",
     "rxjs": "^7.4.0",
