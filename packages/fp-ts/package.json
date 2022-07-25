@@ -22,6 +22,7 @@
     "@frp-ts/utils": "^1.0.0-beta.0"
   },
   "devDependencies": {
+    "@frp-ts/test-utils": "^1.0.0-beta.0",
     "fp-ts": "^2.11.5",
     "rimraf": "^3.0.2",
     "rxjs": "^7.4.0",

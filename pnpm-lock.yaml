@@ -97,6 +97,7 @@ importers:
   packages/fp-ts:
     specifiers:
       '@frp-ts/core': ^1.0.0-beta.0
+      '@frp-ts/test-utils': ^1.0.0-beta.0
       '@frp-ts/utils': ^1.0.0-beta.0
       fp-ts: ^2.11.5
       rimraf: ^3.0.2
@@ -107,6 +108,7 @@ importers:
       '@frp-ts/core': link:../core
       '@frp-ts/utils': link:../utils
     devDependencies:
+      '@frp-ts/test-utils': link:../test-utils
       fp-ts: 2.11.5
       rimraf: 3.0.2
       rxjs: 7.5.1
@@ -116,15 +118,18 @@ importers:
   packages/lens:
     specifiers:
       '@frp-ts/core': ^1.0.0-beta.0
+      '@frp-ts/test-utils': ^1.0.0-beta.0
       tslib: ^2.1.0
     dependencies:
       '@frp-ts/core': link:../core
     devDependencies:
+      '@frp-ts/test-utils': link:../test-utils
       tslib: 2.3.1
 
   packages/react:
     specifiers:
       '@frp-ts/core': ^1.0.0-beta.0
+      '@frp-ts/test-utils': ^1.0.0-beta.0
       '@frp-ts/utils': ^1.0.0-beta.0
       '@testing-library/react': ^12.1.2
       '@types/react': '>=16.0.0'
@@ -136,6 +141,7 @@ importers:
       '@frp-ts/core': link:../core
       '@frp-ts/utils': link:../utils
     devDependencies:
+      '@frp-ts/test-utils': link:../test-utils
       '@testing-library/react': 12.1.2_sfoxds7t5ydpegc3knd667wn6m
       '@types/react': 17.0.38
       '@types/react-dom': 17.0.11
