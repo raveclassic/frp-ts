@@ -156,26 +156,6 @@ describe('combine', () => {
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(cb).toHaveBeenLastCalledWith(2)
 	})
-	it('does not emit if projected value did not change and combined property has at least one consumer', () => {
-		const a = newAtom(0)
-		const b = newAtom(1)
-		const c = combine(a, b, (a, b) => a + b)
-		const o = {
-			next: jest.fn(),
-		}
-		c.subscribe(o)
-		expect(o.next).toHaveBeenCalledTimes(0)
-
-		action(() => {
-			a.set(1)
-			b.set(0)
-		})
-		action(() => {
-			a.set(0)
-			b.set(1)
-		})
-		expect(o.next).toHaveBeenCalledTimes(0)
-	})
 	it('emits notification if read new value after being set inside action', () => {
 		const a = newAtom(1)
 		const b = combine(a, (a) => [a])
@@ -192,32 +172,20 @@ describe('combine', () => {
 
 		expect(cb1).toBeCalledTimes(1)
 	})
-	it('multicasts the result observable', () => {
+	it("emits do not triggers updates to the value", () => {
 		const emitter = newEmitter()
 		// we need a property that always has a new value
 		// so that projection function is not memoized by combine
 		const a = newProperty(now, emitter.subscribe)
+
 		const cb = jest.fn(now)
-		const c = combine(a, cb)
+		const c = combine(a, now)
+
 		const cb1 = jest.fn(constVoid)
-		const cb2 = jest.fn(constVoid)
 		c.subscribe({ next: cb1 })
-		c.subscribe({ next: cb2 })
-		// imitate consumer to warm up the cache
-		c.get()
-		cb.mockClear()
+
 		emitter.next(now())
-		expect(cb).toHaveBeenCalledTimes(1)
-	})
-	it('correctly caches undefined value', () => {
-		const a = newAtom<number | undefined>(0)
-		const b = combine(a, (a) => a)
-		// at this moment cache is not initialized
-		const cb = jest.fn(constVoid)
-		b.subscribe({ next: cb })
 		expect(cb).toHaveBeenCalledTimes(0)
-		a.set(undefined)
-		expect(cb).toHaveBeenCalledTimes(1)
 	})
 })
 

@@ -91,31 +91,8 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
 	if (doesNotEmit) return newProperty(get, never.subscribe)
 
-	let cachedValue: Result = get()
-	let shouldNotify = false
-	const getAndNotify = () => {
-		const value = get()
-		if (cachedValue !== value) {
-			shouldNotify = true
-		}
-		cachedValue = value
-		return value
-	}
-
-	const merged = mergeMany(properties)
-	const proxy: Observable<Time> = multicast({
-		subscribe: (observer) =>
-			merged.subscribe({
-				next: (time) => {
-					getAndNotify()
-					if (shouldNotify) {
-						shouldNotify = false
-						observer.next(time)
-					}
-				},
-			}),
-	})
-	return newProperty(getAndNotify, proxy.subscribe)
+	const proxy: Observable<Time> = multicast(mergeMany(properties))
+	return newProperty(get, proxy.subscribe)
 }
 
 const memoizeProjectionFunction = <Result>(
