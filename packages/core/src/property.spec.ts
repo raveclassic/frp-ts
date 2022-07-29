@@ -172,7 +172,7 @@ describe('combine', () => {
 
 		expect(cb1).toBeCalledTimes(1)
 	})
-	it("emits do not triggers updates to the value", () => {
+	it('emits do not trigger updates to the value', () => {
 		const emitter = newEmitter()
 		// we need a property that always has a new value
 		// so that projection function is not memoized by combine
@@ -186,6 +186,46 @@ describe('combine', () => {
 
 		emitter.next(now())
 		expect(cb).toHaveBeenCalledTimes(0)
+	})
+	it('does not call getter on construction (is lazy)', () => {
+		const get = jest.fn(constVoid)
+		const source = newProperty(get, never.subscribe)
+		combine(source, (a) => [a])
+		expect(get).not.toHaveBeenCalled()
+	})
+	it('does not emit on construction', () => {
+		const a = newAtom(0)
+		const b = combine(a, (a) => a > 0)
+		const cb = jest.fn(constVoid)
+		b.subscribe({ next: cb })
+		expect(cb).not.toHaveBeenCalled()
+	})
+	it('does not emit if projected value did not change', () => {
+		const a = newAtom(0)
+		const b = combine(a, (a) => a > 0)
+		const cb = jest.fn(constVoid)
+		const s = b.subscribe({ next: cb })
+		a.set(-1)
+		expect(cb).not.toHaveBeenCalled()
+		s.unsubscribe()
+		a.set(-2)
+		expect(cb).not.toHaveBeenCalled()
+		b.subscribe({ next: cb })
+		expect(cb).not.toHaveBeenCalled()
+		a.set(-3)
+		expect(cb).not.toHaveBeenCalled()
+	})
+	it('emits within action if read combined result after setting the source', () => {
+		const a = newAtom(0)
+		const b = combine(a, (a) => a > 0)
+		const cb = jest.fn(constVoid)
+		b.subscribe({ next: cb })
+		action(() => {
+			a.set(1)
+			// this basically checks that `get` does not update internal cache
+			b.get()
+		})
+		expect(cb).toHaveBeenCalledTimes(1)
 	})
 })
 

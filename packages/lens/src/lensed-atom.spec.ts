@@ -1,4 +1,5 @@
 import { Lens, newLensedAtom } from './lensed-atom'
+import { constVoid } from '@frp-ts/utils'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 const prop = <O extends object, K extends keyof O>(key: K): Lens<O, O[K]> => ({
@@ -53,6 +54,16 @@ describe('view', () => {
 		b.set(2)
 		expect(ao.next).toHaveBeenCalledTimes(2)
 		expect(bo.next).toHaveBeenCalledTimes(2)
+	})
+	it('does not notify if viewed value did not change', () => {
+		const a = newLensedAtom({ foo: 0 })
+		const b = a.view(prop('foo'))
+		const cb = jest.fn(constVoid)
+		b.subscribe({ next: cb })
+		expect(cb).not.toHaveBeenCalled()
+		// set new reference
+		a.set({ foo: 0 })
+		expect(cb).not.toHaveBeenCalled()
 	})
 	it('composes', () => {
 		interface Foo {
