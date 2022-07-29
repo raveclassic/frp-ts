@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.2](https://github.com/raveclassic/frp-ts/compare/v1.0.0-beta.0...v1.0.0-beta.2) (2022-07-29)
+
+
+### Bug Fixes
+
+* **core:** bringing back lazy behavior for combine ([#66](https://github.com/raveclassic/frp-ts/issues/66)) ([4598adb](https://github.com/raveclassic/frp-ts/commit/4598adb2dc89e9188724a278377f70cfae6564bf))
+
+
+### Features
+
+* **core:** skip duplicates on push in combine ([#67](https://github.com/raveclassic/frp-ts/issues/67)) ([645970f](https://github.com/raveclassic/frp-ts/commit/645970fc17bc886da54cdda60b40daccee1d5e86))
+
+
+
+
+
 # [1.0.0-beta.1](https://github.com/raveclassic/frp-ts/compare/v1.0.0-beta.0...v1.0.0-beta.1) (2022-07-25)
 
 **Note:** Version bump only for package @frp-ts/core
