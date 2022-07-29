@@ -57,5 +57,18 @@ describe('interop-observable', () => {
 
 			expect(cb).toBeCalledTimes(2)
 		})
+		it('correctly caches undefined value', () => {
+			const a = newAtom<number | undefined>(0)
+			const b = combine(a, (a) => a)
+
+			const source = newInteropObservable(b.get, b.subscribe)
+			const cb = jest.fn()
+
+			// subscribe to warm up the cache
+			source.subscribe({ next: cb })
+			expect(cb).toHaveBeenCalledTimes(1)
+			a.set(undefined)
+			expect(cb).toHaveBeenCalledTimes(2)
+		})
 	})
 })
