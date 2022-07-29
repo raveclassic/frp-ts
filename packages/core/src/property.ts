@@ -91,7 +91,22 @@ export const combine = <Properties extends readonly Property<unknown>[], Result>
 	const doesNotEmit = properties.every((property) => property.subscribe === never.subscribe)
 	if (doesNotEmit) return newProperty(get, never.subscribe)
 
-	const proxy: Observable<Time> = multicast(mergeMany(properties))
+	const merged = mergeMany(properties)
+
+	const proxy: Observable<Time> = multicast({
+		subscribe: (observer) => {
+			let lastValue = get()
+			return merged.subscribe({
+				next: (time) => {
+					const newValue = get()
+					if (lastValue !== newValue) {
+						lastValue = newValue
+						observer.next(time)
+					}
+				},
+			})
+		},
+	})
 	return newProperty(get, proxy.subscribe)
 }
 
