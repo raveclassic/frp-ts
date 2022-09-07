@@ -132,11 +132,11 @@ importers:
       '@frp-ts/test-utils': ^1.0.0-beta.2
       '@frp-ts/utils': ^1.0.0-beta.2
       '@testing-library/react': ^12.1.2
-      '@types/react': '>=16.0.0'
-      '@types/react-dom': '>=16.0.0'
+      '@types/react': '>=16.8.0'
+      '@types/react-dom': '>=16.8.0'
       '@types/use-sync-external-store': ^0.0.3
-      react: '>=16.0.0'
-      react-dom: '>=16.0.0'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
       tslib: ^2.1.0
       use-sync-external-store: ^1.2.0
     dependencies:
@@ -2232,6 +2232,7 @@ packages:
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
     requiresBuild: true
     dev: true
     optional: true
@@ -2241,6 +2242,7 @@ packages:
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
     requiresBuild: true
     dev: true
     optional: true
@@ -2250,6 +2252,7 @@ packages:
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
     requiresBuild: true
     dev: true
     optional: true
@@ -2259,6 +2262,7 @@ packages:
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
     requiresBuild: true
     dev: true
     optional: true
@@ -6720,7 +6724,7 @@ packages:
     dev: true
 
   /object-assign/4.1.1:
-    resolution: {integrity: sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM=}
+    resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
 
   /object-inspect/1.12.0:

@@ -25,16 +25,16 @@
   "devDependencies": {
     "@frp-ts/test-utils": "^1.0.0-beta.2",
     "@testing-library/react": "^12.1.2",
-    "@types/react": ">=16.0.0",
-    "@types/react-dom": ">=16.0.0",
+    "@types/react": ">=16.8.0",
+    "@types/react-dom": ">=16.8.0",
     "@types/use-sync-external-store": "^0.0.3",
-    "react": ">=16.0.0",
-    "react-dom": ">=16.0.0",
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0",
     "tslib": "^2.3.1"
   },
   "peerDependencies": {
-    "@types/react": ">=16.0.0",
-    "react": ">=16.0.0",
+    "@types/react": ">=16.8.0",
+    "react": ">=16.8.0",
     "tslib": "^2.3.1"
   }
 }
