@@ -54,14 +54,12 @@ describe('useProperty', () => {
 		expect(cb).not.toHaveBeenCalled()
 	})
 	it('triggers rerender even if newValue is emitted on the same tick', () => {
-		let counter = 0
-		const e = newEmitter()
-		const p: Property<number> = newProperty(() => counter++, e.subscribe)
+		const a = newAtom(0)
 		const cb = jest.fn(constVoid)
-		render(<Test property={p} onValue={cb} />)
+		render(<Test property={a} onValue={cb} />)
 		cb.mockClear()
-		act(() => e.next(0))
-		act(() => e.next(0))
+		act(() => a.set(1))
+		act(() => a.set(1))
 		expect(cb).toHaveBeenCalledTimes(1)
 	})
 	it('unsubscribes from property on unmount', () => {
