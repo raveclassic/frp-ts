@@ -8,9 +8,11 @@ interface Ref<Value> {
 }
 
 export function useObservable<Value>(source: Observable<Value>, initial: Value): Value {
-	// eslint-disable-next-line no-restricted-syntax
-	const ref = useRef<Ref<Value>>(undefined as unknown as Ref<Value>)
-	if (ref.current === undefined || ref.current.source !== source) {
+	const ref = useRef<Ref<Value>>({
+		source,
+		value: initial,
+	})
+	if (ref.current.source !== source) {
 		ref.current = {
 			source,
 			value: initial,
