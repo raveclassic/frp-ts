@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.3](https://github.com/raveclassic/frp-ts/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2022-09-08)
+
+
+### Features
+
+* **react:** Use sync external store ([#69](https://github.com/raveclassic/frp-ts/issues/69)) ([d287d2c](https://github.com/raveclassic/frp-ts/commit/d287d2cc7c2099c60794f7407eaa15a9f9e8d390))
+
+
+### BREAKING CHANGES
+
+* **react:** change required react peer dependency to >=16.8.0
+
+
+
+
+
 # [1.0.0-beta.2](https://github.com/raveclassic/frp-ts/compare/v1.0.0-beta.0...v1.0.0-beta.2) (2022-07-29)
 
 

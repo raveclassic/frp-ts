@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/react",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "description": "React bindings for @frp-ts project",
   "typedocMain": "./src/index.ts",
   "author": "raveclassic",
@@ -18,12 +18,12 @@
     "access": "public"
   },
   "dependencies": {
-    "use-sync-external-store": "^1.2.0",
-    "@frp-ts/core": "^1.0.0-beta.2",
-    "@frp-ts/utils": "^1.0.0-beta.2"
+    "@frp-ts/core": "^1.0.0-beta.3",
+    "@frp-ts/utils": "^1.0.0-beta.3",
+    "use-sync-external-store": "^1.2.0"
   },
   "devDependencies": {
-    "@frp-ts/test-utils": "^1.0.0-beta.2",
+    "@frp-ts/test-utils": "^1.0.0-beta.3",
     "@testing-library/react": "^12.1.2",
     "@types/react": ">=16.8.0",
     "@types/react-dom": ">=16.8.0",
