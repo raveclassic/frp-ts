@@ -2,7 +2,7 @@ import { Atom, newAtom } from './atom'
 
 import { never, newObservable } from './observable'
 import { constVoid } from '@frp-ts/utils'
-import { combine, flatten, fromObservable, newProperty, Property, scan, tap } from './property'
+import { combine, distinctUntilChanged, flatten, fromObservable, newProperty, Property, scan, tap } from './property'
 import { from, Observable, Subject } from 'rxjs'
 import { action, newEmitter } from './emitter'
 import { attachSubscription } from '@frp-ts/test-utils'
@@ -534,5 +534,50 @@ describe('scan', () => {
 		s.next(1)
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(getA()).toBe(3)
+	})
+})
+
+describe('distinctUntilChanged', () => {
+	it('distincts', () => {
+		const init = {
+			name: 'Jack',
+			age: 20,
+		}
+		const a = newAtom(init)
+		const cbA = jest.fn()
+		const subscriptionA = a.subscribe({ next: cbA })
+
+		// If name is the same then no emit new value
+		const [b] = distinctUntilChanged<{ name: string; age: number }>((prev, curr) => prev.name === curr.name)(a)
+		const cbB = jest.fn()
+		const subscriptionB = b.subscribe({ next: cbB })
+
+		// check for initial value
+		expect(cbA.mock.calls.length).toBe(0)
+		expect(a.get()).toBe(init)
+		expect(cbB.mock.calls.length).toBe(0)
+		expect(b.get()).toBe(init)
+
+		const sameNameVal = {
+			name: 'Jack',
+			age: 40,
+		}
+		a.set(sameNameVal)
+		expect(cbA.mock.calls.length).toBe(1)
+		expect(a.get()).toBe(sameNameVal)
+		expect(cbB.mock.calls.length).toBe(0)
+		expect(b.get()).toBe(init)
+
+		const otherNameVal = {
+			name: 'Fred',
+			age: 20,
+		}
+		a.set(otherNameVal)
+		expect(cbA.mock.calls.length).toBe(2)
+		expect(a.get()).toBe(otherNameVal)
+		expect(cbB.mock.calls.length).toBe(1)
+		expect(b.get()).toBe(otherNameVal)
+		subscriptionA.unsubscribe()
+		subscriptionB.unsubscribe()
 	})
 })

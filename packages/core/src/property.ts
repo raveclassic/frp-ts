@@ -72,6 +72,22 @@ export const scan =
 		return [p, s]
 	}
 
+export const distinctUntilChanged =
+	<A>(comparator: (prev: A, curr: A) => boolean) =>
+	(property: Property<A>): [Property<A>, Subscription] => {
+		const inner = newAtom(property.get())
+		const s = property.subscribe({
+			next: () => {
+				const prev = inner.get()
+				const curr = property.get()
+				if (!comparator(prev, curr)) {
+					inner.set(curr)
+				}
+			},
+		})
+		return [inner, s]
+	}
+
 export type PropertyValue<Target> = Target extends Property<infer A> ? A : never
 export type MapPropertiesToValues<Target extends readonly Property<unknown>[]> = {
 	readonly [Index in keyof Target]: PropertyValue<Target[Index]>
