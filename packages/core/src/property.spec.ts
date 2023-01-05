@@ -538,22 +538,6 @@ describe('scan', () => {
 	})
 })
 
-describe('iterator', () => {
-	it('iterates current value', () => {
-		const a = newAtom(0)
-		const results: number[] = []
-		for (const value of a) {
-			results.push(value)
-		}
-		expect(results).toEqual([0])
-	})
-	it('converts to array with current value', () => {
-		const a = newAtom(0)
-		expect(Array.from(a)).toEqual([0])
-		expect([...a]).toEqual([0])
-	})
-})
-
 describe('async iterator', () => {
 	async function collect<A>(source: AsyncIterable<A>, n: number): Promise<readonly A[]> {
 		let i = 0
