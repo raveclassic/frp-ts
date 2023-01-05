@@ -7,6 +7,7 @@ import { from, Observable, Subject } from 'rxjs'
 import { action, newEmitter } from './emitter'
 import { attachSubscription } from '@frp-ts/test-utils'
 import { now } from './clock'
+import { AsyncIterable, asyncIteratorSymbol } from './async-iterator'
 
 describe('combine', () => {
 	it('combines', () => {
@@ -534,5 +535,74 @@ describe('scan', () => {
 		s.next(1)
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(getA()).toBe(3)
+	})
+})
+
+describe('async iterator', () => {
+	async function collect<A>(source: AsyncIterable<A>, n: number): Promise<readonly A[]> {
+		let i = 0
+		const results: A[] = []
+		if (n === 0) {
+			return results
+		}
+		for await (const value of source) {
+			results.push(value)
+			i++
+			if (i === n) {
+				return results
+			}
+		}
+		return results
+	}
+	it('starts with current value', async () => {
+		expect(await collect(newAtom(0), 1)).toEqual([0])
+	})
+	it('waits for emissions', async () => {
+		const source = newAtom(0)
+		const result = collect(source, 2)
+		source.set(1)
+		expect(await result).toEqual([0, 1])
+	})
+	it('handles emissions inside async iterator', async () => {
+		const source = newAtom(0)
+		async function run() {
+			const results: number[] = []
+			for await (const value of source) {
+				results.push(value)
+				if (value !== 1) {
+					// emit next immediately
+					source.set(value + 1)
+				} else {
+					break
+				}
+			}
+			return results
+		}
+		expect(await run()).toEqual([0, 1])
+	})
+	it('manual iteration', async () => {
+		const source = newAtom(0)
+		const iterator = source[asyncIteratorSymbol]()
+		expect(await iterator.next()).toEqual({ value: 0 })
+		// pull before setting (buffer should be empty)
+		const second = iterator.next()
+		// now set (buffer should be empty)
+		source.set(1)
+		expect(await second).toEqual({ value: 1 })
+		// terminate
+		expect(await iterator.return?.()).toEqual({ done: true })
+		// try to pull after termination
+		expect(await iterator.next()).toEqual({ done: true })
+	})
+	it('works with async generators', async () => {
+		const source = newAtom(1)
+		async function* multiply(source: AsyncIterable<number>, by: number) {
+			for await (const value of source) {
+				yield value * by
+			}
+		}
+		const result = collect(multiply(source, 2), 2)
+		source.set(2)
+		expect(await result).toEqual([2, 4])
 	})
 })
