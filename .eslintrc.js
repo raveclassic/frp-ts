@@ -117,7 +117,7 @@ module.exports = {
 		'unicorn/prefer-string-slice': 2,
 		'unicorn/prefer-string-starts-ends-with': 2,
 		'unicorn/prefer-string-trim-start-end': 2,
-		'unicorn/prefer-ternary': 2,
+		'unicorn/prefer-ternary': 0,
 		'unicorn/prefer-type-error': 2,
 		'unicorn/throw-new-error': 2,
 		/**
