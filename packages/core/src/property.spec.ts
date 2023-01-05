@@ -7,7 +7,7 @@ import { from, Observable, Subject } from 'rxjs'
 import { action, newEmitter } from './emitter'
 import { attachSubscription } from '@frp-ts/test-utils'
 import { now } from './clock'
-import { asyncIteratorSymbol } from './async-iterator'
+import { AsyncIterable, asyncIteratorSymbol } from './async-iterator'
 
 describe('combine', () => {
 	it('combines', () => {
@@ -555,7 +555,7 @@ describe('iterator', () => {
 })
 
 describe('async iterator', () => {
-	async function collect<A>(source: Property<A>, n: number): Promise<readonly A[]> {
+	async function collect<A>(source: AsyncIterable<A>, n: number): Promise<readonly A[]> {
 		let i = 0
 		const results: A[] = []
 		if (n === 0) {
@@ -609,5 +609,16 @@ describe('async iterator', () => {
 		expect(await iterator.return?.()).toEqual({ done: true })
 		// try to pull after termination
 		expect(await iterator.next()).toEqual({ done: true })
+	})
+	it('works with async generators', async () => {
+		const source = newAtom(1)
+		async function* multiply(source: AsyncIterable<number>, by: number) {
+			for await (const value of source) {
+				yield value * by
+			}
+		}
+		const result = collect(multiply(source, 2), 2)
+		source.set(2)
+		expect(await result).toEqual([2, 4])
 	})
 })
