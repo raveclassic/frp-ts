@@ -1,4 +1,4 @@
-import { type Observable, type Observer, type Subscription } from './observable'
+import { type Observer, type Subscription } from './observable'
 import { type Time } from './clock'
 
 declare global {
@@ -22,7 +22,7 @@ export interface InteropObservableHolder<A> {
 
 export const newInteropObservable = <A>(
 	get: () => A,
-	subscribe: Observable<Time>['subscribe'],
+	subscribe: (observer: Observer<Time>) => Subscription,
 ): InteropObservable<A> => ({
 	subscribe: (observer) => {
 		const emitNext = () => {

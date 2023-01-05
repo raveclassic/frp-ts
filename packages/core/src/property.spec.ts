@@ -536,3 +536,46 @@ describe('scan', () => {
 		expect(getA()).toBe(3)
 	})
 })
+
+describe('iterator', () => {
+	it('iterates current value', () => {
+		const a = newAtom(0)
+		const results: number[] = []
+		for (const value of a) {
+			results.push(value)
+		}
+		expect(results).toEqual([0])
+	})
+	it('converts to array with current value', () => {
+		const a = newAtom(0)
+		expect(Array.from(a)).toEqual([0])
+		expect([...a]).toEqual([0])
+	})
+})
+
+describe('async iterator', () => {
+	async function collect<A>(source: Property<A>, n: number): Promise<readonly A[]> {
+		let i = 0
+		const results: A[] = []
+		if (n === 0) {
+			return results
+		}
+		for await (const value of source) {
+			results.push(value)
+			i++
+			if (i === n) {
+				return results
+			}
+		}
+		return results
+	}
+	it('starts with current value', async () => {
+		expect(await collect(newAtom(0), 1)).toEqual([0])
+	})
+	it('waits for emissions', async () => {
+		const source = newAtom(0)
+		const result = collect(source, 2)
+		source.set(1)
+		expect(await result).toEqual([0, 1])
+	})
+})

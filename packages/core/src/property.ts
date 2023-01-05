@@ -4,16 +4,22 @@ import { newAtom } from './atom'
 import { Time } from './clock'
 import { memo0, memo1, memo2, memo3, memo4, memo5, memoMany } from '@frp-ts/utils'
 import { InteropObservableHolder, newInteropObservable, observableSymbol } from './interop-observable'
+import { Iterable, newIterator } from './iterator'
+import { AsyncIterable, newAsyncIterator } from './async-iterator'
 
-export interface Property<A> extends Observable<Time>, InteropObservableHolder<A> {
+export interface Property<A> extends Observable<Time>, InteropObservableHolder<A>, Iterable<A>, AsyncIterable<A> {
 	readonly get: () => A
 }
 
-export const newProperty = <A>(get: () => A, subscribe: (observer: Observer<Time>) => Subscription): Property<A> => ({
-	get,
-	subscribe,
-	[observableSymbol]: () => newInteropObservable(get, subscribe),
-})
+export const newProperty = <A>(get: () => A, subscribe: (observer: Observer<Time>) => Subscription): Property<A> => {
+	return {
+		get,
+		subscribe,
+		[observableSymbol]: () => newInteropObservable(get, subscribe),
+		[Symbol.iterator]: () => newIterator(get),
+		[Symbol.asyncIterator]: () => newAsyncIterator(get, subscribe),
+	}
+}
 
 export const flatten = <A>(source: Property<Property<A>>): [Property<A>, Subscription] => {
 	// store initial inner source in a mutable reference
