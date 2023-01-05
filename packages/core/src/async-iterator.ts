@@ -16,7 +16,7 @@ interface AsyncIterator<T, TReturn = unknown, TNext = undefined> {
 
 export const asyncIteratorSymbol: typeof Symbol.asyncIterator =
 	// eslint-disable-next-line no-restricted-syntax
-	(typeof Symbol === 'function' && Symbol.asyncIterator) || ('@@asyncIterator' as never)
+	(typeof Symbol === 'function' && Symbol.asyncIterator) || /* istanbul ignore next */ ('@@asyncIterator' as never)
 
 export interface AsyncIterable<A> {
 	readonly [Symbol.asyncIterator]: () => AsyncIterator<A, void>
