@@ -114,21 +114,31 @@ export const memoMany = <Args extends readonly unknown[], Result>(
 		cachedArgs = args
 	}
 	return (...args: Args): Result => {
-		const length = args.length
-		if (hasValue && length === 0) {
-			return cachedResult
-		}
-		if (!hasValue || cachedArgs.length !== length) {
-			update(args)
-			return cachedResult
-		}
-		for (let i = 0; i < length; i++) {
-			if (cachedArgs[i] !== args[i]) {
+		if (hasValue) {
+			if (args.length === 0 && cachedArgs.length === 0) {
+				// zero-argument functions won't change its result
+				return cachedResult
+			}
+
+			if (cachedArgs.length !== args.length) {
+				// different number of args
 				update(args)
 				return cachedResult
 			}
+
+			// same number of args, just iterate over them
+			for (let i = 0; i < args.length; i++) {
+				if (cachedArgs[i] !== args[i]) {
+					update(args)
+					return cachedResult
+				}
+			}
+
+			return cachedResult
+		} else {
+			update(args)
+			return cachedResult
 		}
-		return cachedResult
 	}
 }
 

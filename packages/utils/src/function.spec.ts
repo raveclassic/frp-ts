@@ -136,4 +136,11 @@ describe('memoMany', () => {
 		memo()
 		expect(f).toHaveBeenCalledTimes(1)
 	})
+	it('resets cache when number of arguments drops zero', () => {
+		const f = jest.fn((...args: readonly unknown[]): number => args.length)
+		const memo = memoMany(f)
+		expect(memo(1)).toEqual(1)
+		expect(memo(1)).toEqual(1)
+		expect(memo()).toEqual(0)
+	})
 })
