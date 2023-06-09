@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.4](https://github.com/raveclassic/frp-ts/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2023-06-09)
+
+
+### Bug Fixes
+
+* **util:** fix memoization for functions dropping their arguments to 0 ([41ddc7f](https://github.com/raveclassic/frp-ts/commit/41ddc7f9ba98cab17cc855c203be44c4a363e86b))
+
+
+
+
+
 # [1.0.0-beta.3](https://github.com/raveclassic/frp-ts/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2022-09-08)
 
 **Note:** Version bump only for package @frp-ts/utils
