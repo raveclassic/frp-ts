@@ -14,4 +14,5 @@ export const useProperty = <A>(property: Property<A>): A =>
 			[property],
 		),
 		property.get,
+		property.get,
 	)
