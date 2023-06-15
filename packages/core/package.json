@@ -1,6 +1,6 @@
 {
   "name": "@frp-ts/core",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "description": "Functional reactive values-over-time",
   "type": "commonjs",
   "typedocMain": "./src/index.ts",
@@ -22,10 +22,10 @@
     "tslib": "^2.3.1"
   },
   "dependencies": {
-    "@frp-ts/utils": "^1.0.0-beta.4"
+    "@frp-ts/utils": "^1.0.0-beta.5"
   },
   "devDependencies": {
-    "@frp-ts/test-utils": "^1.0.0-beta.4",
+    "@frp-ts/test-utils": "^1.0.0-beta.5",
     "rimraf": "^3.0.2",
     "rxjs": "^7.4.0",
     "tslib": "^2.3.1",
