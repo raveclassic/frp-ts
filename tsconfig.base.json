@@ -19,6 +19,7 @@
       "@frp-ts/fp-ts": ["packages/fp-ts/src/index.ts"],
       "@frp-ts/lens": ["packages/lens/src/index.ts"],
       "@frp-ts/react": ["packages/react/src/index.ts"],
+      "@frp-ts/solid": ["packages/solid/src/index.ts"],
       "@frp-ts/test-utils": ["packages/test-utils/src/index.ts"],
       "@frp-ts/utils": ["packages/utils/src/index.ts"]
     }
