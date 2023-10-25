@@ -34,6 +34,14 @@ describe('atom', () => {
 		expect(cb).toHaveBeenCalledTimes(1)
 		expect(cb).toHaveBeenLastCalledWith(4)
 	})
+	it('does not enter an infinite loop if the action was called during notifying by another action', () => {
+		const a = newAtom(0)
+		const fn = jest.fn()
+		const cb = () => action(fn)
+		a.subscribe({ next: cb })
+		action(() => a.set(1))
+		expect(fn).toHaveBeenCalledTimes(1)
+	})
 	it('skips duplicates', () => {
 		const { set, subscribe } = newAtom(0)
 		const f = jest.fn()
