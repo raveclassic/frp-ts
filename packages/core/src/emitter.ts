@@ -10,10 +10,10 @@ export const action = (f: () => void): void => {
 	isLocked = false
 	if (lastTime !== undefined) {
 		for (const listener of Array.from(lockedListeners)) {
+			lockedListeners.delete(listener)
 			listener(lastTime)
 		}
 		lastTime = undefined
-		lockedListeners.clear()
 	}
 }
 
