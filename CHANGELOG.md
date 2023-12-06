@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.6](https://github.com/raveclassic/frp-ts/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2023-12-06)
+
+
+### Bug Fixes
+
+* **core:** fix infinite loop when the action was called during notifying by another action ([#80](https://github.com/raveclassic/frp-ts/issues/80)) ([336948c](https://github.com/raveclassic/frp-ts/commit/336948c82ab1767a9d3ef9e6cab5b10fd9b6d9d4))
+
+
+
+
+
 # [1.0.0-beta.5](https://github.com/raveclassic/frp-ts/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2023-06-15)
 
 
